@@ -30,16 +30,17 @@ public class GraphWindow extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 2649145625138349841L;
 	private JPanel contentPane;
 	private int[] channels = {1,2};
-	private int subSampling = 10;
+	private int subSampling = 1;
 	private JPlotLayout graphALayout;
 	private JPlotLayout graphBLayout;
 	private String dataFile = "F:\\BCICIV_1_asc\\BCICIV_eval_ds1a_cnt.txt";
 	private int channelsCount = 59;
 	private int dataFreq = 1000;
-	private int LowCutOff = 50;
-	private int HighCutOff = 10;
+	private int LowCutOff = 30;
+	private int HighCutOff = 5;
 	private int cutOffPasses = 3;
-
+	private int[] frequencyRange = {13,30};
+	private int[] timeFrame = {10,11};
 	
 	private final int X = 0;
 	private final int Y = 1;
@@ -112,6 +113,7 @@ public class GraphWindow extends JFrame implements ActionListener {
 		graphALayout.setTitles("Ch.A", "", "");
 		graphBLayout.setTitles("Ch.B", "", "");
 		
+		setWaveClass(WavesClasses.GAMMA);
 		updateGraphs(true);
 				
 		setContentPane(contentPane);
@@ -219,8 +221,20 @@ public class GraphWindow extends JFrame implements ActionListener {
 			e.printStackTrace();
 		}
 	    
-	    int i = 0;
-	    while(line != null) {
+	    int i=0;
+	    int toSkip = (timeFrame[0] * dataFreq) / subsamplingFactor;
+		while(line != null && i<toSkip) {
+			try {
+				line = in.readLine();
+				i++;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+    	
+		int toRead = ((timeFrame[1] - timeFrame[0]) * dataFreq) / subsamplingFactor; 
+	    i = 0;
+	    while(line != null && i < toRead) {
 	    	x = i; 
 	    	y = Integer.parseInt(line.split("\t")[channel]);
 	    	p = new Point2D.Double(x, y);
@@ -259,6 +273,15 @@ public class GraphWindow extends JFrame implements ActionListener {
 		return data;
 	}
 	
+	public void setWaveClass(WaveClass wc) {
+		LowCutOff = wc.getUpperAmpl();
+		HighCutOff = wc.getLowerAmpl();
+		frequencyRange = new int[] {
+			wc.getLowerFreq(),
+			wc.getUpperFreq()
+		};
+	}
+	
 	private SimpleLine processSignal(double[][] data) {
 		if(LowCutOff > 0 || HighCutOff > 0) {
 			Logger.log("applying cutoff " 
@@ -271,6 +294,12 @@ public class GraphWindow extends JFrame implements ActionListener {
 				if(LowCutOff > 0) data = CutOff.lowAmplitude(data, LowCutOff);
 			}
 		}
+		
+		if(frequencyRange[0] > 0 || frequencyRange[1] > 0) {
+			Logger.log("showing frequency range [" + frequencyRange[0] + " ; " + frequencyRange[1] + "]");
+			data = CutOff.frequencyRange(data, frequencyRange[0], frequencyRange[1]);
+		}
+
 	    return new SimpleLine(data[X], data[Y], null);
 	}
 

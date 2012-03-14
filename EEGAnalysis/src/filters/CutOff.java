@@ -8,6 +8,17 @@ import main.Logger;
 public class CutOff extends Filter {
 	protected static enum AMPLITUDE { High, Low }
 	
+	public static double[][] frequencyRange(double[][] data, int from, int to) {
+		double[][] newData = FFT.forward(data);
+		for(int i=0; i<from; i++) {
+			newData[Y][i] = 0;
+		}
+		for(int i=to; i<data[Y].length; i++) {
+			newData[Y][i] = 0;
+		}
+		return FFT.inverse(newData);
+	}
+	
 	public static double[][] lowAmplitude(double[][] data, double threshold) {
 		return amplitude(data, threshold, AMPLITUDE.Low); 
 	}
