@@ -1,5 +1,6 @@
 package main;
 
+import filters.CutOff;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
@@ -12,8 +13,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -38,6 +37,7 @@ public class GraphWindow extends JFrame implements ActionListener {
 	private int channelsCount = 59;
 	private int dataFreq = 1000;
 	private int cutOff = 400;
+	private int cutOffPasses = 3;
 
 	
 	private final int X = 0;
@@ -64,24 +64,32 @@ public class GraphWindow extends JFrame implements ActionListener {
 		updateGraphs(false);
 	}
 	
-	public void updateGraphs(Boolean force) {
-		if(force || !((SGTData)graphALayout.getData().firstElement()).getId().equals(
-				getDataId(dataFile, subSampling, channels[0], cutOff)) ) {
+	private boolean settingsChanged(String graphID) {
+		if(graphID.equals("A")) {
+			return !((SGTData)graphALayout.getData().firstElement()).getId().equals(
+					getDataId(dataFile, subSampling, channels[0], cutOff));
+		} else {
+			return !((SGTData)graphBLayout.getData().firstElement()).getId().equals(
+					getDataId(dataFile, subSampling, channels[1], cutOff));
+		}
+	}
+	
+	private void updateGraphs(Boolean force) {
+		if(force || settingsChanged("A")) {
 			graphALayout.setBatch(true);
 			
 			graphALayout.clear();
-			SGTData dataA = readTheData(dataFile, subSampling, channels[0], cutOff);
+			SGTData dataA = readTheData(channels[0]);
 			graphALayout.addData(dataA);
 			
 			graphALayout.setBatch(false);
 		}
 		
-		if(force || !((SGTData)graphBLayout.getData().firstElement()).getId().equals(
-				getDataId(dataFile, subSampling, channels[1], cutOff)) ) {
+		if(force || settingsChanged("B")) {
 			graphBLayout.setBatch(true);
 			
 			graphBLayout.clear();
-			SGTData dataB = readTheData(dataFile, subSampling, channels[1], cutOff);
+			SGTData dataB = readTheData(channels[1]);
 			graphBLayout.addData(dataB);
 			
 			graphBLayout.setBatch(false);
@@ -192,6 +200,10 @@ public class GraphWindow extends JFrame implements ActionListener {
 		contentPane.setLayout(gl_contentPane);
 	}
 
+	private SGTData readTheData(int channel) {
+		return readTheData(dataFile, subSampling, channel, cutOff);
+	}
+	
 	private SGTData readTheData(String file, int subsamplingFactor, int channel, int cutOff) {
 		BufferedReader in = null;
 		String line = null;
@@ -222,7 +234,7 @@ public class GraphWindow extends JFrame implements ActionListener {
 				e.printStackTrace();
 			}
 	    }
-	    Logger.log("parsing " + (i*subsamplingFactor)/1000 + "K samples from " 
+	    Logger.log("parsing " + i/1000 + "K samples (over " + (i*subsamplingFactor)/1000 + "K ones) from " 
 	    		+ dataFreq + "Hz channel " + channel + "'s data => " 
 	    		+ (i*subsamplingFactor)/dataFreq + "s record"
 	    		);
@@ -248,73 +260,12 @@ public class GraphWindow extends JFrame implements ActionListener {
 	
 	private SimpleLine processSignal(double[][] data) {
 		if(cutOff > 0) {
-			data = highAmplitudeCutOff(data, cutOff);
-			data = highAmplitudeCutOff(data, cutOff);
-			data = highAmplitudeCutOff(data, cutOff);
+			Logger.log("applying a cutoff of " + cutOff + "µV (" + cutOffPasses + "passes)");
+			for(int i=0; i<cutOffPasses; i++) {
+				data = CutOff.highAmplitude(data, cutOff);
+			}
 		}
 	    return new SimpleLine(data[X], data[Y], null);
-	}
-
-	private double[][] highAmplitudeCutOff(double[][] data, double amplThreshold) {
-		double f[] = data[Y];
-		List<Integer> toErease = new ArrayList<Integer>();
-		
-		int xx = 1;
-		while(xx < f.length-2) {
-			int x = xx;
-			//Logger.log("xx=" + xx +  " f[x]=" + f[x] + " f[x+1]=" + f[x+1]);
-			
-			// Ca monte
-			if(f[x+1] > f[x]) {			
-				while((x+1 < f.length-1) && (f[x] < f[x+1] || f[x] == f[x+1])) {x++;}
-				
-				// ça redescend
-				if(f[x+1] < f[x] && Math.abs(f[xx] - f[x]) < amplThreshold) {
-					for(int i=xx; i<=x; i++) {
-						toErease.add(i);
-					}
-				}
-				
-				xx = x+1;
-				continue;
-			} 
-			
-			// Ca descend 
-			else if (f[x+1] < f[x]) {	
-				while((x+1 < f.length-1) &&  (f[x] > f[x+1])) {x++;}
-				
-				// ça remonte
-				if(f[x+1] > f[x] && Math.abs(f[xx] - f[x]) < amplThreshold) {
-					for(int i=xx; i<=x; i++) {
-						toErease.add(i);
-					}
-				}
-				
-				xx = x+1;
-				continue;
-			} 
-			
-			// Ca stagne 
-			else {
-				while((x+1 < f.length-1) && (f[x] == f[x+1])) {x++;}
-				xx = x+1;
-				continue;
-			}
-		}
-		Logger.log(toErease.size() + " samples droped");
-		
-		double[] xArr = new double[data[Y].length - toErease.size()];
-		double[] yArr = new double[data[Y].length - toErease.size()];
-		
-		for(int i=0, ii=0; i<data[Y].length; i++) {
-			if(!toErease.contains(i)) {
-				xArr[ii] = (double) i;
-				yArr[ii] = data[Y][i];
-				ii++;
-			}
-		}
-		
-		return new double[][] { xArr, yArr };
 	}
 
 	private String getDataId(String file, int sampling, int channel, int cutOff) {
