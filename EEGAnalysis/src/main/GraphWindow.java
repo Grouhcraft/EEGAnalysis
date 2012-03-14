@@ -9,11 +9,13 @@ import gov.noaa.pmel.util.Point2D;
 
 import java.awt.EventQueue;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.swing.JFrame;
+import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.GroupLayout;
@@ -29,18 +31,22 @@ public class GraphWindow extends JFrame implements ActionListener {
 	 */
 	private static final long serialVersionUID = 2649145625138349841L;
 	private JPanel contentPane;
-	private int[] channels = {1,2};
-	private int subSampling = 1;
 	private JPlotLayout graphALayout;
 	private JPlotLayout graphBLayout;
-	private String dataFile = "F:\\BCICIV_1_asc\\BCICIV_eval_ds1a_cnt.txt";
+	//private String dataFile = "C:\\Users\\melendil\\Desktop\\mentalitruffe\\BCICIV_eval_ds1a_cnt.txt";
+	private File dataFile = new File("C:\\Users\\melendil\\Desktop\\mentalitruffe\\BCICIV_eval_ds1a_cnt.txt");
 	private int channelsCount = 59;
 	private int dataFreq = 1000;
+	
 	private int LowCutOff = 30;
 	private int HighCutOff = 5;
 	private int cutOffPasses = 3;
 	private int[] frequencyRange = {13,30};
 	private int[] timeFrame = {10,11};
+	private int subSampling = 1;
+	private int[] channels = {1,2};
+
+
 	
 	private final int X = 0;
 	private final int Y = 1;
@@ -115,6 +121,8 @@ public class GraphWindow extends JFrame implements ActionListener {
 	 * Create the frame
 	 */
 	public GraphWindow() {
+		JMenuBar menuBar = new GraphMenu(this);
+		setJMenuBar(menuBar);
 		setTitle("EEG Viewer");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 882, 410);
@@ -234,7 +242,7 @@ public class GraphWindow extends JFrame implements ActionListener {
 	 * @param HighCutOff @todo remove that !
 	 * @return the SGTData data used by the graph layouts
 	 */
-	private SGTData readTheData(String file, int subsamplingFactor, int channel, int LowCutOff, int HighCutOff) {
+	private SGTData readTheData(File file, int subsamplingFactor, int channel, int LowCutOff, int HighCutOff) {
 		BufferedReader in = null;
 		String line = null;
 		int x,y;
@@ -353,8 +361,8 @@ public class GraphWindow extends JFrame implements ActionListener {
 	 * @param HighCutOff the High-Amplitude cutOff set
 	 * @return a string representing the data and its settings
 	 */
-	private String getDataId(String file, int sampling, int channel, int LowCutOff, int HighCutOff) {
-		return file + sampling + "_" + channel + "_" + LowCutOff + "_" + HighCutOff;
+	private String getDataId(File file, int sampling, int channel, int LowCutOff, int HighCutOff) {
+		return file.getPath() + sampling + "_" + channel + "_" + LowCutOff + "_" + HighCutOff;
 	}
 
 	/**
@@ -395,5 +403,13 @@ public class GraphWindow extends JFrame implements ActionListener {
 			}
 		}
 		updateGraphs();
+	}
+	
+	public File getDataFile() {
+		return dataFile;
+	}
+
+	public void setDataFile(File dataFile) {
+		this.dataFile = dataFile;
 	}
 }
