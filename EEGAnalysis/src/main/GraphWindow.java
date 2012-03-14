@@ -33,8 +33,7 @@ public class GraphWindow extends JFrame implements ActionListener {
 	private JPanel contentPane;
 	private JPlotLayout graphALayout;
 	private JPlotLayout graphBLayout;
-	//private String dataFile = "C:\\Users\\melendil\\Desktop\\mentalitruffe\\BCICIV_eval_ds1a_cnt.txt";
-	private File dataFile = new File("C:\\Users\\melendil\\Desktop\\mentalitruffe\\BCICIV_eval_ds1a_cnt.txt");
+	private File dataFile = new File(R.get("datafile"));
 	private int channelsCount = 59;
 	private int dataFreq = 1000;
 	
