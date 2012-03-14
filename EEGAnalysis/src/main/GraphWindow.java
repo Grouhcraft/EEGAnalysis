@@ -30,13 +30,14 @@ public class GraphWindow extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 2649145625138349841L;
 	private JPanel contentPane;
 	private int[] channels = {1,2};
-	private int subSampling = 100;
+	private int subSampling = 10;
 	private JPlotLayout graphALayout;
 	private JPlotLayout graphBLayout;
 	private String dataFile = "F:\\BCICIV_1_asc\\BCICIV_eval_ds1a_cnt.txt";
 	private int channelsCount = 59;
 	private int dataFreq = 1000;
-	private int cutOff = 400;
+	private int LowCutOff = 50;
+	private int HighCutOff = 10;
 	private int cutOffPasses = 3;
 
 	
@@ -67,10 +68,10 @@ public class GraphWindow extends JFrame implements ActionListener {
 	private boolean settingsChanged(String graphID) {
 		if(graphID.equals("A")) {
 			return !((SGTData)graphALayout.getData().firstElement()).getId().equals(
-					getDataId(dataFile, subSampling, channels[0], cutOff));
+					getDataId(dataFile, subSampling, channels[0], LowCutOff, HighCutOff));
 		} else {
 			return !((SGTData)graphBLayout.getData().firstElement()).getId().equals(
-					getDataId(dataFile, subSampling, channels[1], cutOff));
+					getDataId(dataFile, subSampling, channels[1], LowCutOff, HighCutOff));
 		}
 	}
 	
@@ -201,10 +202,10 @@ public class GraphWindow extends JFrame implements ActionListener {
 	}
 
 	private SGTData readTheData(int channel) {
-		return readTheData(dataFile, subSampling, channel, cutOff);
+		return readTheData(dataFile, subSampling, channel, LowCutOff, HighCutOff);
 	}
 	
-	private SGTData readTheData(String file, int subsamplingFactor, int channel, int cutOff) {
+	private SGTData readTheData(String file, int subsamplingFactor, int channel, int LowCutOff, int HighCutOff) {
 		BufferedReader in = null;
 		String line = null;
 		int x,y;
@@ -251,7 +252,7 @@ public class GraphWindow extends JFrame implements ActionListener {
 	    	i++;
 	    }
 	    SimpleLine data = processSignal(new double[][] {xArr, yArr});
-	    data.setId(getDataId(file,subsamplingFactor, channel, cutOff));
+	    data.setId(getDataId(file,subsamplingFactor, channel, LowCutOff, HighCutOff));
 	    data.setXMetaData(new SGTMetaData("Time", "1000 / " + subsamplingFactor + " Hz", false, false));
 	    data.setYMetaData(new SGTMetaData("Potential", "µV", false, false));
 	    
@@ -259,17 +260,22 @@ public class GraphWindow extends JFrame implements ActionListener {
 	}
 	
 	private SimpleLine processSignal(double[][] data) {
-		if(cutOff > 0) {
-			Logger.log("applying a cutoff of " + cutOff + "µV (" + cutOffPasses + "passes)");
+		if(LowCutOff > 0 || HighCutOff > 0) {
+			Logger.log("applying cutoff " 
+					+ "Low:" + ((LowCutOff > 0) ? LowCutOff + "µV " : "none ") 
+					+ "High:" + ((HighCutOff > 0) ? HighCutOff + "µV " : "none ")
+					+"(" + cutOffPasses + "passes)");
+			
 			for(int i=0; i<cutOffPasses; i++) {
-				data = CutOff.highAmplitude(data, cutOff);
+				if(HighCutOff > 0) data = CutOff.highAmplitude(data, HighCutOff);
+				if(LowCutOff > 0) data = CutOff.lowAmplitude(data, LowCutOff);
 			}
 		}
 	    return new SimpleLine(data[X], data[Y], null);
 	}
 
-	private String getDataId(String file, int sampling, int channel, int cutOff) {
-		return file + sampling + "_" + channel + "_" + cutOff;
+	private String getDataId(String file, int sampling, int channel, int LowCutOff, int HighCutOff) {
+		return file + sampling + "_" + channel + "_" + LowCutOff + "_" + HighCutOff;
 	}
 
 	@Override
@@ -297,12 +303,12 @@ public class GraphWindow extends JFrame implements ActionListener {
 				subSampling /= 10;
 			}
 		} else if (e.getActionCommand().equals("increase_cutoff")) {
-			if(cutOff < 2000) {
-				cutOff += 200;
+			if(HighCutOff < 2000) {
+				HighCutOff += 200;
 			}
 		} else if (e.getActionCommand().equals("decrease_cutoff")) {
-			if(cutOff >= 200) {
-				cutOff -= 200;
+			if(HighCutOff >= 200) {
+				HighCutOff -= 200;
 			}
 		}
 		updateGraphs();
