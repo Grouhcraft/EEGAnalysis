@@ -1,7 +1,16 @@
 package main;
 
+/**
+ * Define the various waves classes emitted by the brain
+ * @author knoodrake
+ * @see {@link WaveClass}
+ *
+ */
 public interface WavesClasses {
 
+	/**
+	 * Active thinking, focus on outside world or resolving problems
+	 */
 	public static final WaveClass BETA = new WaveClass() {
 		@Override
 		public int getUpperFreq() { return 30; }
@@ -13,6 +22,10 @@ public interface WavesClasses {
 		public int getLowerAmpl() { return 5; }
 	};
 	
+	/**
+	 * Awareness, inattention
+	 * Best catch at occipital and frontal cortex
+	 */
 	public static final WaveClass ALPHA = new WaveClass() {
 		@Override
 		public int getUpperFreq() { return 13; }
@@ -24,6 +37,9 @@ public interface WavesClasses {
 		public int getLowerAmpl() { return 30; }
 	};
 	
+	/**
+	 * Emotional stress, frustration or disappointment
+	 */
 	public static final WaveClass THETA = new WaveClass() {
 		@Override
 		public int getUpperFreq() { return 7; }
@@ -35,6 +51,9 @@ public interface WavesClasses {
 		public int getLowerAmpl() { return 20; }
 	};
 	
+	/**
+	 * Deep sleep, or physical defects in brain if awake 
+	 */
 	public static final WaveClass DELTA = new WaveClass() {
 		@Override
 		public int getUpperFreq() { return 4; }
@@ -46,6 +65,9 @@ public interface WavesClasses {
 		public int getLowerAmpl() { return 0; }
 	};
 	
+	/**
+	 * Mechanism of consciousness
+	 */
 	public static final WaveClass GAMMA = new WaveClass() {
 		@Override
 		public int getUpperFreq() { return MAX_FREQUENCY; }
@@ -57,6 +79,9 @@ public interface WavesClasses {
 		public int getLowerAmpl() { return 0; }
 	};
 	
+	/**
+	 * Motor activities. Same frequencies as {@link #ALPHA} but recorded over motor cortex
+	 */
 	public static final WaveClass MU = new WaveClass() {
 		@Override
 		public int getUpperFreq() { return 12; }

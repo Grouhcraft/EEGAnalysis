@@ -62,10 +62,19 @@ public class GraphWindow extends JFrame implements ActionListener {
 		});
 	}
 	
+	/**
+	 * Update the two graph layouts if the underlying data has changed
+	 */
 	public void updateGraphs() { 
 		updateGraphs(false);
 	}
 	
+	/**
+	 * Indicate if the data used by the given graph layout has changed since his last update 
+	 * @param graphID the string identifying the graph layout
+	 * @return true if the data has changed
+	 * @see {@link #updateGraphs()}
+	 */
 	private boolean settingsChanged(String graphID) {
 		if(graphID.equals("A")) {
 			return !((SGTData)graphALayout.getData().firstElement()).getId().equals(
@@ -75,7 +84,11 @@ public class GraphWindow extends JFrame implements ActionListener {
 					getDataId(dataFile, subSampling, channels[1], LowCutOff, HighCutOff));
 		}
 	}
-	
+	/**
+	 * Update the two graph layouts if the underlying data has changed
+	 * @param force Update the graph without checking if data, used for the first update.
+	 * @see {@link #updateGraphs()} 
+	 */
 	private void updateGraphs(Boolean force) {
 		if(force || settingsChanged("A")) {
 			graphALayout.setBatch(true);
@@ -99,7 +112,7 @@ public class GraphWindow extends JFrame implements ActionListener {
  	}
 
 	/**
-	 * Create the frame.
+	 * Create the frame
 	 */
 	public GraphWindow() {
 		setTitle("EEG Viewer");
@@ -203,10 +216,24 @@ public class GraphWindow extends JFrame implements ActionListener {
 		contentPane.setLayout(gl_contentPane);
 	}
 
+	/**
+	 * Reads the EEG data from {@link #dataFile}   
+	 * @param channel EEG Channel to read 
+	 * @return the SGTData data used by the graph layouts
+	 */
 	private SGTData readTheData(int channel) {
 		return readTheData(dataFile, subSampling, channel, LowCutOff, HighCutOff);
 	}
 	
+	/**
+	 * Reads the EEG data from {@link #dataFile}   
+	 * @param file absolute path of the data file
+	 * @param subsamplingFactor 1 = no subSampling, 10 = take 1/10th of the samples, 100 = ... 
+	 * @param channel EEG channel to read
+	 * @param LowCutOff @todo remove that !
+	 * @param HighCutOff @todo remove that !
+	 * @return the SGTData data used by the graph layouts
+	 */
 	private SGTData readTheData(String file, int subsamplingFactor, int channel, int LowCutOff, int HighCutOff) {
 		BufferedReader in = null;
 		String line = null;
@@ -273,6 +300,14 @@ public class GraphWindow extends JFrame implements ActionListener {
 		return data;
 	}
 	
+	/**
+	 * Register the various settings related to the selected {@link WavesClasses wave class}
+	 * @param wc the wave class
+	 * @see {@link WavesClasses}
+	 * @see {@link #frequencyRange}
+	 * @see {@link #HighCutOff}
+	 * @see {@link #LowCutOff}
+	 */
 	public void setWaveClass(WaveClass wc) {
 		LowCutOff = wc.getUpperAmpl();
 		HighCutOff = wc.getLowerAmpl();
@@ -282,6 +317,12 @@ public class GraphWindow extends JFrame implements ActionListener {
 		};
 	}
 	
+	/**
+	 * Apply treatments to the signal data then transforms it to a {@link SimpleLine}, 
+	 * used by the {@link JPlotLayout graph}
+	 * @param data index 0 = X, index 1 = Y
+	 * @return the drawable SimpleLine curve
+	 */
 	private SimpleLine processSignal(double[][] data) {
 		if(LowCutOff > 0 || HighCutOff > 0) {
 			Logger.log("applying cutoff " 
@@ -303,10 +344,23 @@ public class GraphWindow extends JFrame implements ActionListener {
 	    return new SimpleLine(data[X], data[Y], null);
 	}
 
+	/**
+	 * Constructs the ID string for a data, which allows to track any changes in data settings
+	 * @param file the data file used
+	 * @param sampling the subsampling ratio used
+	 * @param channel the EEG channel  
+	 * @param LowCutOff the Low-Amplitude cutOff set
+	 * @param HighCutOff the High-Amplitude cutOff set
+	 * @return a string representing the data and its settings
+	 */
 	private String getDataId(String file, int sampling, int channel, int LowCutOff, int HighCutOff) {
 		return file + sampling + "_" + channel + "_" + LowCutOff + "_" + HighCutOff;
 	}
 
+	/**
+	 * Manage the UI buttons events, update the graphs accordingly
+	 * @see {@link #updateGraphs()}
+	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getActionCommand().equals("preva")) {
