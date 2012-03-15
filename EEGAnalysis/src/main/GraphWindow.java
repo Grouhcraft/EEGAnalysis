@@ -5,23 +5,40 @@ import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
 import gov.noaa.pmel.sgt.swing.JPlotLayout;
+import gov.noaa.pmel.sgt.swing.prop.NewLevelsDialog;
 import gov.noaa.pmel.util.Point2D;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.EventQueue;
+import java.awt.Graphics;
+import java.awt.Insets;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
+import javax.swing.Spring;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.SpringLayout;
+import javax.swing.SpringLayout.Constraints;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.plaf.metal.MetalBorders;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 
 public class GraphWindow extends JFrame implements ActionListener {
 
@@ -150,16 +167,18 @@ public class GraphWindow extends JFrame implements ActionListener {
 		setTitle("EEG Viewer");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 882, 410);
+		setLayout(new BorderLayout());
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		add(contentPane, BorderLayout.CENTER); 
 		
 		graphALayout = new JPlotLayout(false, false, false, false, "A", null, false);
 		graphBLayout = new JPlotLayout(false, false, false, false, "B", null, false);
 		
+		
 		setWaveClass(WaveClass.GAMMA);
 		updateGraphs(true);
 
-		setContentPane(contentPane);
 		JButton btnPrevA = new JButton("<< Prev Ch.");
 		JButton btnNextA = new JButton("Next Ch. >>");		
 		JButton btnPrevB = new JButton("<< Prev. Ch.");
@@ -192,6 +211,15 @@ public class GraphWindow extends JFrame implements ActionListener {
 		
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
 		gl_contentPane.setAutoCreateGaps(true);
+		JPanel graphAPanel = new JPanel();
+		JPanel graphBPanel = new JPanel();
+		graphAPanel.setBorder(BorderFactory.createLineBorder(Color.red, 2));
+		graphBPanel.setBorder(BorderFactory.createLineBorder(Color.blue, 2));
+		graphAPanel.setLayout(new BorderLayout());
+		graphBPanel.setLayout(new BorderLayout());
+		graphAPanel.add(graphALayout, BorderLayout.CENTER);
+		graphBPanel.add(graphBLayout, BorderLayout.CENTER);
+		
 		
 		// Horizontal
 		gl_contentPane.setHorizontalGroup(
@@ -199,13 +227,13 @@ public class GraphWindow extends JFrame implements ActionListener {
 						
 					// Graph A, Boutons
 					.addGroup(gl_contentPane.createParallelGroup()
-						.addComponent(graphALayout)
+						.addComponent(graphAPanel)
 						.addGroup(gl_contentPane.createSequentialGroup().addComponent(btnPrevA).addComponent(btnNextA))
 					)
 							
 					// Graph B, Boutons
 					.addGroup(gl_contentPane.createParallelGroup()
-						.addComponent(graphBLayout)
+						.addComponent(graphBPanel)
 						.addGroup(gl_contentPane.createSequentialGroup().addComponent(btnPrevB).addComponent(btnNextB))
 					)
 							
@@ -230,8 +258,8 @@ public class GraphWindow extends JFrame implements ActionListener {
 								.addComponent(btnMoreCutoff)
 								.addComponent(btnLessCutoff)
 								)
-						.addComponent(graphALayout)
-						.addComponent(graphBLayout)
+						.addComponent(graphAPanel)
+						.addComponent(graphBPanel)
 					)
 					
 					// Boutons prevA, prevB, nextA, nextB
@@ -243,7 +271,14 @@ public class GraphWindow extends JFrame implements ActionListener {
 					)
 		);
 		
+		addComponentListener(new java.awt.event.ComponentAdapter() {
+			  public void componentResized(ComponentEvent event) {
+				  	
+				  }
+			});
+		
 		contentPane.setLayout(gl_contentPane);
+		pack();
 	}
 
 	/**
