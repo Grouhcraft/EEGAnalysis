@@ -50,7 +50,6 @@ public class GraphMenu extends JMenuBar {
 		
 		JMenu waveClasses = new JMenu("Wave classes");
 		for(Field c : WaveClass.class.getDeclaredFields()) {
-			Logger.log("name:" + c.getName());
 			if(WaveClass.class.getName().equals( c.getType().getName())) {
 				JMenuItem item = new JMenuItem(c.getName());
 				item.addActionListener(new ActionListener() {
@@ -58,8 +57,8 @@ public class GraphMenu extends JMenuBar {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						try {
-							WaveClass wc = (WaveClass) WaveClass.class.getField(((JMenuItem)e.getSource()).getText()).get(WaveClass.class.getClass());
-							getParentWindow().setWaveClass(wc);
+							Logger.log("clicked: " +  ((JMenuItem)e.getSource()).getText());
+							getParentWindow().setWaveClass(WaveClass.get(((JMenuItem)e.getSource()).getText()));
 							getParentWindow().updateGraphs();
 						} catch (Exception e1) {
 							e1.printStackTrace();

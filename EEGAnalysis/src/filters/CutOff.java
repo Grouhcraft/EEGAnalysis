@@ -74,6 +74,7 @@ public class CutOff extends Filter {
 				if((ampl == AMPLITUDE.High && Math.abs(f[xx] - f[x]) < threshold)
 						|| (ampl == AMPLITUDE.Low && Math.abs(f[xx] - f[x]) > threshold)) {
 					toErease = addRangeTo(toErease, xx, x);
+					//for(int i=xx; i<x; i++) { data[Y][i] = 0; }
 				}
 				xx = x+1;
 				continue;
@@ -84,6 +85,7 @@ public class CutOff extends Filter {
 				if((ampl == AMPLITUDE.High && Math.abs(f[xx] - f[x]) < threshold) ||
 						(ampl == AMPLITUDE.Low && Math.abs(f[xx] - f[x]) > threshold)) {
 					toErease = addRangeTo(toErease, xx, x);
+					//for(int i=xx; i<x; i++) { data[Y][i] = 0; }
 				}
 				xx = x+1;
 				continue;

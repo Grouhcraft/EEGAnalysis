@@ -6,7 +6,6 @@ import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
 import gov.noaa.pmel.sgt.swing.JPlotLayout;
 import gov.noaa.pmel.util.Point2D;
-
 import java.awt.EventQueue;
 import java.io.BufferedReader;
 import java.io.File;
@@ -23,8 +22,6 @@ import javax.swing.JButton;
 import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 
 public class GraphWindow extends JFrame implements ActionListener {
 
@@ -56,7 +53,7 @@ public class GraphWindow extends JFrame implements ActionListener {
 	
 	static class TimeFrame {
 		int from = 10;
-		int to = 30;
+		int to = 15;
 	} 
 	
 	static class Channels {
@@ -72,6 +69,7 @@ public class GraphWindow extends JFrame implements ActionListener {
 	
 	private final int X = 0;
 	private final int Y = 1;
+	private WaveClass waveClass;
 	
 
 	/**
@@ -106,10 +104,10 @@ public class GraphWindow extends JFrame implements ActionListener {
 	private boolean settingsChanged(String graphID) {
 		if(graphID.equals("A")) {
 			return !((SGTData)graphALayout.getData().firstElement()).getId().equals(
-					getDataId(dataSettings.file, dataSettings.subSampling, channels.a, amplitudeCutoff, timeFrame));
+					getDataId(dataSettings.file, dataSettings.subSampling, channels.a, amplitudeCutoff, timeFrame, frequencyRange));
 		} else {
 			return !((SGTData)graphBLayout.getData().firstElement()).getId().equals(
-					getDataId(dataSettings.file, dataSettings.subSampling, channels.b, amplitudeCutoff, timeFrame));
+					getDataId(dataSettings.file, dataSettings.subSampling, channels.b, amplitudeCutoff, timeFrame, frequencyRange));
 		}
 	}
 	/**
@@ -124,8 +122,10 @@ public class GraphWindow extends JFrame implements ActionListener {
 			graphALayout.clear();
 			SGTData dataA = readTheData(channels.a);
 			graphALayout.addData(dataA);
+			graphALayout.setTitles("Channel #" + channels.a, waveClass.getName(), dataSettings.file.getName());
 			
 			graphALayout.setBatch(false);
+
 		}
 		
 		if(force || settingsChanged("B")) {
@@ -134,8 +134,10 @@ public class GraphWindow extends JFrame implements ActionListener {
 			graphBLayout.clear();
 			SGTData dataB = readTheData(channels.b);
 			graphBLayout.addData(dataB);
-			
+			graphBLayout.setTitles("Channel #" + channels.b, waveClass.getName(), dataSettings.file.getName());
+
 			graphBLayout.setBatch(false);
+
 		}
  	}
 
@@ -153,8 +155,6 @@ public class GraphWindow extends JFrame implements ActionListener {
 		
 		graphALayout = new JPlotLayout(false, false, false, false, "A", null, false);
 		graphBLayout = new JPlotLayout(false, false, false, false, "B", null, false);
-		graphALayout.setTitles("Ch.A", "", "");
-		graphBLayout.setTitles("Ch.B", "", "");
 		
 		setWaveClass(WaveClass.GAMMA);
 		updateGraphs(true);
@@ -323,8 +323,8 @@ public class GraphWindow extends JFrame implements ActionListener {
 	    	i++;
 	    }
 	    SimpleLine data = processSignal(new double[][] {xArr, yArr});
-	    data.setId(getDataId(file,dataSettings.subSampling, channel, amplitudeCutoff, timeFrame));
-	    data.setXMetaData(new SGTMetaData("Time", "1000 / " + dataSettings.subSampling + " Hz", false, false));
+	    data.setId(getDataId(file,dataSettings.subSampling, channel, amplitudeCutoff, timeFrame, frequencyRange));
+	    data.setXMetaData(new SGTMetaData("Samples", dataSettings.frequency / dataSettings.subSampling + " Hz", false, false));
 	    data.setYMetaData(new SGTMetaData("Potential", "µV", false, false));
 	    
 		return data;
@@ -339,6 +339,7 @@ public class GraphWindow extends JFrame implements ActionListener {
 	 * @see {@link #LowCutOff}
 	 */
 	public void setWaveClass(WaveClass wc) {
+		waveClass = wc;
 		amplitudeCutoff.low = wc.getUpperAmpl();
 		amplitudeCutoff.high = wc.getLowerAmpl();
 		frequencyRange.lower = wc.getLowerFreq();
@@ -381,10 +382,11 @@ public class GraphWindow extends JFrame implements ActionListener {
 	 * @param HighCutOff the High-Amplitude cutOff set
 	 * @return a string representing the data and its settings
 	 */
-	private String getDataId(File file, int sampling, int channel, AmplitudeCutoff ampCutOff, TimeFrame timeRange) {
+	private String getDataId(File file, int sampling, int channel, AmplitudeCutoff ampCutOff, TimeFrame timeRange, FrequencyRange fr) {
 		return file.getPath() + sampling 
 				+ "_" + channel + "_" + ampCutOff.low + "_" + ampCutOff.high
-				+ "_" + timeRange.from + "_" + timeRange.to;
+				+ "_" + timeRange.from + "_" + timeRange.to
+				+ "_" + fr.higher + "_" + fr.lower;
 	}
 
 	/**
