@@ -1,0 +1,3 @@
+* Create an environment variable named "EEGDATA"
+* set its value to your path to the EEG data files directory
+* Ex: %EEGDATA% = C:\my\data\files

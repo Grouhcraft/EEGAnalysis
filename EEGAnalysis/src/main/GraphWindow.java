@@ -33,7 +33,7 @@ public class GraphWindow extends JFrame implements ActionListener {
 	private JPanel contentPane;
 	private JPlotLayout graphALayout;
 	private JPlotLayout graphBLayout;
-	private File dataFile = new File(R.get("datafile"));
+	private File dataFile = new File(System.getenv("EEGDATA") + "\\" + R.get("datafile"));
 	private int channelsCount = 59;
 	private int dataFreq = 1000;
 	
