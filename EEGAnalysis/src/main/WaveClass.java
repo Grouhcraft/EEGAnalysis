@@ -1,5 +1,5 @@
 package main;
-
+//test
 /**
  * Define the various waves classes emitted by the brain
  * @author knoodrake
