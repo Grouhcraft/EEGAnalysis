@@ -3,6 +3,7 @@ package main;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.lang.reflect.Field;
 
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
@@ -46,5 +47,30 @@ public class GraphMenu extends JMenuBar {
 		});
 		file.add(loadDataFile);
 		add(file);
+		
+		JMenu waveClasses = new JMenu("Wave classes");
+		for(Field c : WaveClass.class.getDeclaredFields()) {
+			Logger.log("name:" + c.getName());
+			if(WaveClass.class.getName().equals( c.getType().getName())) {
+				JMenuItem item = new JMenuItem(c.getName());
+				item.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						try {
+							WaveClass wc = (WaveClass) WaveClass.class.getField(((JMenuItem)e.getSource()).getText()).get(WaveClass.class.getClass());
+							getParentWindow().setWaveClass(wc);
+							getParentWindow().updateGraphs();
+						} catch (Exception e1) {
+							e1.printStackTrace();
+						}
+					
+					}
+				});
+				waveClasses.add(item);
+			}
+		}
+		
+		add(waveClasses);
 	}
 }

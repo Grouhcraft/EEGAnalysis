@@ -3,7 +3,6 @@ package main;
 /**
  * Define the various waves classes emitted by the brain
  * @author knoodrake
- * @see {@link WaveClass}
  * @see {@link #ALPHA}
  * @see {@link #BETA}
  * @see {@link #GAMMA}

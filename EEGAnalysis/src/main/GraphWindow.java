@@ -23,6 +23,8 @@ import javax.swing.JButton;
 import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 public class GraphWindow extends JFrame implements ActionListener {
 
@@ -54,7 +56,7 @@ public class GraphWindow extends JFrame implements ActionListener {
 	
 	static class TimeFrame {
 		int from = 10;
-		int to = 15;
+		int to = 30;
 	} 
 	
 	static class Channels {
@@ -156,7 +158,7 @@ public class GraphWindow extends JFrame implements ActionListener {
 		
 		setWaveClass(WaveClass.GAMMA);
 		updateGraphs(true);
-				
+
 		setContentPane(contentPane);
 		JButton btnPrevA = new JButton("<< Prev Ch.");
 		JButton btnNextA = new JButton("Next Ch. >>");		
