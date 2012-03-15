@@ -4,9 +4,16 @@ package main;
  * Define the various waves classes emitted by the brain
  * @author knoodrake
  * @see {@link WaveClass}
- *
+ * @see {@link #ALPHA}
+ * @see {@link #BETA}
+ * @see {@link #GAMMA}
+ * @see {@link #THETA}
+ * @see {@link #MU}
+ * @see {@link #DELTA}
  */
-public interface WavesClasses {
+public class WavesClasses {
+	
+	private WavesClasses(){}
 
 	/**
 	 * Active thinking, focus on outside world or resolving problems

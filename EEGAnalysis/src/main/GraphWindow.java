@@ -33,19 +33,40 @@ public class GraphWindow extends JFrame implements ActionListener {
 	private JPanel contentPane;
 	private JPlotLayout graphALayout;
 	private JPlotLayout graphBLayout;
-	private File dataFile = new File(System.getenv("EEGDATA") + "\\" + R.get("datafile"));
-	private int channelsCount = 59;
-	private int dataFreq = 1000;
+
+	static class DataSettings  {
+		int channelsCount = 59;
+		int frequency = 1000;
+		File file = new File(System.getenv("EEGDATA") + "\\" + R.get("datafile"));
+		int subSampling = 1;
+	}
 	
-	private int LowCutOff = 30;
-	private int HighCutOff = 5;
-	private int cutOffPasses = 3;
-	private int[] frequencyRange = {13,30};
-	private int[] timeFrame = {10,11};
-	private int subSampling = 1;
-	private int[] channels = {1,2};
-
-
+	static class AmplitudeCutoff {
+		int high = 30;
+		int low = 5;
+		int passes = 3;
+	}
+	
+	static class FrequencyRange {
+		int lower = 30;
+		int higher = 5;
+	}
+	
+	static class TimeFrame {
+		int from = 10;
+		int to = 15;
+	} 
+	
+	static class Channels {
+		int a = 1;
+		int b = 2;
+	}
+	
+	private Channels channels = new Channels();
+	private TimeFrame timeFrame = new TimeFrame();
+	private FrequencyRange frequencyRange = new FrequencyRange();
+	private AmplitudeCutoff amplitudeCutoff = new AmplitudeCutoff();
+	private DataSettings dataSettings = new DataSettings();
 	
 	private final int X = 0;
 	private final int Y = 1;
@@ -83,10 +104,10 @@ public class GraphWindow extends JFrame implements ActionListener {
 	private boolean settingsChanged(String graphID) {
 		if(graphID.equals("A")) {
 			return !((SGTData)graphALayout.getData().firstElement()).getId().equals(
-					getDataId(dataFile, subSampling, channels[0], LowCutOff, HighCutOff));
+					getDataId(dataSettings.file, dataSettings.subSampling, channels.a, amplitudeCutoff, timeFrame));
 		} else {
 			return !((SGTData)graphBLayout.getData().firstElement()).getId().equals(
-					getDataId(dataFile, subSampling, channels[1], LowCutOff, HighCutOff));
+					getDataId(dataSettings.file, dataSettings.subSampling, channels.b, amplitudeCutoff, timeFrame));
 		}
 	}
 	/**
@@ -99,7 +120,7 @@ public class GraphWindow extends JFrame implements ActionListener {
 			graphALayout.setBatch(true);
 			
 			graphALayout.clear();
-			SGTData dataA = readTheData(channels[0]);
+			SGTData dataA = readTheData(channels.a);
 			graphALayout.addData(dataA);
 			
 			graphALayout.setBatch(false);
@@ -109,7 +130,7 @@ public class GraphWindow extends JFrame implements ActionListener {
 			graphBLayout.setBatch(true);
 			
 			graphBLayout.clear();
-			SGTData dataB = readTheData(channels[1]);
+			SGTData dataB = readTheData(channels.b);
 			graphBLayout.addData(dataB);
 			
 			graphBLayout.setBatch(false);
@@ -229,7 +250,7 @@ public class GraphWindow extends JFrame implements ActionListener {
 	 * @return the SGTData data used by the graph layouts
 	 */
 	private SGTData readTheData(int channel) {
-		return readTheData(dataFile, subSampling, channel, LowCutOff, HighCutOff);
+		return readTheData(dataSettings.file, channel );
 	}
 	
 	/**
@@ -241,7 +262,7 @@ public class GraphWindow extends JFrame implements ActionListener {
 	 * @param HighCutOff @todo remove that !
 	 * @return the SGTData data used by the graph layouts
 	 */
-	private SGTData readTheData(File file, int subsamplingFactor, int channel, int LowCutOff, int HighCutOff) {
+	private SGTData readTheData(File file, int channel) {
 		BufferedReader in = null;
 		String line = null;
 		int x,y;
@@ -256,7 +277,7 @@ public class GraphWindow extends JFrame implements ActionListener {
 		}
 	    
 	    int i=0;
-	    int toSkip = (timeFrame[0] * dataFreq) / subsamplingFactor;
+	    int toSkip = (timeFrame.from * dataSettings.frequency) / dataSettings.subSampling;
 		while(line != null && i<toSkip) {
 			try {
 				line = in.readLine();
@@ -266,7 +287,7 @@ public class GraphWindow extends JFrame implements ActionListener {
 			}
 		}
     	
-		int toRead = ((timeFrame[1] - timeFrame[0]) * dataFreq) / subsamplingFactor; 
+		int toRead = ((timeFrame.to - timeFrame.from) * dataSettings.frequency) / dataSettings.subSampling; 
 	    i = 0;
 	    while(line != null && i < toRead) {
 	    	x = i; 
@@ -276,16 +297,16 @@ public class GraphWindow extends JFrame implements ActionListener {
 	    	
 	    	i++;
 	    	try {
-	    		for(int ii=0; ii < (subsamplingFactor > 1 ? subsamplingFactor-1 : 1); ii++ ) {
+	    		for(int ii=0; ii < (dataSettings.subSampling > 1 ? dataSettings.subSampling-1 : 1); ii++ ) {
 	    			line = in.readLine();
 	    		}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 	    }
-	    Logger.log("parsing " + i/1000 + "K samples (over " + (i*subsamplingFactor)/1000 + "K ones) from " 
-	    		+ dataFreq + "Hz channel " + channel + "'s data => " 
-	    		+ (i*subsamplingFactor)/dataFreq + "s record"
+	    Logger.log("parsing " + i/1000 + "K samples (over " + (i*dataSettings.subSampling)/1000 + "K ones) from " 
+	    		+ dataSettings.frequency + "Hz channel " + channel + "'s data => " 
+	    		+ (i*dataSettings.subSampling)/dataSettings.frequency + "s record"
 	    		);
 	    
 	    
@@ -300,8 +321,8 @@ public class GraphWindow extends JFrame implements ActionListener {
 	    	i++;
 	    }
 	    SimpleLine data = processSignal(new double[][] {xArr, yArr});
-	    data.setId(getDataId(file,subsamplingFactor, channel, LowCutOff, HighCutOff));
-	    data.setXMetaData(new SGTMetaData("Time", "1000 / " + subsamplingFactor + " Hz", false, false));
+	    data.setId(getDataId(file,dataSettings.subSampling, channel, amplitudeCutoff, timeFrame));
+	    data.setXMetaData(new SGTMetaData("Time", "1000 / " + dataSettings.subSampling + " Hz", false, false));
 	    data.setYMetaData(new SGTMetaData("Potential", "µV", false, false));
 	    
 		return data;
@@ -316,12 +337,10 @@ public class GraphWindow extends JFrame implements ActionListener {
 	 * @see {@link #LowCutOff}
 	 */
 	public void setWaveClass(WaveClass wc) {
-		LowCutOff = wc.getUpperAmpl();
-		HighCutOff = wc.getLowerAmpl();
-		frequencyRange = new int[] {
-			wc.getLowerFreq(),
-			wc.getUpperFreq()
-		};
+		amplitudeCutoff.low = wc.getUpperAmpl();
+		amplitudeCutoff.high = wc.getLowerAmpl();
+		frequencyRange.lower = wc.getLowerFreq();
+		frequencyRange.higher = wc.getUpperFreq();
 	}
 	
 	/**
@@ -330,22 +349,22 @@ public class GraphWindow extends JFrame implements ActionListener {
 	 * @param data index 0 = X, index 1 = Y
 	 * @return the drawable SimpleLine curve
 	 */
-	private SimpleLine processSignal(double[][] data) {
-		if(LowCutOff > 0 || HighCutOff > 0) {
+	private SimpleLine processSignal(double[][] data) {		
+		if(amplitudeCutoff.low > 0 || amplitudeCutoff.high > 0) {
 			Logger.log("applying cutoff " 
-					+ "Low:" + ((LowCutOff > 0) ? LowCutOff + "µV " : "none ") 
-					+ "High:" + ((HighCutOff > 0) ? HighCutOff + "µV " : "none ")
-					+"(" + cutOffPasses + "passes)");
+					+ "Low:" + ((amplitudeCutoff.low > 0) ? amplitudeCutoff.low + "µV " : "none ") 
+					+ "High:" + ((amplitudeCutoff.high > 0) ? amplitudeCutoff.high + "µV " : "none ")
+					+"(" + amplitudeCutoff.passes + "passes)");
 			
-			for(int i=0; i<cutOffPasses; i++) {
-				if(HighCutOff > 0) data = CutOff.highAmplitude(data, HighCutOff);
-				if(LowCutOff > 0) data = CutOff.lowAmplitude(data, LowCutOff);
+			for(int i=0; i<amplitudeCutoff.passes; i++) {
+				if(amplitudeCutoff.high > 0) data = CutOff.highAmplitude(data, amplitudeCutoff.high);
+				if(amplitudeCutoff.low > 0) data = CutOff.lowAmplitude(data, amplitudeCutoff.low);
 			}
 		}
 		
-		if(frequencyRange[0] > 0 || frequencyRange[1] > 0) {
-			Logger.log("showing frequency range [" + frequencyRange[0] + " ; " + frequencyRange[1] + "]");
-			data = CutOff.frequencyRange(data, frequencyRange[0], frequencyRange[1]);
+		if(frequencyRange.lower > 0 || frequencyRange.higher > 0) {
+			Logger.log("showing frequency range [" + frequencyRange.lower + " ; " + frequencyRange.higher + "]");
+			data = CutOff.frequencyRange(data, frequencyRange.lower, frequencyRange.higher);
 		}
 
 	    return new SimpleLine(data[X], data[Y], null);
@@ -360,8 +379,10 @@ public class GraphWindow extends JFrame implements ActionListener {
 	 * @param HighCutOff the High-Amplitude cutOff set
 	 * @return a string representing the data and its settings
 	 */
-	private String getDataId(File file, int sampling, int channel, int LowCutOff, int HighCutOff) {
-		return file.getPath() + sampling + "_" + channel + "_" + LowCutOff + "_" + HighCutOff;
+	private String getDataId(File file, int sampling, int channel, AmplitudeCutoff ampCutOff, TimeFrame timeRange) {
+		return file.getPath() + sampling 
+				+ "_" + channel + "_" + ampCutOff.low + "_" + ampCutOff.high
+				+ "_" + timeRange.from + "_" + timeRange.to;
 	}
 
 	/**
@@ -371,44 +392,36 @@ public class GraphWindow extends JFrame implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getActionCommand().equals("preva")) {
-			if(channels[0] > 1) {
-				channels[0]--;
+			if(channels.a > 1) {
+				channels.a--;
 			}
 		} else if (e.getActionCommand().equals("nexta")) {
-			if(channels[0] < channelsCount) {
-				channels[0]++;
+			if(channels.a < dataSettings.channelsCount) {
+				channels.a++;
 			}
 		} else if (e.getActionCommand().equals("prevb")) {
-			if(channels[1] > 1) {
-				channels[1]--;
+			if(channels.b > 1) {
+				channels.b--;
 			}
 		} else if (e.getActionCommand().equals("nextb")) {
-			if(channels[0] < channelsCount) {
-				channels[1]++;
+			if(channels.a < dataSettings.channelsCount) {
+				channels.b++;
 			}
 		} else if (e.getActionCommand().equals("decrease_sampling")) {
-				subSampling *= 10;
+			dataSettings.subSampling *= 10;
 		} else if (e.getActionCommand().equals("increase_sampling")) {
-			if(subSampling >= 10) {
-				subSampling /= 10;
-			}
-		} else if (e.getActionCommand().equals("increase_cutoff")) {
-			if(HighCutOff < 2000) {
-				HighCutOff += 200;
-			}
-		} else if (e.getActionCommand().equals("decrease_cutoff")) {
-			if(HighCutOff >= 200) {
-				HighCutOff -= 200;
+			if(dataSettings.subSampling >= 10) {
+				dataSettings.subSampling /= 10;
 			}
 		}
 		updateGraphs();
 	}
 	
 	public File getDataFile() {
-		return dataFile;
+		return dataSettings.file;
 	}
 
 	public void setDataFile(File dataFile) {
-		this.dataFile = dataFile;
+		dataSettings.file = dataFile;
 	}
 }
