@@ -154,7 +154,7 @@ public class GraphWindow extends JFrame implements ActionListener {
 		graphALayout.setTitles("Ch.A", "", "");
 		graphBLayout.setTitles("Ch.B", "", "");
 		
-		setWaveClass(WavesClasses.GAMMA);
+		setWaveClass(WaveClass.GAMMA);
 		updateGraphs(true);
 				
 		setContentPane(contentPane);
