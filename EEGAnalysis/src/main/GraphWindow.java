@@ -1,19 +1,20 @@
 package main;
 
 import filters.CutOff;
+import filters.FFT;
+import filters.WelchMethod;
+import gov.noaa.pmel.sgt.Attribute;
+import gov.noaa.pmel.sgt.LineAttribute;
+import gov.noaa.pmel.sgt.dm.PointCollection;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
 import gov.noaa.pmel.sgt.swing.JPlotLayout;
-import gov.noaa.pmel.sgt.swing.prop.NewLevelsDialog;
 import gov.noaa.pmel.util.Point2D;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.EventQueue;
-import java.awt.Graphics;
-import java.awt.Insets;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -25,20 +26,13 @@ import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
-import javax.swing.Spring;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.SpringLayout;
-import javax.swing.SpringLayout.Constraints;
-import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
-import javax.swing.plaf.metal.MetalBorders;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 
 public class GraphWindow extends JFrame implements ActionListener {
 
@@ -52,8 +46,9 @@ public class GraphWindow extends JFrame implements ActionListener {
 
 	static class DataSettings  {
 		int channelsCount = 59;
-		int frequency = 1000;
+		int frequency = 100;
 		File file = new File(System.getenv("EEGDATA") + "\\" + R.get("datafile"));
+		File markerFile = new File(System.getenv("EEGDATA") + "\\" + R.get("markerfile"));
 		int subSampling = 1;
 	}
 	
@@ -64,18 +59,32 @@ public class GraphWindow extends JFrame implements ActionListener {
 	}
 	
 	static class FrequencyRange {
-		int lower = 30;
+		int lower = 15;
 		int higher = 5;
 	}
 	
 	static class TimeFrame {
-		int from = 10;
-		int to = 15;
+		int from = 43;
+		int to = 49;
 	} 
 	
 	static class Channels {
 		int a = 1;
-		int b = 2;
+		int b = 57;
+		String[] code = new String[] {
+			"AF3", "AF4", "F5", "F3", 
+			"F1", "Fz", "F2", "F4", "F6", 
+			"FC5", "FC3", "FC1", "FCz", 
+			"FC2", "FC4", "FC6", "CFC7", "CFC5", 
+			"CFC3", "CFC1", "CFC2", "CFC4",
+			"CFC6", "CFC8", "T7", "C5", 
+			"C3", "C1", "Cz", "C2", "C4", 
+			"C6", "T8", "CCP7", "CCP5", "CCP3",
+			"CCP1", "CCP2", "CCP4", "CCP6", "CCP8", 
+			"CP5", "CP3", "CP1", "CPz", "CP2", 
+			"CP4", "CP6", "P5", "P3", "P1", "Pz", 
+			"P2", "P4", "P6", "PO1", "PO2", "O1"
+		};
 	}
 	
 	private Channels channels = new Channels();
@@ -138,8 +147,19 @@ public class GraphWindow extends JFrame implements ActionListener {
 			
 			graphALayout.clear();
 			SGTData dataA = readTheData(channels.a);
-			graphALayout.addData(dataA);
-			graphALayout.setTitles("Channel #" + channels.a, waveClass.getName(), dataSettings.file.getName());
+			graphALayout.addData(dataA, new LineAttribute(LineAttribute.SOLID, Color.MAGENTA));
+	/*		
+			// Graph markers
+			double startLimit = (Double) dataA.getXRange().getStart().getObjectValue();
+			double endLimit = (Double) dataA.getXRange().getEnd().getObjectValue();
+			double maxYValue = (Double) dataA.getYRange().getEnd().getObjectValue();
+			double minYValue = (Double) dataA.getYRange().getStart().getObjectValue();
+			SGTData makerData = readTheMarkerData(startLimit, endLimit, minYValue, maxYValue);
+			graphALayout.addData(makerData, new LineAttribute(LineAttribute.HEAVY, Color.LIGHT_GRAY));
+
+			// --------------
+		*/	
+			graphALayout.setTitles("Channel #" + channels.a + " (" + channels.code[channels.a]+ ")", waveClass.getName(), dataSettings.file.getName());
 			
 			graphALayout.setBatch(false);
 
@@ -151,7 +171,7 @@ public class GraphWindow extends JFrame implements ActionListener {
 			graphBLayout.clear();
 			SGTData dataB = readTheData(channels.b);
 			graphBLayout.addData(dataB);
-			graphBLayout.setTitles("Channel #" + channels.b, waveClass.getName(), dataSettings.file.getName());
+			graphBLayout.setTitles("Channel #" + channels.b + " (" + channels.code[channels.b]+ ")", waveClass.getName(), dataSettings.file.getName());
 
 			graphBLayout.setBatch(false);
 
@@ -174,7 +194,6 @@ public class GraphWindow extends JFrame implements ActionListener {
 		
 		graphALayout = new JPlotLayout(false, false, false, false, "A", null, false);
 		graphBLayout = new JPlotLayout(false, false, false, false, "B", null, false);
-		
 		
 		setWaveClass(WaveClass.GAMMA);
 		updateGraphs(true);
@@ -290,6 +309,55 @@ public class GraphWindow extends JFrame implements ActionListener {
 		return readTheData(dataSettings.file, channel );
 	}
 	
+	
+	private SGTData readTheMarkerData(double startLimit, double endLimit, double minYValue, double maxYValue) {
+		BufferedReader in = null;
+		String line = null;
+	    try {
+			in = new BufferedReader(new FileReader(dataSettings.markerFile));
+			line = in.readLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	    ArrayList<Double> times = new ArrayList<Double>();
+	    ArrayList<Integer> directions = new ArrayList<Integer>();
+	    while(line != null) {
+	    	double d = Double.parseDouble(line.split("\t")[0]);
+	    	double plopStartLimit = timeFrame.from * dataSettings.frequency;
+	    	double plopEndLimit = timeFrame.to * dataSettings.frequency;
+	    	if(d > plopStartLimit && d < plopEndLimit) {
+	    		int dir = (int)Double.parseDouble(line.split("\t")[1]);
+	    		directions.add(dir);
+	    		times.add(d);
+	    	}
+	    	try {
+	    		line = in.readLine();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+	    }
+	    double[] xArr = new double[(int) (endLimit - startLimit)];
+	    double[] yArr = new double[(int) (endLimit - startLimit)];
+	    for(int i=(int) startLimit; i<endLimit; i++) {
+	    	xArr[i] = i;
+	    	yArr[i] = 0;
+	    }
+	    int cueDuration = 4;
+	    for(int i=0; i<times.size(); i++) {
+	    	for(int y=0; y<cueDuration * dataSettings.frequency &&
+	    			(int)(times.get(i) - timeFrame.from * dataSettings.frequency) + y < yArr.length 
+	    			; y++) {
+		    	yArr[(int)(times.get(i) - timeFrame.from * dataSettings.frequency) + y] 
+		    			= directions.get(i) == 1 ? maxYValue : minYValue;
+	    	}
+	    }
+	    SimpleLine markers = new SimpleLine(xArr, yArr, null);
+	    markers.setId("markers");	
+	    markers.setXMetaData(new SGTMetaData("Cues", "", false, false));
+	    markers.setYMetaData(new SGTMetaData("", "", false, false));
+	    return markers;
+	}
+	
 	/**
 	 * Reads the EEG data from {@link #dataFile}   
 	 * @param file absolute path of the data file
@@ -395,16 +463,16 @@ public class GraphWindow extends JFrame implements ActionListener {
 					+"(" + amplitudeCutoff.passes + "passes)");
 			
 			for(int i=0; i<amplitudeCutoff.passes; i++) {
-				if(amplitudeCutoff.high > 0) data = CutOff.highAmplitude(data, amplitudeCutoff.high);
-				if(amplitudeCutoff.low > 0) data = CutOff.lowAmplitude(data, amplitudeCutoff.low);
+			//	if(amplitudeCutoff.high > 0) data = CutOff.highAmplitude(data, amplitudeCutoff.high);
+			//	if(amplitudeCutoff.low > 0) data = CutOff.lowAmplitude(data, amplitudeCutoff.low);
 			}
 		}
 		
 		if(frequencyRange.lower > 0 || frequencyRange.higher > 0) {
-			Logger.log("showing frequency range [" + frequencyRange.lower + " ; " + frequencyRange.higher + "]");
-			data = CutOff.frequencyRange(data, frequencyRange.lower, frequencyRange.higher);
+		//	Logger.log("showing frequency range [" + frequencyRange.lower + " ; " + frequencyRange.higher + "]");
+		//	data = CutOff.frequencyRange(data, frequencyRange.lower, frequencyRange.higher);
 		}
-
+		data = WelchMethod.compute(data);
 	    return new SimpleLine(data[X], data[Y], null);
 	}
 

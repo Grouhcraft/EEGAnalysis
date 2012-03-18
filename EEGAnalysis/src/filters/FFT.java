@@ -34,4 +34,11 @@ public class FFT extends Filter {
 		fft.realInverse(y, false);
 		return new double[][] { data[X].clone(), y };
 	}
+
+	public static double[] forward(double[] data) {
+		DoubleFFT_1D fft = new DoubleFFT_1D(data.length);
+		double[] y = data.clone();
+		fft.realForward(y);
+		return y;
+	}
 }
