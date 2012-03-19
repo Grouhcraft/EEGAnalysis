@@ -1,4 +1,4 @@
-package main;
+package plot;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,18 +10,22 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
+import main.MainWindow;
+
+
+
 public class GraphMenu extends JMenuBar {
 
 	private static final long serialVersionUID = -5364900148201046220L;
 	private static File currentDir = null;
-	private GraphWindow parentWindow;
+	private PlotFrame parentWindow;
 
 
-	public GraphWindow getParentWindow() {
+	public PlotFrame getParentWindow() {
 		return parentWindow;
 	}
 
-	public GraphMenu(GraphWindow parentWindow) {
+	public GraphMenu(PlotFrame parentWindow) {
 		this.parentWindow = parentWindow;
 		JMenu file = new JMenu("File");
 		JMenuItem loadDataFile = new JMenuItem("Load data file");
@@ -40,7 +44,7 @@ public class GraphMenu extends JMenuBar {
 			    	File selectedFile = fileChooser.getSelectedFile();
 					getParentWindow().setDataFile(selectedFile);
 					System.out.println(selectedFile.getPath());
-					getParentWindow().updateGraphs();
+					getParentWindow().updateGraph();
 			    }
 
 			}
@@ -57,9 +61,7 @@ public class GraphMenu extends JMenuBar {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						try {
-							Logger.log("clicked: " +  ((JMenuItem)e.getSource()).getText());
 							getParentWindow().setWaveClass(WaveClass.get(((JMenuItem)e.getSource()).getText()));
-							getParentWindow().updateGraphs();
 						} catch (Exception e1) {
 							e1.printStackTrace();
 						}
@@ -69,7 +71,18 @@ public class GraphMenu extends JMenuBar {
 				waveClasses.add(item);
 			}
 		}
-		
 		add(waveClasses);
+		
+		JMenu clone = new JMenu("Clone");
+		JMenuItem cloneItem = new JMenuItem("Clone this plot");
+		cloneItem.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				MainWindow.getInstance().createNewPlot(getParentWindow());
+			}
+		});
+		clone.add(cloneItem);
+		add(clone);
 	}
 }

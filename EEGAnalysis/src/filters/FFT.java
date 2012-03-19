@@ -11,34 +11,79 @@ import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
  */
 public class FFT extends Filter {
 	
-	/**
-	 * Computes the DFT of the Time-based signal data 
-	 * @param data 2 dimensions signal data
-	 * @return the DFT data
-	 */
-	public static double[][] forward(double[][] data) {
-		DoubleFFT_1D fft = new DoubleFFT_1D(data[Y].length);
-		double[] y = data[Y].clone();
-		fft.realForward(y);
-		return new double[][] { data[X].clone(), y };
+	public class Data {
+		protected double[] x;
+		protected Complex[] y;
+		
+		protected double[] initialX;
+		protected double[] initialY;
+		
+		public Data(double[] x, Complex[] y) {
+			this.x = x;
+			this.y = y;
+		}
+		
+		public Data(double[] initialData) {
+			this.initialY = initialData;
+		}
+		
+		public Data(double[][] initialData) {
+			this.initialX = initialData[X];
+			this.initialY = initialData[Y];
+		}
+		
+		private Data() {}
+	}
+	private Data data = new Data();
+	
+	public FFT() {}
+	
+	public FFT(double[] data) {
+		this.data.initialY = data.clone();
 	}
 	
-	/**
-	 * Computes the signal data from the it's DFT 
-	 * @param data 2 dimensions signal data, within which Y-axis (index 1) is a DFT
-	 * @return the original signal data
-	 */
-	public static double[][] inverse(double[][] data) {
-		DoubleFFT_1D fft = new DoubleFFT_1D(data[Y].length);
-		double[] y = data[Y];
-		fft.realInverse(y, false);
-		return new double[][] { data[X].clone(), y };
+	public FFT(double[][] data) {
+		this.data.initialX = data[X].clone();
+		this.data.initialY = data[Y].clone();
+	}
+	
+	public FFT forward() {		
+		DoubleFFT_1D fft = new DoubleFFT_1D(data.initialY.length);
+		fft.realForward(data.initialY);
+		if(data.initialX != null) {
+			data.x = oneOfTwo(data.initialX);
+		}
+		data.y = Complex.fromFFTArray(data.initialY);
+		return this;
+	}
+	
+	public FFT inverse() {
+		data.initialY = Complex.toFFTArray(data.y);
+		new DoubleFFT_1D(data.initialY.length).realInverse(data.initialY, false);
+		return this;
+	}
+	
+	private double[] oneOfTwo(double[] from) {
+		double[] half = new double[from.length/2];
+		for(int i=0; i<from.length/2; i++) {
+			half[i] = from[i*2];
+		}
+		return half;
+	}
+	
+	public Data getData() {
+		return data;
 	}
 
-	public static double[] forward(double[] data) {
-		DoubleFFT_1D fft = new DoubleFFT_1D(data.length);
-		double[] y = data.clone();
-		fft.realForward(y);
-		return y;
+
+	public void setData(Data data) {
+		this.data = data;
+	}
+
+	public double[][] getInitialData() {
+		return new double[][] {
+			this.data.initialX,
+			this.data.initialY
+		};
 	}
 }

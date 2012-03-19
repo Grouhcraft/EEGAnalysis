@@ -11,6 +11,22 @@ public abstract class Filter {
 	protected final static int X = 0;
 	protected final static int Y = 1;
 	
+	protected static double sq(double x) {
+		return x * x;
+	}
+	
+	protected static double abs(double x) {
+		return Math.abs(x);
+	}
+	
+	protected static double sqrt(double x) {
+		return Math.sqrt(x);
+	}
+	
+	protected static double module(Complex c) {
+		return sqrt(sq(c.im) + sq(c.real));
+	}
+	
 	/**
 	 * Erases values from a signal data array
 	 * @param remove list of values to removes

@@ -1,4 +1,4 @@
-package main;
+package plot;
 //test
 /**
  * Define the various waves classes emitted by the brain

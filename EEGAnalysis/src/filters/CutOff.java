@@ -20,15 +20,18 @@ public class CutOff extends Filter {
 	 * @param to frequency range end (in Hz)
 	 * @return a filtered data
 	 */
-	public static double[][] frequencyRange(double[][] data, int from, int to) {
-		double[][] newData = FFT.forward(data);
+	public static double[][] frequencyRange(double[][] data, int from, int to) {		
+		FFT fft = new FFT(data);
+		fft.forward();
+		
 		for(int i=0; i<from; i++) {
-			newData[Y][i] = 0;
+			fft.getData().y[i].zero();
 		}
-		for(int i=to; i<data[Y].length; i++) {
-			newData[Y][i] = 0;
+		for(int i=to; i<fft.getData().y.length; i++) {
+			fft.getData().y[i].zero();
 		}
-		return FFT.inverse(newData);
+		fft.inverse();
+		return fft.getInitialData();
 	}
 	
 	/**

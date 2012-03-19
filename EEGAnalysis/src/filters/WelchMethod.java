@@ -4,12 +4,10 @@ import java.util.Arrays;
 
 public class WelchMethod extends Filter {
 
-	private static int defaultSegmentLength = 16;
-	private static int defaultOverlappSize = 8;
-	private static int defaultWindowSize = 8;
+	private static int defaultSegmentLength = 100;
 	
 	static public double[][] compute(double[][] data) {
-		return compute(data, defaultSegmentLength, defaultOverlappSize, defaultWindowSize);
+		return compute(data, defaultSegmentLength, defaultSegmentLength/2, defaultSegmentLength/2);
 	}
 	
 	/**
@@ -31,29 +29,17 @@ public class WelchMethod extends Filter {
 			double[] dataSegment = Arrays.copyOfRange(data[Y], segmentStart, segmentStart + segmentLength);
 			int windowStart = (segmentLength - windowSize) / 2;
 			double[] dataWindow = Arrays.copyOfRange(dataSegment, windowStart, windowStart + windowSize);
-			double[] fftOfDataWindow = FFT.forward(dataWindow);
-			double squaredMag = computeSquaredMagnitude(fftOfDataWindow);
+
+			double[] psd = EnergySpectralDensity.compute(dataWindow);
+			double squaredMag = 0;
+			for(double d : psd) {
+				squaredMag += d;
+			}
+			squaredMag /= psd.length;
 			
 			powerFrequency[X][i] = i;
-			powerFrequency[Y][i] = squaredMag/(nSegments * sumOfTheFFT(fftOfDataWindow));
+			powerFrequency[Y][i] = squaredMag;
 		}
 		return powerFrequency;
-	}
-
-	private static double sumOfTheFFT(double[] dft) {
-		double sum = 0;
-		for(int i=0; i<dft.length; i++) {
-			sum += Math.abs(dft[i]); 
-		}
-		return sum;
-	}
-
-	private static double computeSquaredMagnitude(double[] dft) {
-		double squaredMag = 0;
-		for(int i=0; i<dft.length; i++) {
-			squaredMag += dft[i]*dft[i] + i*i;
-		}
-		return squaredMag;
-	}
-	
+	}	
 }
