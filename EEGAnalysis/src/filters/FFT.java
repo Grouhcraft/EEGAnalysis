@@ -47,16 +47,21 @@ public class FFT extends Filter {
 		this.data.initialY = data[Y].clone();
 	}
 	
-	public FFT forward() {		
+	/**
+	 * Compute the DFT of the signal
+	 * @return itself
+	 */
+	public FFT forward() {
 		DoubleFFT_1D fft = new DoubleFFT_1D(data.initialY.length);
-		fft.realForward(data.initialY);
+		double[] yData = data.initialY;
+		fft.realForward(yData);
 		if(data.initialX != null) {
 			data.x = oneOfTwo(data.initialX);
 		}
-		data.y = Complex.fromFFTArray(data.initialY);
+		data.y = Complex.fromFFTArray(yData);
 		return this;
 	}
-	
+
 	public FFT inverse() {
 		data.initialY = Complex.toFFTArray(data.y);
 		new DoubleFFT_1D(data.initialY.length).realInverse(data.initialY, false);

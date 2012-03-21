@@ -1,6 +1,8 @@
 package plot;
 
 import filters.CutOff;
+import filters.EnergySpectralDensity;
+import filters.WelchMethod;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
@@ -20,7 +22,7 @@ import main.R;
 public class Plot {
 	static class DataSettings  {
 		int channelsCount = 59;
-		int frequency = 100;
+		int samplingRate = 100;
 		File file = null; 
 		File markerFile = new File(System.getenv("EEGDATA") + "\\" + R.get("markerfile"));
 		int subSampling = 1;
@@ -54,7 +56,7 @@ public class Plot {
 	
 	static class TimeFrame {
 		int from = 10;
-		int to = 160;
+		int to = 30;
 	} 
 	
 	public TimeFrame timeFrame = new TimeFrame();
@@ -101,8 +103,8 @@ public class Plot {
 	    ArrayList<Integer> directions = new ArrayList<Integer>();
 	    while(line != null) {
 	    	double d = Double.parseDouble(line.split("\t")[0]);
-	    	double plopStartLimit = timeFrame.from * dataSettings.frequency;
-	    	double plopEndLimit = timeFrame.to * dataSettings.frequency;
+	    	double plopStartLimit = timeFrame.from * dataSettings.samplingRate;
+	    	double plopEndLimit = timeFrame.to * dataSettings.samplingRate;
 	    	if(d > plopStartLimit && d < plopEndLimit) {
 	    		int dir = (int)Double.parseDouble(line.split("\t")[1]);
 	    		directions.add(dir);
@@ -122,10 +124,10 @@ public class Plot {
 	    }
 	    int cueDuration = 4;
 	    for(int i=0; i<times.size(); i++) {
-	    	for(int y=0; y<cueDuration * dataSettings.frequency &&
-	    			(int)(times.get(i) - timeFrame.from * dataSettings.frequency) + y < yArr.length 
+	    	for(int y=0; y<cueDuration * dataSettings.samplingRate &&
+	    			(int)(times.get(i) - timeFrame.from * dataSettings.samplingRate) + y < yArr.length 
 	    			; y++) {
-		    	yArr[(int)(times.get(i) - timeFrame.from * dataSettings.frequency) + y] 
+		    	yArr[(int)(times.get(i) - timeFrame.from * dataSettings.samplingRate) + y] 
 		    			= directions.get(i) == 1 ? maxYValue : minYValue;
 	    	}
 	    }
@@ -160,7 +162,7 @@ public class Plot {
 		}
 	    
 	    int i=0;
-	    int toSkip = (timeFrame.from * dataSettings.frequency) / dataSettings.subSampling;
+	    int toSkip = (timeFrame.from * dataSettings.samplingRate) / dataSettings.subSampling;
 		while(line != null && i<toSkip) {
 			try {
 				line = in.readLine();
@@ -170,7 +172,7 @@ public class Plot {
 			}
 		}
     	
-		int toRead = ((timeFrame.to - timeFrame.from) * dataSettings.frequency) / dataSettings.subSampling; 
+		int toRead = ((timeFrame.to - timeFrame.from) * dataSettings.samplingRate) / dataSettings.subSampling; 
 	    i = 0;
 	    while(line != null && i < toRead) {
 	    	x = i; 
@@ -188,8 +190,8 @@ public class Plot {
 			}
 	    }
 	    Logger.log("parsing " + i/1000 + "K samples (over " + (i*dataSettings.subSampling)/1000 + "K ones) from " 
-	    		+ dataSettings.frequency + "Hz channel " + channel + "'s data => " 
-	    		+ (i*dataSettings.subSampling)/dataSettings.frequency + "s record"
+	    		+ dataSettings.samplingRate + "Hz channel " + channel + "'s data => " 
+	    		+ (i*dataSettings.subSampling)/dataSettings.samplingRate + "s record"
 	    		);
 	    
 	    
@@ -199,13 +201,13 @@ public class Plot {
 	    i = 0;
 	    while(it.hasNext()) {
 	    	p = (Point2D.Double) it.next();
-	    	xArr[i] = p.x;
+	    	xArr[i] = p.x / dataSettings.samplingRate;
 	    	yArr[i] = p.y;
 	    	i++;
 	    }
 	    SimpleLine data = processSignal(new double[][] {xArr, yArr});
 	    data.setId(getDataId(file,dataSettings.subSampling, channel, amplitudeCutoff, timeFrame, frequencyRange));
-	    data.setXMetaData(new SGTMetaData("Samples", dataSettings.frequency / dataSettings.subSampling + " Hz", false, false));
+	    data.setXMetaData(new SGTMetaData("Time", "secondes", false, false));
 	    data.setYMetaData(new SGTMetaData("Potential", "µV", false, false));
 	    
 		return data;
@@ -234,6 +236,7 @@ public class Plot {
 	 * @return the drawable SimpleLine curve
 	 */
 	private SimpleLine processSignal(double[][] data) {		
+		/*
 		if(amplitudeCutoff.low > 0 || amplitudeCutoff.high > 0) {
 			Logger.log("applying cutoff " 
 					+ "Low:" + ((amplitudeCutoff.low > 0) ? amplitudeCutoff.low + "µV " : "none ") 
@@ -245,13 +248,16 @@ public class Plot {
 			//	if(amplitudeCutoff.low > 0) data = CutOff.lowAmplitude(data, amplitudeCutoff.low);
 			}
 		}
+		*/
 		
 		if(frequencyRange.lower > 0 || frequencyRange.higher > 0) {
 			Logger.log("showing frequency range [" + frequencyRange.lower + " ; " + frequencyRange.higher + "]");
-			data = CutOff.frequencyRange(data, frequencyRange.lower, frequencyRange.higher);
+			data = CutOff.frequencyRange(data, frequencyRange.lower, frequencyRange.higher, dataSettings.samplingRate);
 		}
 		//data = WelchMethod.compute(data);
-		//data = EnergySpectralDensity.wtf(data);
+		//data = EnergySpectralDensity.test(dataSettings.samplingRate);
+		//data = EnergySpectralDensity.compute(data, dataSettings.samplingRate, 50);
+		//data = filters.FFT.getInterpolatedData(data);
 	    return new SimpleLine(data[X], data[Y], null);
 	}
 
