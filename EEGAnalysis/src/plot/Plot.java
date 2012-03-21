@@ -69,6 +69,7 @@ public class Plot {
 	public WaveClass waveClass;
 	
 	private SGTData data = null;
+	private GraphType graphType = GraphType.WaveForm;
 	
 	public Plot(int channel, File file) {
 		dataSettings.file = file;
@@ -207,8 +208,13 @@ public class Plot {
 	    }
 	    SimpleLine data = processSignal(new double[][] {xArr, yArr});
 	    data.setId(getDataId(file,dataSettings.subSampling, channel, amplitudeCutoff, timeFrame, frequencyRange));
-	    data.setXMetaData(new SGTMetaData("Time", "secondes", false, false));
-	    data.setYMetaData(new SGTMetaData("Potential", "µV", false, false));
+	    if(graphType == GraphType.EnergySpectralDensity) {
+		    data.setXMetaData(new SGTMetaData("Frequency", "Hz", false, false));
+		    data.setYMetaData(new SGTMetaData("Magnitude", "dBµV²", false, false));
+	    } else {
+		    data.setXMetaData(new SGTMetaData("Time", "secondes", false, false));
+		    data.setYMetaData(new SGTMetaData("Potential", "µV", false, false));	    	
+	    }
 	    
 		return data;
 	}
@@ -235,29 +241,23 @@ public class Plot {
 	 * @param data index 0 = X, index 1 = Y
 	 * @return the drawable SimpleLine curve
 	 */
-	private SimpleLine processSignal(double[][] data) {		
-		/*
-		if(amplitudeCutoff.low > 0 || amplitudeCutoff.high > 0) {
-			Logger.log("applying cutoff " 
-					+ "Low:" + ((amplitudeCutoff.low > 0) ? amplitudeCutoff.low + "µV " : "none ") 
-					+ "High:" + ((amplitudeCutoff.high > 0) ? amplitudeCutoff.high + "µV " : "none ")
-					+"(" + amplitudeCutoff.passes + "passes)");
-			
-			for(int i=0; i<amplitudeCutoff.passes; i++) {
-			//	if(amplitudeCutoff.high > 0) data = CutOff.highAmplitude(data, amplitudeCutoff.high);
-			//	if(amplitudeCutoff.low > 0) data = CutOff.lowAmplitude(data, amplitudeCutoff.low);
-			}
-		}
-		*/
-		
-		if(frequencyRange.lower > 0 || frequencyRange.higher > 0) {
+	private SimpleLine processSignal(double[][] data) {				
+		if(waveClass != WaveClass.NONE) {
 			Logger.log("showing frequency range [" + frequencyRange.lower + " ; " + frequencyRange.higher + "]");
 			data = CutOff.frequencyRange(data, frequencyRange.lower, frequencyRange.higher, dataSettings.samplingRate);
 		}
-		//data = WelchMethod.compute(data);
-		//data = EnergySpectralDensity.test(dataSettings.samplingRate);
-		//data = EnergySpectralDensity.compute(data, dataSettings.samplingRate, 50);
-		//data = filters.FFT.getInterpolatedData(data);
+		if(getGraphType() == GraphType.EnergySpectralDensity) {
+			int lfq;
+			int hfq;
+			if(waveClass == WaveClass.NONE) {
+				lfq = 0;
+				hfq = dataSettings.samplingRate / 2;
+			} else {
+				lfq = waveClass.getLowerFreq();
+				hfq = waveClass.getUpperFreq();
+			}
+			data = EnergySpectralDensity.compute(data, dataSettings.samplingRate, lfq, hfq);
+		}
 	    return new SimpleLine(data[X], data[Y], null);
 	}
 
@@ -291,5 +291,13 @@ public class Plot {
 
 	public void setDataFile(File dataFile) {
 		dataSettings.file = dataFile;
+	}
+
+	public void setGraphType(GraphType graphType) {
+		this.graphType = graphType;
+	}
+
+	public GraphType getGraphType() {
+		return graphType;
 	}
 }

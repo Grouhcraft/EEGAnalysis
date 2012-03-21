@@ -14,7 +14,7 @@ import main.MainWindow;
 
 
 
-public class GraphMenu extends JMenuBar {
+public class GraphMenu extends JMenuBar implements ActionListener {
 
 	private static final long serialVersionUID = -5364900148201046220L;
 	private static File currentDir = null;
@@ -73,6 +73,17 @@ public class GraphMenu extends JMenuBar {
 		}
 		add(waveClasses);
 		
+		JMenu graphType = new JMenu("Visualize..");
+		JMenuItem PSDItem= new JMenuItem("Energy Spectral Density Periodogram");
+		JMenuItem waveItem = new JMenuItem("Waveform");
+		PSDItem.setActionCommand("view_psd");
+		waveItem.setActionCommand("view_waveform");
+		PSDItem.addActionListener(this);
+		waveItem.addActionListener(this);
+		graphType.add(PSDItem);
+		graphType.add(waveItem);
+		add(graphType);
+		
 		JMenu clone = new JMenu("Clone");
 		JMenuItem cloneItem = new JMenuItem("Clone this plot");
 		cloneItem.addActionListener(new ActionListener() {
@@ -84,5 +95,15 @@ public class GraphMenu extends JMenuBar {
 		});
 		clone.add(cloneItem);
 		add(clone);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		String c = arg0.getActionCommand();
+		if(c.equals("view_psd")) {
+			getParentWindow().setGraphType(GraphType.EnergySpectralDensity);
+		} else if (c.equals("view_waveform")) {
+			getParentWindow().setGraphType(GraphType.WaveForm);
+		}
 	}
 }

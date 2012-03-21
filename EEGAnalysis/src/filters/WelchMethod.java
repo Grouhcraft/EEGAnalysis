@@ -5,12 +5,13 @@ import java.util.Arrays;
 public class WelchMethod extends Filter {
 
 	private static int defaultSegmentLength = 10000;
-	
+	/*
 	static public double[][] compute(double[][] data) {
 		//return compute(data, defaultSegmentLength, defaultSegmentLength/2, defaultSegmentLength/2);
 		return computeTest(data, defaultSegmentLength, defaultSegmentLength/2, defaultSegmentLength/2);
 		
 	}
+	*/
 	
 	/**
 	 * @param data
@@ -18,6 +19,7 @@ public class WelchMethod extends Filter {
 	 * @param overlapSize in samples
 	 * @return
 	 */
+	/*
 	static public double[][] compute(double[][] data, int segmentLength, int overlapSize, int windowSize) {
 		int signalLength = data[Y].length;
 		int nSegments = (int) (signalLength / (segmentLength - overlapSize));
@@ -73,4 +75,5 @@ public class WelchMethod extends Filter {
 		
 		return powerFrequency;
 	}	
+	*/
 }

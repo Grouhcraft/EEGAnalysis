@@ -27,21 +27,37 @@ public class EnergySpectralDensity extends Filter {
 	 * @return
 	 * 		The periodogram plot data
 	 */
-	public static double[][] compute(double[][] signal, double fs, double freqUpperLimit) {
-		return compute(signal, fs, freqUpperLimit, true);
+	public static double[][] compute(
+			double[][] signal, 
+			double fs, 
+			double freqLowerLimit, 
+			double freqUpperLimit
+	) {
+		return compute(signal, fs, freqLowerLimit, freqUpperLimit, true);
 	}
 	
 	/**
 	 * same as {@link #compute(double[][], double, double)} but without logarithmic Y axis
 	 */
-	public static double[][] computeNoLog(double[][] signal, double fs, double freqUpperLimit) {
-		return compute(signal, fs, freqUpperLimit, false);
+	public static double[][] computeNoLog(
+			double[][] signal, 
+			double fs, 
+			double freqLowerLimit, 
+			double freqUpperLimit
+	) {
+		return compute(signal, fs, freqLowerLimit, freqUpperLimit, false);
 	}
 	
 	/**
 	 * @see {@link #compute(double[][], double, double)}
 	 */
-	private static double[][] compute(double[][] signal, double fs, double freqUpperLimit, boolean logarithmicY) {
+	private static double[][] compute(
+			double[][] signal, 
+			double fs,
+			double freqLowerLimit,
+			double freqUpperLimit, 
+			boolean logarithmicY 
+	){
 		if(freqUpperLimit > fs/2) {
 			throw new IllegalArgumentException("data sampling must be at least 2 times the upper frequency limit");
 		}
@@ -49,17 +65,18 @@ public class EnergySpectralDensity extends Filter {
 		fft.forward();
 		double signalLen = (double)fft.getData().y.length;
 		int len = (int) ((signalLen / fs) * freqUpperLimit);
-		double[] sumy = new double[len];
-		double[] sumx = new double[len];
-		for(int i=0; i<len; i++) {
-			sumy[i] = logarithmicY 
+		int from = (int) ((signalLen / fs) * freqLowerLimit);
+		double[] sumy = new double[len - from];
+		double[] sumx = new double[len - from];
+		for(int i=from; i<len; i++) {
+			sumy[i-from] = logarithmicY 
 					? Math.log10(sq(module(fft.getData().y[i])))
 					: sq(module(fft.getData().y[i]))
 					;
 		}
 		
-		for(int i=0; i<len; i++) {
-			sumx[i] = ((double)i) * fs / signalLen;
+		for(int i=from; i<len; i++) {
+			sumx[i-from] = ((double)i) * fs / signalLen;
 		}
 		return new double[][] { sumx, sumy };
 	}

@@ -38,6 +38,8 @@ public abstract class WaveClass {
 			return GAMMA;
 		} else if (wcName.equals("MU")) {
 			return MU;
+		} else if (wcName.equals("NONE")) {
+			return NONE;
 		} else {
 			return null;
 		}
@@ -63,6 +65,17 @@ public abstract class WaveClass {
 	 */
 	public abstract int getLowerAmpl();
 
+	public static final WaveClass NONE = new WaveClass("NONE") {
+		@Override
+		public int getUpperFreq() { return 0; }
+		@Override
+		public int getLowerFreq() { return 0; }
+		@Override
+		public int getUpperAmpl() { return 0; }
+		@Override
+		public int getLowerAmpl() { return 0; }
+	};
+	
 	/**
 	 * Active thinking, focus on outside world or resolving problems
 	 */

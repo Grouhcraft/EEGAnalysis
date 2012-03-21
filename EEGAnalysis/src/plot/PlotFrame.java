@@ -33,6 +33,9 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 	
 	public PlotFrame(String plotId, PlotFrame p) {
 		initialize(plotId, p.getPlot().getChanel(), p.getDataFile());
+		plot.setGraphType(p.getPlot().getGraphType());
+		plot.setWaveClass(p.getPlot().waveClass);
+		updateGraph();
 	}
 	
 	/**
@@ -139,5 +142,10 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 
 	public void setDataFile(File selectedFile) {
 		plot.setDataFile(selectedFile);
+	}
+
+	public void setGraphType(GraphType graphType) {
+		plot.setGraphType(graphType);
+		updateGraph();
 	}
 }
