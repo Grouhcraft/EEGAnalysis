@@ -32,7 +32,7 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 	}
 	
 	public PlotFrame(String plotId, PlotFrame p) {
-		initialize(plotId, p.getPlot().getChanel(), p.getDataFile());
+		initialize(plotId, p.getPlot().dataSettings.channel, p.getDataFile());
 		plot.setGraphType(p.getPlot().getGraphType());
 		plot.setWaveClass(p.getPlot().waveClass);
 		updateGraph();

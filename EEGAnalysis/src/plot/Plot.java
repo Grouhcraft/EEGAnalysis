@@ -78,10 +78,6 @@ public class Plot {
 		dataSettings.channel = channel;
 	}
 
-	public int getChanel() {
-		return dataSettings.channel;
-	}
-
 	/**
 	 * Reads the EEG data from {@link #dataFile}   
 	 * @param channel EEG Channel to read 
@@ -106,11 +102,6 @@ public class Plot {
 		    }
 			return data;
 	}
-	
-	
-
-	
-
 	
 	/**
 	 * Register the various settings related to the selected {@link WavesClasses wave class}
