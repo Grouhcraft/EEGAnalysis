@@ -7,16 +7,9 @@ import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
 import gov.noaa.pmel.sgt.swing.JPlotLayout;
-import gov.noaa.pmel.util.Point2D;
-
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-
 import main.Logger;
+import main.MainWindow;
 import main.R;
 
 public class Plot {
@@ -25,7 +18,6 @@ public class Plot {
 		int samplingRate = 100;
 		File file = null; 
 		File markerFile = new File(System.getenv("EEGDATA") + "\\" + R.get("markerfile"));
-		int subSampling = 1;
 		int channel = 1;
 		String[] channelCode = new String[] {
 				"AF3", "AF4", "F5", "F3", 
@@ -55,8 +47,18 @@ public class Plot {
 	}
 	
 	static class TimeFrame {
-		int from = 10;
-		int to = 30;
+		int getFrom() {
+			return MainWindow.getPrefs().getInt(MainWindow.PREF_TIME_FROM, 30);
+		}
+		void setFrom(int from) {
+			MainWindow.getPrefs().putInt(MainWindow.PREF_TIME_FROM, from);
+		}
+		int getTo() {
+			return getFrom() + MainWindow.getPrefs().getInt(MainWindow.PREF_TIME_DURATION, 60);
+		}
+		void setTo(int to) {
+			MainWindow.getPrefs().putInt(MainWindow.PREF_TIME_DURATION, to - getFrom());
+		}
 	} 
 	
 	public TimeFrame timeFrame = new TimeFrame();
@@ -86,138 +88,29 @@ public class Plot {
 	 * @return the SGTData data used by the graph layouts
 	 */
 	private SGTData readTheData() {
-		return readTheData(dataSettings.file, dataSettings.channel);
+		 SimpleLine data = processSignal(new DataFileReader().dataReader.read(
+				 dataSettings.file, 
+				 dataSettings.channel,
+				 dataSettings.samplingRate,
+				 timeFrame.getFrom(),
+				 timeFrame.getTo()
+				 ));
+		    data.setId(getDataId());
+		    if(graphType == GraphType.EnergySpectralDensity
+		    		|| graphType == GraphType.WelchPeriodogram) {
+			    data.setXMetaData(new SGTMetaData("Frequency", "Hz", false, false));
+			    data.setYMetaData(new SGTMetaData("Magnitude", "dBµV²", false, false));
+		    } else if (graphType == GraphType.WaveForm) {
+			    data.setXMetaData(new SGTMetaData("Time", "secondes", false, false));
+			    data.setYMetaData(new SGTMetaData("Potential", "µV", false, false));	    	
+		    }
+			return data;
 	}
 	
 	
-	@SuppressWarnings("unused")
-	private SGTData readTheMarkerData(double startLimit, double endLimit, double minYValue, double maxYValue) {
-		BufferedReader in = null;
-		String line = null;
-	    try {
-			in = new BufferedReader(new FileReader(dataSettings.markerFile));
-			line = in.readLine();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	    ArrayList<Double> times = new ArrayList<Double>();
-	    ArrayList<Integer> directions = new ArrayList<Integer>();
-	    while(line != null) {
-	    	double d = Double.parseDouble(line.split("\t")[0]);
-	    	double plopStartLimit = timeFrame.from * dataSettings.samplingRate;
-	    	double plopEndLimit = timeFrame.to * dataSettings.samplingRate;
-	    	if(d > plopStartLimit && d < plopEndLimit) {
-	    		int dir = (int)Double.parseDouble(line.split("\t")[1]);
-	    		directions.add(dir);
-	    		times.add(d);
-	    	}
-	    	try {
-	    		line = in.readLine();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-	    }
-	    double[] xArr = new double[(int) (endLimit - startLimit)];
-	    double[] yArr = new double[(int) (endLimit - startLimit)];
-	    for(int i=(int) startLimit; i<endLimit; i++) {
-	    	xArr[i] = i;
-	    	yArr[i] = 0;
-	    }
-	    int cueDuration = 4;
-	    for(int i=0; i<times.size(); i++) {
-	    	for(int y=0; y<cueDuration * dataSettings.samplingRate &&
-	    			(int)(times.get(i) - timeFrame.from * dataSettings.samplingRate) + y < yArr.length 
-	    			; y++) {
-		    	yArr[(int)(times.get(i) - timeFrame.from * dataSettings.samplingRate) + y] 
-		    			= directions.get(i) == 1 ? maxYValue : minYValue;
-	    	}
-	    }
-	    SimpleLine markers = new SimpleLine(xArr, yArr, null);
-	    markers.setId("markers");	
-	    markers.setXMetaData(new SGTMetaData("Cues", "", false, false));
-	    markers.setYMetaData(new SGTMetaData("", "", false, false));
-	    return markers;
-	}
+
 	
-	/**
-	 * Reads the EEG data from {@link #dataFile}   
-	 * @param file absolute path of the data file
-	 * @param subsamplingFactor 1 = no subSampling, 10 = take 1/10th of the samples, 100 = ... 
-	 * @param channel EEG channel to read
-	 * @param LowCutOff @todo remove that !
-	 * @param HighCutOff @todo remove that !
-	 * @return the SGTData data used by the graph layouts
-	 */
-	private SGTData readTheData(File file, int channel) {
-		BufferedReader in = null;
-		String line = null;
-		int x,y;
-		Point2D.Double p = null;
-		ArrayList<Point2D> list = new ArrayList<Point2D>();
-		
-	    try {
-			in = new BufferedReader(new FileReader(file));
-			line = in.readLine();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	    
-	    int i=0;
-	    int toSkip = (timeFrame.from * dataSettings.samplingRate) / dataSettings.subSampling;
-		while(line != null && i<toSkip) {
-			try {
-				line = in.readLine();
-				i++;
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-    	
-		int toRead = ((timeFrame.to - timeFrame.from) * dataSettings.samplingRate) / dataSettings.subSampling; 
-	    i = 0;
-	    while(line != null && i < toRead) {
-	    	x = i; 
-	    	y = Integer.parseInt(line.split("\t")[channel]);
-	    	p = new Point2D.Double(x, y);
-	    	list.add(p);
-	    	
-	    	i++;
-	    	try {
-	    		for(int ii=0; ii < (dataSettings.subSampling > 1 ? dataSettings.subSampling-1 : 1); ii++ ) {
-	    			line = in.readLine();
-	    		}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-	    }
-	    Logger.log("parsing " + i/1000 + "K samples (over " + (i*dataSettings.subSampling)/1000 + "K ones) from " 
-	    		+ dataSettings.samplingRate + "Hz channel " + channel + "'s data => " 
-	    		+ (i*dataSettings.subSampling)/dataSettings.samplingRate + "s record"
-	    		);
-	    
-	    
-	    double xArr[] = new double[list.size()];
-	    double yArr[] = new double[list.size()];
-	    Iterator<Point2D> it = list.iterator();
-	    i = 0;
-	    while(it.hasNext()) {
-	    	p = (Point2D.Double) it.next();
-	    	xArr[i] = p.x / dataSettings.samplingRate;
-	    	yArr[i] = p.y;
-	    	i++;
-	    }
-	    SimpleLine data = processSignal(new double[][] {xArr, yArr});
-	    data.setId(getDataId(file,dataSettings.subSampling, channel, amplitudeCutoff, timeFrame, frequencyRange));
-	    if(graphType == GraphType.EnergySpectralDensity) {
-		    data.setXMetaData(new SGTMetaData("Frequency", "Hz", false, false));
-		    data.setYMetaData(new SGTMetaData("Magnitude", "dBµV²", false, false));
-	    } else {
-		    data.setXMetaData(new SGTMetaData("Time", "secondes", false, false));
-		    data.setYMetaData(new SGTMetaData("Potential", "µV", false, false));	    	
-	    }
-	    
-		return data;
-	}
+
 	
 	/**
 	 * Register the various settings related to the selected {@link WavesClasses wave class}
@@ -246,7 +139,8 @@ public class Plot {
 			Logger.log("showing frequency range [" + frequencyRange.lower + " ; " + frequencyRange.higher + "]");
 			data = CutOff.frequencyRange(data, frequencyRange.lower, frequencyRange.higher, dataSettings.samplingRate);
 		}
-		if(getGraphType() == GraphType.EnergySpectralDensity) {
+		if(getGraphType() == GraphType.EnergySpectralDensity
+				|| getGraphType() == GraphType.WelchPeriodogram) {
 			int lfq;
 			int hfq;
 			if(waveClass == WaveClass.NONE) {
@@ -256,7 +150,11 @@ public class Plot {
 				lfq = waveClass.getLowerFreq();
 				hfq = waveClass.getUpperFreq();
 			}
-			data = EnergySpectralDensity.compute(data, dataSettings.samplingRate, lfq, hfq);
+			if(getGraphType() == GraphType.EnergySpectralDensity)
+				data = EnergySpectralDensity.compute(data, dataSettings.samplingRate, lfq, hfq);
+			else if (getGraphType() == GraphType.WelchPeriodogram) {
+				data = WelchMethod.compute(data, dataSettings.samplingRate, lfq, hfq);
+			}
 		}
 	    return new SimpleLine(data[X], data[Y], null);
 	}
@@ -264,17 +162,16 @@ public class Plot {
 	/**
 	 * Constructs the ID string for a data, which allows to track any changes in data settings
 	 * @param file the data file used
-	 * @param sampling the subsampling ratio used
 	 * @param channel the EEG channel  
 	 * @param LowCutOff the Low-Amplitude cutOff set
 	 * @param HighCutOff the High-Amplitude cutOff set
 	 * @return a string representing the data and its settings
 	 */
-	private String getDataId(File file, int sampling, int channel, AmplitudeCutoff ampCutOff, TimeFrame timeRange, FrequencyRange fr) {
-		return file.getPath() + sampling 
-				+ "_" + channel + "_" + ampCutOff.low + "_" + ampCutOff.high
-				+ "_" + timeRange.from + "_" + timeRange.to
-				+ "_" + fr.higher + "_" + fr.lower;
+	private String getDataId() {
+		return dataSettings.file.getPath() 
+				+ "_" + dataSettings.channel + "_" + amplitudeCutoff.low + "_" + amplitudeCutoff.high
+				+ "_" + timeFrame.getFrom() + "_" + timeFrame.getTo()
+				+ "_" + frequencyRange.higher + "_" + frequencyRange.lower;
 	}
 
 	public void update() {

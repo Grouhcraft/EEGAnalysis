@@ -56,6 +56,7 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		setIconifiable(true);
 		setMaximizable(true);
 		setResizable(true);
+		setSize(600, 400);
 		setTitle("plot #" + plotID);
 		JMenuBar menuBar = new GraphMenu(this);
 		setJMenuBar(menuBar);

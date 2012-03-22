@@ -1,7 +1,5 @@
 package filters;
 
-import main.Logger;
-
 /**
  * Energy Spectral Density computation methods
  * @author knoodrake

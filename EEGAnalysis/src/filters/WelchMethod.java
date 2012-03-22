@@ -2,16 +2,34 @@ package filters;
 
 import java.util.Arrays;
 
-public class WelchMethod extends Filter {
+import main.Logger;
 
-	private static int defaultSegmentLength = 10000;
-	/*
-	static public double[][] compute(double[][] data) {
-		//return compute(data, defaultSegmentLength, defaultSegmentLength/2, defaultSegmentLength/2);
-		return computeTest(data, defaultSegmentLength, defaultSegmentLength/2, defaultSegmentLength/2);
+public class WelchMethod extends Filter {
+	private enum WindowType {
+		HANN, 
+		SQUARE
+	};
+	
+	private static int numberOfSegments = 6;
+	private static int lengthOfSegments = 1000;
+	private static WindowType windowType = WindowType.HANN;
+	
+	static public double[][] compute(double[][] data, double fs, int lfq, int hfq) {
+		int segLen;
+		if(lengthOfSegments == 0) {
+			segLen = (data[Y].length/2) / numberOfSegments;
+			Logger.log("using " + numberOfSegments + " segments of size: " + segLen);
+		} else {
+			segLen = lengthOfSegments;
+			Logger.log("using a segment length of " + lengthOfSegments);
+		}
+		return compute(data, 
+				segLen, 
+				segLen/2, 
+				segLen, 
+				fs, lfq, hfq);
 		
 	}
-	*/
 	
 	/**
 	 * @param data
@@ -19,61 +37,71 @@ public class WelchMethod extends Filter {
 	 * @param overlapSize in samples
 	 * @return
 	 */
-	/*
-	static public double[][] compute(double[][] data, int segmentLength, int overlapSize, int windowSize) {
+	static public double[][] compute(
+			double[][] data, 
+			int segmentLength, 
+			int overlapSize, 
+			int windowSize,
+			double fs,
+			double freqLowerLimit,
+			double freqUpperLimit
+			) {
 		int signalLength = data[Y].length;
 		int nSegments = (int) (signalLength / (segmentLength - overlapSize));
+		int fftLen = windowSize/2;
+		int from = (int) ((fftLen / fs) * freqLowerLimit); 
+		int to = (int) ((fftLen / fs) * freqUpperLimit); 
 		double[][] powerFrequency = new double[][] { 
-				new double[nSegments], 
-				new double[nSegments] 
+				new double[to - from], 
+				new double[to - from] 
 		};
+		for(int i=from; i<to; i++) {
+			powerFrequency[X][i-from] = ((double)i) * fs / fftLen;
+		}
 		
 		for(int i=0; i<nSegments; i++) {
 			int segmentStart = i * (segmentLength - overlapSize);
 			double[] dataSegment = Arrays.copyOfRange(data[Y], segmentStart, segmentStart + segmentLength);
-			int windowStart = (segmentLength - windowSize) / 2;
-			double[] dataWindow = Arrays.copyOfRange(dataSegment, windowStart, windowStart + windowSize);
+			double[] dataWindow = getWindow(dataSegment, windowSize, windowType);
 
-			double[] psd = EnergySpectralDensity.compute(dataWindow);
-			double squaredMag = 0;
-			for(double d : psd) {
-				squaredMag += d;
+			double[] psd = EnergySpectralDensity.compute(dataWindow, fs);
+			for(int ii=from; ii<to; ii++) {
+				powerFrequency[Y][ii-from] += psd[ii];
 			}
-			squaredMag /= psd.length;
-			
-			powerFrequency[X][i] = i;
-			powerFrequency[Y][i] = squaredMag;
 		}
+		for(int i=0; i<powerFrequency[Y].length; i++) {
+			powerFrequency[Y][i] = Math.log10(powerFrequency[Y][i] / ((double)nSegments));
+		}
+		
 		return powerFrequency;
-	}	
+	}
 	
-	static public double[][] computeTest(double[][] data, int segmentLength, int overlapSize, int windowSize) {
-		int signalLength = data[Y].length;
-		int nSegments = (int) (signalLength / (segmentLength - overlapSize));
-		double[][] powerFrequency = new double[][] { 
-				new double[windowSize/2 -1], 
-				new double[windowSize/2 -1] 
-		};
-		for(int i=0; i<powerFrequency[Y].length; i++) {
-			powerFrequency[X][i] = i*2;
+	/**
+	 * Performs a window function over given data and returns the result in a new array
+	 * @param dataSegment
+	 * @param windowSize
+	 */
+	private static double[] getWindow(double[] dataSegment, int windowSize, WindowType type) {
+		if(type == WindowType.SQUARE) {
+			return getSquareWindow(dataSegment, windowSize);
+		} else {
+			return getHannWindow(dataSegment, windowSize);
 		}
-		
-		for(int i=0; i<nSegments; i++) {
-			int segmentStart = i * (segmentLength - overlapSize);
-			double[] dataSegment = Arrays.copyOfRange(data[Y], segmentStart, segmentStart + segmentLength);
-			int windowStart = (segmentLength - windowSize) / 2;
-			double[] dataWindow = Arrays.copyOfRange(dataSegment, windowStart, windowStart + windowSize);
+	}
+	
+	private static double[] getSquareWindow(double[] dataSegment, int windowSize) {
+		int windowStart = (dataSegment.length - windowSize) / 2;
+		double[] window = Arrays.copyOfRange(dataSegment, windowStart, windowStart + windowSize);
+		return window;
+	}
 
-			double[] psd = EnergySpectralDensity.compute(dataWindow);
-			for(int ii=0; ii<powerFrequency[Y].length; ii++) {
-				powerFrequency[Y][ii] += psd[ii] / windowSize;
-			}
+	private static double[] getHannWindow(double[] dataSegment, int windowSize) {
+		// https://en.wikipedia.org/wiki/Hanning_window
+		double[] window = new double[windowSize];
+		int start = (dataSegment.length - windowSize)/2;
+		for(int i=start; i<windowSize + start; i++) { 
+			window[i-start] = 0.5 * ( 1 - Math.cos((2 * Math.PI * dataSegment[i])/windowSize) ); 
 		}
-		for(int i=0; i<powerFrequency[Y].length; i++) {
-			powerFrequency[Y][i] /= nSegments;
-		}
-		
-		return powerFrequency;
+		return window;
 	}	
-	*/
 }

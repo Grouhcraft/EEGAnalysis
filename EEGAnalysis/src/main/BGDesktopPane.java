@@ -15,26 +15,42 @@ public class BGDesktopPane extends JDesktopPane {
 	private Image backImage = null; // member variable
 
 	public BGDesktopPane() {
+		
 		try {
 			backImage = new javax.swing.ImageIcon(this.getClass().getResource("../bg.jpg")).getImage();
 		} catch (Exception e) {
-		//	Logger.log("Could not find file in folder: "
-		//			+ this.getClass().getResource("../bg.jpg"));
+			Logger.log("Could not find file in folder: "
+					+ this.getClass().getResource("../bg.jpg"));
 		}
+		
+		setVisible(true);
+		setEnabled(true);
 	}
 
 	@Override
 	public void paintComponent(Graphics g) {
-		super.paintComponent(g);
-		if(backImage != null) {
+		if(backImage == null) {
+			super.paintComponent(g);
+		} else {
 			Graphics2D g2d = (Graphics2D) g;
 			
 			double mw = backImage.getWidth(null);
 			double mh = backImage.getHeight(null);
-			double sw = this.getWidth() / mw;
-			double sh = this.getHeight() / mh;
-			g2d.scale(sw, sh);		
-			g2d.drawImage(backImage, 0, 0, this.getWidth(), this.getHeight(), this);
+			double sw = getWidth() / mw;
+			double sh = getHeight() / mh;
+			int h,w,x,y;
+			if(sw < sh) {
+			 	w = (int) (mw * sw);
+			 	h = (int) (mh * sw);
+			} else {
+				w = (int) (mw * sh);
+				h = (int) (mh * sh);
+			}
+			x = (getWidth() - w) / 2;
+			y = (getHeight() - h) / 2;
+			g2d.drawImage(backImage, x, y, w, h, this);
+
 		}
 	}
+
 }

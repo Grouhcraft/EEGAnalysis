@@ -1,5 +1,7 @@
 package filters;
 
+import java.util.Arrays;
+
 import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
 
 /**
@@ -45,6 +47,18 @@ public class FFT extends Filter {
 	public FFT(double[][] data) {
 		this.data.initialX = data[X].clone();
 		this.data.initialY = data[Y].clone();
+	}
+	
+	public FFT forwardFull() {
+		DoubleFFT_1D fft = new DoubleFFT_1D(data.initialY.length);
+		double[] yData = Arrays.copyOf(data.initialY, data.initialY.length*2);
+		fft.realForwardFull(yData);
+		if(data.initialX != null) {
+			//data.x = oneOfTwo(data.initialX);
+			data.x = data.initialX.clone();
+		}
+		data.y = Complex.fromFFTArray(yData);
+		return this;
 	}
 	
 	/**

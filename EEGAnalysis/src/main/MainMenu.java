@@ -18,7 +18,6 @@ public class MainMenu extends JMenuBar {
 	private static File currentDir = null;
 	private MainWindow parentWindow;
 
-
 	public MainWindow getParentWindow() {
 		return parentWindow;
 	}

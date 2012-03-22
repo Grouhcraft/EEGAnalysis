@@ -76,10 +76,14 @@ public class GraphMenu extends JMenuBar implements ActionListener {
 		JMenu graphType = new JMenu("Visualize..");
 		JMenuItem PSDItem= new JMenuItem("Energy Spectral Density Periodogram");
 		JMenuItem waveItem = new JMenuItem("Waveform");
+		JMenuItem welchItem = new JMenuItem("Welch Periodogram");
 		PSDItem.setActionCommand("view_psd");
 		waveItem.setActionCommand("view_waveform");
+		welchItem.setActionCommand("view_welch");
 		PSDItem.addActionListener(this);
 		waveItem.addActionListener(this);
+		welchItem.addActionListener(this);
+		graphType.add(welchItem);
 		graphType.add(PSDItem);
 		graphType.add(waveItem);
 		add(graphType);
@@ -104,6 +108,8 @@ public class GraphMenu extends JMenuBar implements ActionListener {
 			getParentWindow().setGraphType(GraphType.EnergySpectralDensity);
 		} else if (c.equals("view_waveform")) {
 			getParentWindow().setGraphType(GraphType.WaveForm);
+		} else if (c.equals("view_welch")) {
+			getParentWindow().setGraphType(GraphType.WelchPeriodogram);
 		}
 	}
 }

@@ -56,14 +56,14 @@ public class Sinusoidal {
 		return merged;
 	}
 	
-	public static double[][] getInterpolatedData(double[][] data) {
+	public static double[][] interpolateX2(double[][] data) {
 		return new double[][] {
-			getInterpolatedData(data[X]),
-			getInterpolatedData(data[Y])
+			interpolateX2(data[X]),
+			interpolateX2(data[Y])
 		};
 	}
 	
-	public static double[] getInterpolatedData(double[] data) {
+	public static double[] interpolateX2(double[] data) {
 		double[] newData = new double[data.length * 2];
 		for(int i=0; i<newData.length-2; i+=2) {
 			newData[i] = data[i/2];
