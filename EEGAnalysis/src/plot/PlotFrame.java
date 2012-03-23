@@ -1,6 +1,7 @@
 package plot;
 
 import gov.noaa.pmel.sgt.LineAttribute;
+import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.swing.JPlotLayout;
 
 import java.awt.BorderLayout;
@@ -8,6 +9,7 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.HashMap;
 
 import javax.swing.JButton;
 import javax.swing.JInternalFrame;
@@ -21,30 +23,52 @@ import javax.swing.event.InternalFrameEvent;
 
 import main.MainWindow;
 
-
+/**
+ * PlotFrame is the window containing a plot
+ * @author knoodrake
+ * @see Plot
+ */
 public class PlotFrame extends JInternalFrame implements ActionListener {
 
 	private static final long serialVersionUID = 2796714104577643465L;
 	private JPlotLayout plotLayout;
 	private Plot plot;
+	private HashMap<String, SGTData> linkedDatas = new HashMap<String, SGTData>();
 	public Plot getPlot() {
 		return plot;
 	}
 	
+	/**
+	 * This constructor create a new PlotFrame by cloning another.
+	 * Note that nothing is <i>programmaticaly</i> cloned, it's just that 
+	 * every settings and data sources are copied. 
+	 * @see PlotFrame#PlotFrame(String, int, File)
+	 */
 	public PlotFrame(String plotId, PlotFrame p) {
-		initialize(plotId, p.getPlot().dataSettings.channel, p.getDataFile());
+		initialize(plotId, p.getPlot().dataInfo.channel, p.getDataFile());
 		plot.setGraphType(p.getPlot().getGraphType());
 		plot.setWaveClass(p.getPlot().waveClass);
 		updateGraph();
 	}
 	
 	/**
+	 * Constructor. Note that most stuff is done in {@link #initialize(String, int, File)}
+	 * @param plotID	the ID string of the plot, currently also used as the frame title 
+	 * @param channel	the channel initialy used
+	 * @param file		the datafile initialy used
+	 * @see PlotFrame#PlotFrame(String, PlotFrame)
 	 * @wbp.parser.constructor
 	 */
 	public PlotFrame(String plotID, int channel, File file) {
 		initialize(plotID, channel, file);
 	}
 	
+	/**
+	 * Called by the constructor
+	 * @param plotID
+	 * @param channel
+	 * @param file
+	 */
 	private void initialize(String plotID, int channel, File file) {
 		addInternalFrameListener(new InternalFrameAdapter() {
 			@Override
@@ -109,29 +133,41 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getActionCommand().equals("prev")) {
-			if(plot.dataSettings.channel > 1) {
-				plot.dataSettings.channel--;
+			if(plot.dataInfo.channel > 1) {
+				plot.dataInfo.channel--;
 			}
 		} else if (e.getActionCommand().equals("next")) {
-			if(plot.dataSettings.channel < plot.dataSettings.channelsCount) {
-				plot.dataSettings.channel++;
+			if(plot.dataInfo.channel < plot.dataInfo.channelsCount) {
+				plot.dataInfo.channel++;
 			}
 		}
 		updateGraph();
 	}
 
+	/**
+	 * Updates the {@link Plot} with the current parameters and data.
+	 * This has for effect to reperform all the analysis and processing steps. 
+	 */
 	public void updateGraph() {
 		plotLayout.setBatch(true);
 		plot.update();
 		plotLayout.clear();
 		plotLayout.addData(plot.getData(), new LineAttribute(LineAttribute.SOLID, Color.MAGENTA));
 		plotLayout.setTitles(
-				"Channel #" + plot.dataSettings.channel, 
+				"Channel #" + plot.dataInfo.channel, 
 				"Waves: " + plot.waveClass.getName(), 
 				plot.getDataFile().getName());
+		for(SGTData linkedData : linkedDatas.values()) {
+			plotLayout.addData(linkedData);
+		}
 		plotLayout.setBatch(false);
 	}
 
+	/**
+	 * Assigns a {@link WaveClass}, wich results in setting some 
+	 * wave class attributes like frequency range filtering, etc..  
+	 * @param waveClass
+	 */
 	public void setWaveClass(WaveClass waveClass) {
 		plot.setWaveClass(waveClass);
 		updateGraph();
@@ -145,8 +181,40 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		plot.setDataFile(selectedFile);
 	}
 
+	/**
+	 * Registers the type of graph (waveform, fft, ..) showed
+	 * and then update the view. 
+	 * @param graphType
+	 * @see {@link GraphType}
+	 */
 	public void setGraphType(GraphType graphType) {
 		plot.setGraphType(graphType);
+		updateGraph();
+	}
+
+	/**
+	 * Adds the curve of another {@link PlotFrame} to the plot
+	 * @param plotTitle
+	 */
+	public void linkPlot(String plotTitle) {
+		linkedDatas.put(plotTitle, MainWindow.getInstance().getPlotByTitle(plotTitle).getPlot().getData());
+		updateGraph();
+	}
+	
+	/**
+	 * Returns true if some others curves are currently shown in the plot 
+	 * @see {@link #linkPlot(String)}
+	 */
+	public boolean hasLinkedData() {
+		return !linkedDatas.isEmpty();
+	}
+
+	/**
+	 * Clears all linked graphs if there is any
+	 * @see {@link #linkPlot(String)}
+	 */
+	public void unlinkAll() {
+		linkedDatas.clear();
 		updateGraph();
 	}
 }

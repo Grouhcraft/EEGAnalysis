@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
@@ -19,13 +20,21 @@ public class GraphMenu extends JMenuBar implements ActionListener {
 	private static final long serialVersionUID = -5364900148201046220L;
 	private static File currentDir = null;
 	private PlotFrame parentWindow;
+	private JMenu linkMenu;
+	private static ArrayList<GraphMenu> _instances = new ArrayList<GraphMenu>();
 
 
 	public PlotFrame getParentWindow() {
 		return parentWindow;
 	}
 
+	@Override
+	public void finalize() {
+		_instances.remove(this);
+	}
+	
 	public GraphMenu(PlotFrame parentWindow) {
+		GraphMenu._instances.add(this);
 		this.parentWindow = parentWindow;
 		JMenu file = new JMenu("File");
 		JMenuItem loadDataFile = new JMenuItem("Load data file");
@@ -99,6 +108,43 @@ public class GraphMenu extends JMenuBar implements ActionListener {
 		});
 		clone.add(cloneItem);
 		add(clone);
+		
+		linkMenu = new JMenu("Link with plot..");
+		linkMenu.setVisible(false);
+		add(linkMenu);
+	}
+	
+	public static void updatePlotsLinkMenu() {
+		for(final GraphMenu menu : _instances) {
+			if(MainWindow.getInstance() == null) return;
+			menu.linkMenu.removeAll();
+			for(String plotName : MainWindow.getInstance().getPlotsNames()) {
+				if(!menu.getParentWindow().getTitle().equals(plotName)) {
+					JMenuItem plotEntry = new JMenuItem(plotName);
+					plotEntry.addActionListener(new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent arg0) {
+							menu.getParentWindow().linkPlot(((JMenuItem)arg0.getSource()).getText());
+						}
+					});
+					menu.linkMenu.add(plotEntry);
+				}
+			}
+			if(menu.linkMenu.getSubElements().length > 0) { 
+				menu.linkMenu.setVisible(true);
+				JMenuItem clearLinkedGraphs = new JMenuItem("* Clear linked datas *");
+				clearLinkedGraphs.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						menu.getParentWindow().unlinkAll();
+					}
+				});
+				menu.linkMenu.add(clearLinkedGraphs);
+			} else {
+				menu.linkMenu.setVisible(false);
+			}
+		}
 	}
 
 	@Override

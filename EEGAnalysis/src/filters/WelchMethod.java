@@ -3,6 +3,7 @@ package filters;
 import java.util.Arrays;
 
 import main.Logger;
+import main.MainWindow;
 
 public class WelchMethod extends Filter {
 	private enum WindowType {
@@ -10,24 +11,21 @@ public class WelchMethod extends Filter {
 		SQUARE
 	};
 	
-	private static int numberOfSegments = 6;
-	private static int lengthOfSegments = 1000;
-	private static WindowType windowType = WindowType.HANN;
-	
 	static public double[][] compute(double[][] data, double fs, int lfq, int hfq) {
-		int segLen;
-		if(lengthOfSegments == 0) {
-			segLen = (data[Y].length/2) / numberOfSegments;
-			Logger.log("using " + numberOfSegments + " segments of size: " + segLen);
-		} else {
-			segLen = lengthOfSegments;
-			Logger.log("using a segment length of " + lengthOfSegments);
-		}
+		int segLen = MainWindow.getPrefs().getInt(MainWindow.PREF_WELCH_SEG_LENGTH, 1000);
+		
+		WindowType w = (MainWindow.getPrefs().getBoolean(MainWindow.PREF_WELCH_USE_SQ_WIN, false))
+				? WindowType.SQUARE : WindowType.HANN ;
+		
+		boolean logYScale = (MainWindow.getPrefs().getBoolean(MainWindow.PREF_PERIO_USE_DBSCALE, false))
+				? true : false;
+		
+		Logger.log("segLen=" + segLen);
+		
 		return compute(data, 
-				segLen, 
-				segLen/2, 
-				segLen, 
-				fs, lfq, hfq);
+				segLen, segLen/2, segLen, 
+				fs, lfq, hfq, w, logYScale
+				);
 		
 	}
 	
@@ -44,7 +42,9 @@ public class WelchMethod extends Filter {
 			int windowSize,
 			double fs,
 			double freqLowerLimit,
-			double freqUpperLimit
+			double freqUpperLimit,
+			WindowType windowType,
+			Boolean logYScale
 			) {
 		int signalLength = data[Y].length;
 		int nSegments = (int) (signalLength / (segmentLength - overlapSize));
@@ -69,8 +69,14 @@ public class WelchMethod extends Filter {
 				powerFrequency[Y][ii-from] += psd[ii];
 			}
 		}
-		for(int i=0; i<powerFrequency[Y].length; i++) {
-			powerFrequency[Y][i] = Math.log10(powerFrequency[Y][i] / ((double)nSegments));
+		if(logYScale) {
+			for(int i=0; i<powerFrequency[Y].length; i++) {
+				powerFrequency[Y][i] = Math.log10(powerFrequency[Y][i] / ((double)nSegments));
+			}
+		} else {
+			for(int i=0; i<powerFrequency[Y].length; i++) {
+				powerFrequency[Y][i] = powerFrequency[Y][i] / ((double)nSegments); 
+			}
 		}
 		
 		return powerFrequency;

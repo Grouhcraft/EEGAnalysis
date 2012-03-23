@@ -10,6 +10,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.prefs.Preferences;
 
+import plot.GraphMenu;
 import plot.PlotFrame;
 import plot.WaveClass;
 
@@ -64,6 +65,7 @@ public class MainWindow {
 			e.printStackTrace();
 		}
 		prefs = Preferences.userNodeForPackage(getClass());
+		setDefaultPreferences();
 		frmEegAnalysis.setTitle("EEG Analysis");
 		frmEegAnalysis.setJMenuBar(new MainMenu(this));
 		frmEegAnalysis.setBounds(100, 100, 600, 600);
@@ -77,6 +79,14 @@ public class MainWindow {
 		frmEegAnalysis.getContentPane().add(settingPanel, BorderLayout.EAST);
 		
 		createNewPlot(new File(System.getenv("EEGDATA") + "\\" + R.get("datafile")));
+	}
+
+	private void setDefaultPreferences() {
+		getPrefs().putInt(PREF_WELCH_SEG_LENGTH, 800);
+		getPrefs().putBoolean(PREF_WELCH_USE_SQ_WIN, false);
+		getPrefs().putInt(PREF_TIME_DURATION, 30);
+		getPrefs().putInt(PREF_TIME_FROM, 10);
+		getPrefs().putBoolean(PREF_PERIO_USE_DBSCALE, true); 
 	}
 
 	public void createNewPlot(File selectedFile) {
@@ -103,10 +113,12 @@ public class MainWindow {
 			desktopPane.getDesktopManager().activateFrame(plot);
 		}
 		plots.add(plot);
+		GraphMenu.updatePlotsLinkMenu();
 	}
 	
 	public void removePlot(PlotFrame p) {
 		plots.remove(p);
+		GraphMenu.updatePlotsLinkMenu();
 	}
 	
 	public static MainWindow getInstance() {
@@ -121,5 +133,19 @@ public class MainWindow {
 
 	public static Preferences getPrefs() {
 		return prefs;
+	}
+
+	public String[] getPlotsNames() {
+		String[] plotsNames = new String[plots.size()];
+		for(int i=0; i<plots.size(); i++) {
+			plotsNames[i] = plots.get(i).getTitle();
+		}
+		return plotsNames;
+	}
+
+	public PlotFrame getPlotByTitle(String plotTitle) {
+		for(PlotFrame p : plots) 
+			if(p.getTitle().equals(plotTitle)) return p;
+		return null;
 	}
 }

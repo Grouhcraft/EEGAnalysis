@@ -1,5 +1,7 @@
 package filters;
 
+import main.MainWindow;
+
 /**
  * Energy Spectral Density computation methods
  * @author knoodrake
@@ -31,19 +33,9 @@ public class EnergySpectralDensity extends Filter {
 			double freqLowerLimit, 
 			double freqUpperLimit
 	) {
-		return compute(signal, fs, freqLowerLimit, freqUpperLimit, true);
-	}
-	
-	/**
-	 * same as {@link #compute(double[][], double, double)} but without logarithmic Y axis
-	 */
-	public static double[][] computeNoLog(
-			double[][] signal, 
-			double fs, 
-			double freqLowerLimit, 
-			double freqUpperLimit
-	) {
-		return compute(signal, fs, freqLowerLimit, freqUpperLimit, false);
+		boolean logYScale = (MainWindow.getPrefs().getBoolean(MainWindow.PREF_PERIO_USE_DBSCALE, false))
+				? true : false;
+		return compute(signal, fs, freqLowerLimit, freqUpperLimit, logYScale);
 	}
 	
 	/**

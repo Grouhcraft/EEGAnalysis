@@ -42,6 +42,7 @@ public class SettingsPanel extends JPanel {
 		sliderTimeFrom.setSnapToTicks(true);
 		sliderTimeFrom.setPaintLabels(true);
 		sliderTimeFrom.setPaintTicks(true);
+		sliderTimeFrom.setValue(MainWindow.getPrefs().getInt(MainWindow.PREF_TIME_FROM, 30));
 		
 		JLabel lblTime = new JLabel("Analyze from time:");
 		
@@ -55,6 +56,7 @@ public class SettingsPanel extends JPanel {
 		sliderTimeDuration.setSnapToTicks(true);
 		sliderTimeDuration.setPaintLabels(true);
 		sliderTimeDuration.setPaintTicks(true);
+		sliderTimeDuration.setValue(MainWindow.getPrefs().getInt(MainWindow.PREF_TIME_DURATION, 30));	
 		sliderTimeDuration.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
 				MainWindow.getPrefs().putInt(MainWindow.PREF_TIME_DURATION, ((JSlider)arg0.getSource()).getValue());
@@ -73,6 +75,7 @@ public class SettingsPanel extends JPanel {
 				MainWindow.getPrefs().putBoolean(MainWindow.PREF_WELCH_USE_SQ_WIN, ((JCheckBox)e.getSource()).isSelected());
 			}
 		});
+		chckbxUseSquareWindowing.setSelected(MainWindow.getPrefs().getBoolean(MainWindow.PREF_WELCH_USE_SQ_WIN, false));
 		
 		JLabel lblWelchPeriodogram = new JLabel("Welch Periodogram");
 		lblWelchPeriodogram.setFont(new Font("Tahoma", Font.BOLD, 11));
@@ -82,10 +85,11 @@ public class SettingsPanel extends JPanel {
 		JSpinner spinnerWelchSegLen = new JSpinner();
 		spinnerWelchSegLen.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				MainWindow.getPrefs().putDouble(MainWindow.PREF_WELCH_SEG_LENGTH, (Double)((JSpinner)e.getSource()).getValue());
+				MainWindow.getPrefs().putInt(MainWindow.PREF_WELCH_SEG_LENGTH, (int)(Integer)((JSpinner)e.getSource()).getValue());
 			}
 		});
 		spinnerWelchSegLen.setModel(new SpinnerNumberModel(800, 200, 6000, 200));
+		spinnerWelchSegLen.setValue(MainWindow.getPrefs().getInt(MainWindow.PREF_WELCH_SEG_LENGTH, 800));
 		
 		JSeparator separator_1 = new JSeparator();
 		separator_1.setForeground(Color.DARK_GRAY);
@@ -95,7 +99,7 @@ public class SettingsPanel extends JPanel {
 		lblWelchAndSpd.setFont(new Font("Segoe UI", Font.BOLD, 12));
 		
 		JCheckBox chckbxShowYAxisInDB = new JCheckBox("Show Y axis in dB (logarithmic)");
-		chckbxShowYAxisInDB.setSelected(true);
+		chckbxShowYAxisInDB.setSelected(MainWindow.getPrefs().getBoolean(MainWindow.PREF_PERIO_USE_DBSCALE, true));
 		chckbxShowYAxisInDB.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				MainWindow.getPrefs().putBoolean(MainWindow.PREF_PERIO_USE_DBSCALE, ((JCheckBox)e.getSource()).isSelected());

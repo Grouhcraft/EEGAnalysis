@@ -14,25 +14,18 @@ import main.R;
 
 public class Plot {
 	static class DataSettings  {
-		int channelsCount = 59;
-		int samplingRate = 100;
-		File file = null; 
-		File markerFile = new File(System.getenv("EEGDATA") + "\\" + R.get("markerfile"));
-		int channel = 1;
-		String[] channelCode = new String[] {
-				"AF3", "AF4", "F5", "F3", 
-				"F1", "Fz", "F2", "F4", "F6", 
-				"FC5", "FC3", "FC1", "FCz", 
-				"FC2", "FC4", "FC6", "CFC7", "CFC5", 
-				"CFC3", "CFC1", "CFC2", "CFC4",
-				"CFC6", "CFC8", "T7", "C5", 
-				"C3", "C1", "Cz", "C2", "C4", 
-				"C6", "T8", "CCP7", "CCP5", "CCP3",
-				"CCP1", "CCP2", "CCP4", "CCP6", "CCP8", 
-				"CP5", "CP3", "CP1", "CPz", "CP2", 
-				"CP4", "CP6", "P5", "P3", "P1", "Pz", 
-				"P2", "P4", "P6", "PO1", "PO2", "O1"
-			};
+		int 	channelsCount 	= 59;
+		int 	fs 				= 100;
+		File 	file 			= null; 
+		File 	markerFile 		= new File(System.getenv("EEGDATA") + "\\" + R.get("markerfile"));
+		int		channel 		= 1;
+		String[] channelsCodes = new String[] { "AF3", "AF4", "F5", "F3", "F1",
+				"Fz", "F2", "F4", "F6", "FC5", "FC3", "FC1", "FCz", "FC2",
+				"FC4", "FC6", "CFC7", "CFC5", "CFC3", "CFC1", "CFC2", "CFC4",
+				"CFC6", "CFC8", "T7", "C5", "C3", "C1", "Cz", "C2", "C4", "C6",
+				"T8", "CCP7", "CCP5", "CCP3", "CCP1", "CCP2", "CCP4", "CCP6",
+				"CCP8", "CP5", "CP3", "CP1", "CPz", "CP2", "CP4", "CP6", "P5",
+				"P3", "P1", "Pz", "P2", "P4", "P6", "PO1", "PO2", "O1" };
 	}
 	
 	static class AmplitudeCutoff {
@@ -47,7 +40,7 @@ public class Plot {
 	}
 	
 	static class TimeFrame {
-		int getFrom() {
+		int getFrom() { 
 			return MainWindow.getPrefs().getInt(MainWindow.PREF_TIME_FROM, 30);
 		}
 		void setFrom(int from) {
@@ -61,10 +54,10 @@ public class Plot {
 		}
 	} 
 	
-	public TimeFrame timeFrame = new TimeFrame();
-	public FrequencyRange frequencyRange = new FrequencyRange();
+	public TimeFrame time = new TimeFrame();
+	public FrequencyRange freqRange = new FrequencyRange();
 	public AmplitudeCutoff amplitudeCutoff = new AmplitudeCutoff();
-	public DataSettings dataSettings = new DataSettings();	
+	public DataSettings dataInfo = new DataSettings();	
 	
 	private final int X = 0;
 	private final int Y = 1;
@@ -74,22 +67,21 @@ public class Plot {
 	private GraphType graphType = GraphType.WaveForm;
 	
 	public Plot(int channel, File file) {
-		dataSettings.file = file;
-		dataSettings.channel = channel;
+		dataInfo.file = file;
+		dataInfo.channel = channel;
 	}
 
 	/**
 	 * Reads the EEG data from {@link #dataFile}   
-	 * @param channel EEG Channel to read 
 	 * @return the SGTData data used by the graph layouts
 	 */
 	private SGTData readTheData() {
 		 SimpleLine data = processSignal(new DataFileReader().dataReader.read(
-				 dataSettings.file, 
-				 dataSettings.channel,
-				 dataSettings.samplingRate,
-				 timeFrame.getFrom(),
-				 timeFrame.getTo()
+				 dataInfo.file, 
+				 dataInfo.channel,
+				 dataInfo.fs,
+				 time.getFrom(),
+				 time.getTo()
 				 ));
 		    data.setId(getDataId());
 		    if(graphType == GraphType.EnergySpectralDensity
@@ -107,7 +99,7 @@ public class Plot {
 	 * Register the various settings related to the selected {@link WavesClasses wave class}
 	 * @param wc the wave class
 	 * @see {@link WavesClasses}
-	 * @see {@link #frequencyRange}
+	 * @see {@link #freqRange}
 	 * @see {@link #HighCutOff}
 	 * @see {@link #LowCutOff}
 	 */
@@ -115,8 +107,8 @@ public class Plot {
 		waveClass = wc;
 		amplitudeCutoff.low = wc.getUpperAmpl();
 		amplitudeCutoff.high = wc.getLowerAmpl();
-		frequencyRange.lower = wc.getLowerFreq();
-		frequencyRange.higher = wc.getUpperFreq();
+		freqRange.lower = wc.getLowerFreq();
+		freqRange.higher = wc.getUpperFreq();
 	}
 	
 	/**
@@ -127,24 +119,22 @@ public class Plot {
 	 */
 	private SimpleLine processSignal(double[][] data) {				
 		if(waveClass != WaveClass.NONE) {
-			Logger.log("showing frequency range [" + frequencyRange.lower + " ; " + frequencyRange.higher + "]");
-			data = CutOff.frequencyRange(data, frequencyRange.lower, frequencyRange.higher, dataSettings.samplingRate);
+			Logger.log("showing frequency range [" + freqRange.lower + " ; " + freqRange.higher + "]");
+			data = CutOff.frequencyRange(data, freqRange.lower, freqRange.higher, dataInfo.fs);
 		}
 		if(getGraphType() == GraphType.EnergySpectralDensity
-				|| getGraphType() == GraphType.WelchPeriodogram) {
-			int lfq;
-			int hfq;
-			if(waveClass == WaveClass.NONE) {
-				lfq = 0;
-				hfq = dataSettings.samplingRate / 2;
-			} else {
-				lfq = waveClass.getLowerFreq();
-				hfq = waveClass.getUpperFreq();
-			}
+				|| getGraphType() == GraphType.WelchPeriodogram) 
+		{
+			int lfq = (waveClass == WaveClass.NONE) 
+					? 0 : waveClass.getLowerFreq();
+			int hfq = (waveClass == WaveClass.NONE) 
+					? dataInfo.fs / 2 : waveClass.getUpperFreq();
+	
 			if(getGraphType() == GraphType.EnergySpectralDensity)
-				data = EnergySpectralDensity.compute(data, dataSettings.samplingRate, lfq, hfq);
+				data = EnergySpectralDensity.compute( data, dataInfo.fs, lfq, hfq );
+			
 			else if (getGraphType() == GraphType.WelchPeriodogram) {
-				data = WelchMethod.compute(data, dataSettings.samplingRate, lfq, hfq);
+				data = WelchMethod.compute( data, dataInfo.fs, lfq, hfq);
 			}
 		}
 	    return new SimpleLine(data[X], data[Y], null);
@@ -159,12 +149,15 @@ public class Plot {
 	 * @return a string representing the data and its settings
 	 */
 	private String getDataId() {
-		return dataSettings.file.getPath() 
-				+ "_" + dataSettings.channel + "_" + amplitudeCutoff.low + "_" + amplitudeCutoff.high
-				+ "_" + timeFrame.getFrom() + "_" + timeFrame.getTo()
-				+ "_" + frequencyRange.higher + "_" + frequencyRange.lower;
+		return dataInfo.file.getPath() 
+				+ "_" + dataInfo.channel + "_" + amplitudeCutoff.low + "_" + amplitudeCutoff.high
+				+ "_" + time.getFrom() + "_" + time.getTo()
+				+ "_" + freqRange.higher + "_" + freqRange.lower;
 	}
 
+	/**
+	 * Reloads and parse data from file
+	 */
 	public void update() {
 		data = readTheData();
 	}
@@ -174,11 +167,11 @@ public class Plot {
 	}
 	
 	public File getDataFile() {
-		return dataSettings.file;
+		return dataInfo.file;
 	}
 
 	public void setDataFile(File dataFile) {
-		dataSettings.file = dataFile;
+		dataInfo.file = dataFile;
 	}
 
 	public void setGraphType(GraphType graphType) {
