@@ -76,23 +76,34 @@ public class Plot {
 	 * @return the SGTData data used by the graph layouts
 	 */
 	private SGTData readTheData() {
-		 SimpleLine data = processSignal(new DataFileReader().dataReader.read(
+		boolean test = true;
+		SimpleLine data;
+		
+		// Real data
+		if(!test) data = processSignal(new DataFileReader().dataReader.read(
 				 dataInfo.file, 
 				 dataInfo.channel,
 				 dataInfo.fs,
 				 time.getFrom(),
 				 time.getTo()
 				 ));
-		    data.setId(getDataId());
-		    if(graphType == GraphType.EnergySpectralDensity
-		    		|| graphType == GraphType.WelchPeriodogram) {
-			    data.setXMetaData(new SGTMetaData("Frequency", "Hz", false, false));
-			    data.setYMetaData(new SGTMetaData("Magnitude", "dBµV²", false, false));
-		    } else if (graphType == GraphType.WaveForm) {
-			    data.setXMetaData(new SGTMetaData("Time", "secondes", false, false));
-			    data.setYMetaData(new SGTMetaData("Potential", "µV", false, false));	    	
-		    }
-			return data;
+			
+		// Test sinusoidal
+		else data = processSignal(synthetizer.Sinusoidal.merge(
+					synthetizer.Sinusoidal.generate(1, dataInfo.fs, time.getTo() - time.getFrom(), 0.10, 1),
+					synthetizer.Sinusoidal.generate(2, dataInfo.fs, time.getTo() - time.getFrom(), 0.05, 1)
+				));
+	 
+	    data.setId(getDataId());
+	    if(graphType == GraphType.EnergySpectralDensity
+	    		|| graphType == GraphType.WelchPeriodogram) {
+		    data.setXMetaData(new SGTMetaData("Frequency", "Hz", false, false));
+		    data.setYMetaData(new SGTMetaData("Magnitude", "dBµV²", false, false));
+	    } else if (graphType == GraphType.WaveForm) {
+		    data.setXMetaData(new SGTMetaData("Time", "secondes", false, false));
+		    data.setYMetaData(new SGTMetaData("Potential", "µV", false, false));	    	
+	    }
+		return data;
 	}
 	
 	/**
@@ -129,7 +140,7 @@ public class Plot {
 					? 0 : waveClass.getLowerFreq();
 			int hfq = (waveClass == WaveClass.NONE) 
 					? dataInfo.fs / 2 : waveClass.getUpperFreq();
-	
+			
 			if(getGraphType() == GraphType.EnergySpectralDensity)
 				data = EnergySpectralDensity.compute( data, dataInfo.fs, lfq, hfq );
 			

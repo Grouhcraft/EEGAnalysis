@@ -2,6 +2,8 @@ package filters;
 
 import java.util.Arrays;
 
+import javax.swing.text.Segment;
+
 import main.Logger;
 import main.MainWindow;
 
@@ -23,7 +25,7 @@ public class WelchMethod extends Filter {
 		Logger.log("segLen=" + segLen);
 		
 		return compute(data, 
-				segLen, segLen/2, segLen, 
+				segLen, segLen/2, 
 				fs, lfq, hfq, w, logYScale
 				);
 		
@@ -39,7 +41,6 @@ public class WelchMethod extends Filter {
 			double[][] data, 
 			int segmentLength, 
 			int overlapSize, 
-			int windowSize,
 			double fs,
 			double freqLowerLimit,
 			double freqUpperLimit,
@@ -47,8 +48,17 @@ public class WelchMethod extends Filter {
 			Boolean logYScale
 			) {
 		int signalLength = data[Y].length;
-		int nSegments = (int) (signalLength / (segmentLength - overlapSize));
-		int fftLen = windowSize/2;
+		int nSegments = (int) (signalLength / (segmentLength - overlapSize));		
+		double windowSize;
+		if(windowType == WindowType.HANN) {
+			if(segmentLength % 2 == 0)
+				windowSize = ((double)segmentLength) / 2d;
+			else
+				windowSize = (((double)segmentLength) - 1d) / 2d;
+		} else { // SQUARE
+			windowSize = segmentLength;
+		}
+		int fftLen = (int) (windowSize/2);
 		int from = (int) ((fftLen / fs) * freqLowerLimit); 
 		int to = (int) ((fftLen / fs) * freqUpperLimit); 
 		double[][] powerFrequency = new double[][] { 
@@ -69,6 +79,7 @@ public class WelchMethod extends Filter {
 				powerFrequency[Y][ii-from] += psd[ii];
 			}
 		}
+
 		if(logYScale) {
 			for(int i=0; i<powerFrequency[Y].length; i++) {
 				powerFrequency[Y][i] = Math.log10(powerFrequency[Y][i] / ((double)nSegments));
@@ -87,27 +98,42 @@ public class WelchMethod extends Filter {
 	 * @param dataSegment
 	 * @param windowSize
 	 */
-	private static double[] getWindow(double[] dataSegment, int windowSize, WindowType type) {
+	private static double[] getWindow(double[] dataSegment, double windowSize, WindowType type) {
 		if(type == WindowType.SQUARE) {
 			return getSquareWindow(dataSegment, windowSize);
 		} else {
-			return getHannWindow(dataSegment, windowSize);
+			return getHannWindowTEST(dataSegment, windowSize);
 		}
 	}
 	
-	private static double[] getSquareWindow(double[] dataSegment, int windowSize) {
-		int windowStart = (dataSegment.length - windowSize) / 2;
-		double[] window = Arrays.copyOfRange(dataSegment, windowStart, windowStart + windowSize);
+	private static double[] getSquareWindow(double[] dataSegment, double windowSize) {
+		int windowStart = (int) ((dataSegment.length - windowSize) / 2);
+		double[] window = Arrays.copyOfRange(dataSegment, windowStart, (int) (windowStart + windowSize));
 		return window;
 	}
-
-	private static double[] getHannWindow(double[] dataSegment, int windowSize) {
+	
+	private static double[] getHannWindowTEST(double[] dataSegment, double windowSize) {
 		// https://en.wikipedia.org/wiki/Hanning_window
-		double[] window = new double[windowSize];
-		int start = (dataSegment.length - windowSize)/2;
-		for(int i=start; i<windowSize + start; i++) { 
-			window[i-start] = 0.5 * ( 1 - Math.cos((2 * Math.PI * dataSegment[i])/windowSize) ); 
+		double[] window = new double[dataSegment.length];
+		
+		int start = (int) (((double)dataSegment.length - windowSize)/2d);
+		for(int i=0; i<start; i++) 	dataSegment[i] = 0;
+		for(int i= start + (int)windowSize; i< dataSegment.length; i++) dataSegment[i] = 0;
+		
+		for(int i=0; i<dataSegment.length; i++) {  
+			window[i] = 0.5d * ( 1d - Math.cos((2.0d * Math.PI * dataSegment[i]) / (windowSize-1d)) );
 		}
+		return window;
+	}	
+	
+	private static double[] getHannWindowORIGINAL(double[] dataSegment, double windowSize) {
+		// https://en.wikipedia.org/wiki/Hanning_window
+		double[] window = new double[(int) windowSize];
+		int start = (int) (((double)dataSegment.length - windowSize)/2d);
+		for(int i=start; i<windowSize + start; i++) {  
+			window[i-start] = 0.5d * ( 1d - Math.cos((2.0d * Math.PI * dataSegment[i]) / (windowSize-1d)) );
+		}
+		Logger.log("	ws= " + window.length + ", st= " + start);
 		return window;
 	}	
 }

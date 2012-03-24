@@ -10,7 +10,7 @@ public class EnergySpectralDensity extends Filter {
 	
 	public static double[][] test(double fs) {
 		//double[][] a = synthetizer.Sinusoidal.generate(13, fs, 30, 0.20, 1);
-		double[][] b = synthetizer.Sinusoidal.generate(20, fs, 1, 0.10, 1);
+		double[][] b = synthetizer.Sinusoidal.generate(20, fs, 10, 0.10, 1);
 		//double[][] m = synthetizer.Sinusoidal.merge(a, b);
 		return b;
 	}
