@@ -49,9 +49,9 @@ public class SettingsPanel extends JPanel {
 		JLabel lblAnalyze = new JLabel("Taking");
 		
 		JSlider sliderTimeDuration = new JSlider();
-		sliderTimeDuration.setMajorTickSpacing(4);
-		sliderTimeDuration.setMinorTickSpacing(2);
-		sliderTimeDuration.setMinimum(1);
+		sliderTimeDuration.setMajorTickSpacing(5);
+		sliderTimeDuration.setMinorTickSpacing(1);
+		sliderTimeDuration.setMinimum(0);
 		sliderTimeDuration.setMaximum(30);
 		sliderTimeDuration.setSnapToTicks(true);
 		sliderTimeDuration.setPaintLabels(true);
@@ -59,7 +59,8 @@ public class SettingsPanel extends JPanel {
 		sliderTimeDuration.setValue(MainWindow.getPrefs().getInt(MainWindow.PREF_TIME_DURATION, 30));	
 		sliderTimeDuration.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
-				MainWindow.getPrefs().putInt(MainWindow.PREF_TIME_DURATION, ((JSlider)arg0.getSource()).getValue());
+				int value = ((JSlider)arg0.getSource()).getValue();
+				MainWindow.getPrefs().putInt(MainWindow.PREF_TIME_DURATION, value==0 ? 1 : value);
 			}
 		});
 		

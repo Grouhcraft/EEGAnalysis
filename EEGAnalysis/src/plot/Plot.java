@@ -10,14 +10,13 @@ import gov.noaa.pmel.sgt.swing.JPlotLayout;
 import java.io.File;
 import main.Logger;
 import main.MainWindow;
-import main.R;
 
 public class Plot {
 	static class DataSettings  {
 		int 	channelsCount 	= 59;
 		int 	fs 				= 100;
 		File 	file 			= null; 
-		File 	markerFile 		= new File(System.getenv("EEGDATA") + "\\" + R.get("markerfile"));
+		File 	markerFile 		= null;
 		int		channel 		= 1;
 		String[] channelsCodes = new String[] { "AF3", "AF4", "F5", "F3", "F1",
 				"Fz", "F2", "F4", "F6", "FC5", "FC3", "FC1", "FCz", "FC2",
@@ -26,6 +25,9 @@ public class Plot {
 				"T8", "CCP7", "CCP5", "CCP3", "CCP1", "CCP2", "CCP4", "CCP6",
 				"CCP8", "CP5", "CP3", "CP1", "CPz", "CP2", "CP4", "CP6", "P5",
 				"P3", "P1", "Pz", "P2", "P4", "P6", "PO1", "PO2", "O1" };
+		public String getChannelCode() {
+			return channelsCodes[channel];
+		}
 	}
 	
 	static class AmplitudeCutoff {
@@ -78,6 +80,7 @@ public class Plot {
 	private SGTData readTheData() {
 		boolean test = false;
 		SimpleLine data;
+		Logger.log("Test mode: " + (test ? true : false));
 		
 		// Real data
 		if(!test) data = processSignal(new DataFileReader().dataReader.read(

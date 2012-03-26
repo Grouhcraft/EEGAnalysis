@@ -9,6 +9,7 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 
 import javax.swing.JButton;
@@ -21,6 +22,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
+import main.Logger;
 import main.MainWindow;
 
 /**
@@ -154,11 +156,19 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		plotLayout.clear();
 		plotLayout.addData(plot.getData(), new LineAttribute(LineAttribute.SOLID, Color.MAGENTA));
 		plotLayout.setTitles(
-				"Channel #" + plot.dataInfo.channel, 
+				"Channel #" + plot.dataInfo.channel + "(" + plot.dataInfo.getChannelCode() +")", 
 				"Waves: " + plot.waveClass.getName(), 
 				plot.getDataFile().getName());
 		for(SGTData linkedData : linkedDatas.values()) {
 			plotLayout.addData(linkedData);
+		}
+
+		if(plot.getGraphType() == GraphType.WaveForm) {
+			try {
+				plotLayout.addData((new DataFileReader()).metaDataReader.readFromPlot(plot));
+			} catch (IOException e) {
+				Logger.log(e.getMessage());
+			}
 		}
 		plotLayout.setBatch(false);
 	}

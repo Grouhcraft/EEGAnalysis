@@ -91,6 +91,30 @@ public class DataFileReader {
 	
 	public class MetaDataReader {
 		
+		public SGTData readFromPlot(Plot plot) throws IOException {
+			String plotFileName = plot.getDataFile().getName();
+			File markerFile = null;
+			String markerFileName = "";
+			if(plotFileName.contains("_cnt")) {
+				markerFileName = plot.getDataFile().getParentFile() + "\\" + plotFileName.replace("_cnt", "_mrk");
+				markerFile = new File(markerFileName); 
+			}
+			if(markerFile == null || !markerFile.exists()) {
+				throw new IOException("Unable to find or open marker file:" + markerFileName);
+			}
+			
+			return new DataFileReader().metaDataReader.read(
+					(double)(Double)plot.getData().getXRange().getStart().getObjectValue(),
+					(double)(Double)plot.getData().getXRange().getEnd().getObjectValue(),
+					(double)(Double)plot.getData().getYRange().getStart().getObjectValue(), 
+					(double)(Double)plot.getData().getYRange().getEnd().getObjectValue(), 
+					markerFile, 
+					plot.dataInfo.fs, 
+					plot.time.getFrom(), 
+					plot.time.getTo()
+					);
+		}
+		
 		/**
 		 * @TODO !
 		 * @param startLimit
@@ -103,8 +127,7 @@ public class DataFileReader {
 		 * @param to
 		 * @return
 		 */
-		@SuppressWarnings("unused")
-		private SGTData read(
+		public SGTData read(
 				double startLimit, 
 				double endLimit, 
 				double minYValue, 
@@ -122,13 +145,15 @@ public class DataFileReader {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		    double fromSample = from * samplingRate;
+		    double toSample = to * samplingRate;
+		    minYValue += Math.abs(minYValue/10);
+		    maxYValue -= maxYValue/10;
 		    ArrayList<Double> times = new ArrayList<Double>();
 		    ArrayList<Integer> directions = new ArrayList<Integer>();
 		    while(line != null) {
 		    	double d = Double.parseDouble(line.split("\t")[0]);
-		    	double plopStartLimit = from * samplingRate;
-		    	double plopEndLimit = to * samplingRate;
-		    	if(d > plopStartLimit && d < plopEndLimit) {
+		    	if(d > fromSample && d < toSample) {
 		    		int dir = (int)Double.parseDouble(line.split("\t")[1]);
 		    		directions.add(dir);
 		    		times.add(d);
@@ -139,18 +164,18 @@ public class DataFileReader {
 					e.printStackTrace();
 				}
 		    }
-		    double[] xArr = new double[(int) (endLimit - startLimit)];
-		    double[] yArr = new double[(int) (endLimit - startLimit)];
-		    for(int i=(int) startLimit; i<endLimit; i++) {
-		    	xArr[i] = i;
+		    endLimit = Math.ceil(endLimit);
+		    double[] xArr = new double[(int) (toSample - fromSample)];
+		    double[] yArr = new double[xArr.length];
+		    for(int i=0; i<xArr.length; i++) {
+		    	xArr[i] = (double)i / (double)samplingRate;
 		    	yArr[i] = 0;
 		    }
-		    int cueDuration = 4;
+		    
+		    int cueDuration = 4 * samplingRate;
 		    for(int i=0; i<times.size(); i++) {
-		    	for(int y=0; y<cueDuration * samplingRate &&
-		    			(int)(times.get(i) - from * samplingRate) + y < yArr.length 
-		    			; y++) {
-			    	yArr[(int)(times.get(i) - from * samplingRate) + y] 
+		    	for(int y=0; y<cueDuration && (int)(times.get(i) - fromSample) + y < yArr.length; y++) {		    		
+			    	yArr[(int)(times.get(i) - fromSample) + y] 
 			    			= directions.get(i) == 1 ? maxYValue : minYValue;
 		    	}
 		    }
