@@ -7,12 +7,35 @@ import javax.swing.text.Segment;
 import main.Logger;
 import main.MainWindow;
 
+/**
+ * Welch method is a method to computes a special kind of periodogram
+ * averaged by time to reduce variance and therfore noise.
+ * Multiple window functions are provided to compute the periodogram 
+ * @author knoodrake
+ *
+ */
 public class WelchMethod extends Filter {
+	/**
+	 * Represents the window function to use on 
+	 * a data chunk. HANN is recommanded over SQUARE 
+	 * function, which can bring aliasing and/or leakage
+	 * @author knoodrake
+	 *
+	 */
 	private enum WindowType {
 		HANN, 
 		SQUARE
 	};
 	
+	/**
+	 * Wrapper for {@link #compute(double[][], int, int, double, double, double, WindowType, Boolean)}
+	 * Calling it with automatic parameters guessed or found in settings  
+	 * @param data	The original data, index 0 is X, time, and index 1 is amplitude
+	 * @param fs	Sampling rate
+	 * @param lfq	Lower frequency (in Hz) to show up
+	 * @param hfq	Higher frequency (in Hz) to show up
+	 * @return		the periodogram plot data
+	 */
 	static public double[][] compute(double[][] data, double fs, int lfq, int hfq) {
 		int segLen = MainWindow.getPrefs().getInt(MainWindow.PREF_WELCH_SEG_LENGTH, 1000);
 		
@@ -32,10 +55,17 @@ public class WelchMethod extends Filter {
 	}
 	
 	/**
-	 * @param data
-	 * @param windowSize in samples
-	 * @param overlapSize in samples
-	 * @return
+	 * Computes the periodogram of given signal with welch method
+	 * @param data				The original data, index 0 is X, time, and index 1 is amplitude
+	 * @param segmentLength		Length of the data chuncks in samples
+	 * @param overlapSize		Length of the data chuncks overlaping in samples
+	 * @param fs				Sample rate
+	 * @param freqLowerLimit	Lower frequency (in Hz) to show up
+	 * @param freqUpperLimit	Higher frequency (in Hz) to show up
+	 * @param windowType		{@link WindowType window function} to be applied to chunks
+	 * @param logYScale			If true, magnitude is expressed in a dB scale
+	 * @return					the periodogram plot data
+	 * @see #compute(double[][], double, int, int)
 	 */
 	static public double[][] compute(
 			double[][] data, 
@@ -58,15 +88,14 @@ public class WelchMethod extends Filter {
 		} else { // SQUARE
 			windowSize = segmentLength;
 		}
-		int fftLen = (int) (windowSize/2);
-		int from = (int) ((fftLen / fs) * freqLowerLimit); 
-		int to = (int) ((fftLen / fs) * freqUpperLimit); 
+		int from = (int) ((windowSize/ fs) * freqLowerLimit); 
+		int to = (int) ((windowSize / fs) * freqUpperLimit); 
 		double[][] powerFrequency = new double[][] { 
 				new double[to - from], 
 				new double[to - from] 
 		};
 		for(int i=from; i<to; i++) {
-			powerFrequency[X][i-from] = ((double)i) * fs / fftLen;
+			powerFrequency[X][i-from] = ((double)i) * fs / windowSize;
 		}
 		
 		for(int i=0; i<nSegments; i++) {
@@ -99,10 +128,11 @@ public class WelchMethod extends Filter {
 	 * @param windowSize
 	 */
 	private static double[] getWindow(double[] dataSegment, double windowSize, WindowType type) {
+		
 		if(type == WindowType.SQUARE) {
 			return getSquareWindow(dataSegment, windowSize);
 		} else {
-			return getHannWindowTEST(dataSegment, windowSize);
+			return getHannWindow(dataSegment, windowSize);
 		}
 	}
 	
@@ -112,28 +142,15 @@ public class WelchMethod extends Filter {
 		return window;
 	}
 	
-	private static double[] getHannWindowTEST(double[] dataSegment, double windowSize) {
-		// https://en.wikipedia.org/wiki/Hanning_window
-		double[] window = new double[dataSegment.length];
-		
-		int start = (int) (((double)dataSegment.length - windowSize)/2d);
-		for(int i=0; i<start; i++) 	dataSegment[i] = 0;
-		for(int i= start + (int)windowSize; i< dataSegment.length; i++) dataSegment[i] = 0;
-		
-		for(int i=0; i<dataSegment.length; i++) {  
-			window[i] = 0.5d * ( 1d - Math.cos((2.0d * Math.PI * dataSegment[i]) / (windowSize-1d)) );
-		}
-		return window;
-	}	
-	
-	private static double[] getHannWindowORIGINAL(double[] dataSegment, double windowSize) {
+	private static double[] getHannWindow(double[] dataSegment, double windowSize) {
 		// https://en.wikipedia.org/wiki/Hanning_window
 		double[] window = new double[(int) windowSize];
 		int start = (int) (((double)dataSegment.length - windowSize)/2d);
 		for(int i=start; i<windowSize + start; i++) {  
-			window[i-start] = 0.5d * ( 1d - Math.cos((2.0d * Math.PI * dataSegment[i]) / (windowSize-1d)) );
+			double multiplier = 0.5d * ( 1d - Math.cos((2.0d * Math.PI * (double)(i-start)) / (windowSize-1d)) );
+			window[i-start] = dataSegment[i] * multiplier;
 		}
-		Logger.log("	ws= " + window.length + ", st= " + start);
+		window[0] = dataSegment[start] * 0.5d * ( 1d + Math.cos(0 / (windowSize-1d)) );
 		return window;
 	}	
 }

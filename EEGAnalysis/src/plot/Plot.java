@@ -76,7 +76,7 @@ public class Plot {
 	 * @return the SGTData data used by the graph layouts
 	 */
 	private SGTData readTheData() {
-		boolean test = true;
+		boolean test = false;
 		SimpleLine data;
 		
 		// Real data
@@ -90,9 +90,10 @@ public class Plot {
 			
 		// Test sinusoidal
 		else data = processSignal(synthetizer.Sinusoidal.merge(
-					synthetizer.Sinusoidal.generate(1, dataInfo.fs, time.getTo() - time.getFrom(), 0.10, 1),
-					synthetizer.Sinusoidal.generate(2, dataInfo.fs, time.getTo() - time.getFrom(), 0.05, 1)
+					synthetizer.Sinusoidal.generate(5, dataInfo.fs, time.getTo() - time.getFrom(), 0.10, 1),
+					synthetizer.Sinusoidal.generate(15, dataInfo.fs, time.getTo() - time.getFrom(), 0.05, 1)
 				));
+		
 	 
 	    data.setId(getDataId());
 	    if(graphType == GraphType.EnergySpectralDensity

@@ -8,14 +8,6 @@ import main.MainWindow;
  */
 public class EnergySpectralDensity extends Filter {
 	
-	public static double[][] test(double fs) {
-		//double[][] a = synthetizer.Sinusoidal.generate(13, fs, 30, 0.20, 1);
-		double[][] b = synthetizer.Sinusoidal.generate(20, fs, 10, 0.10, 1);
-		//double[][] m = synthetizer.Sinusoidal.merge(a, b);
-		return b;
-	}
-	
-	
 	/**
 	 * Computes a simple Energy SD periodogram for the given 2D signal.
 	 * Please don't forget that the length of the signal (in s) have to be
@@ -53,9 +45,10 @@ public class EnergySpectralDensity extends Filter {
 		}
 		FFT fft = new FFT(signal);
 		fft.forward();
-		double signalLen = (double)fft.getData().y.length;
-		int len = (int) ((signalLen / fs) * freqUpperLimit);
-		int from = (int) ((signalLen / fs) * freqLowerLimit);
+		//double signalLen = (double)fft.getData().y.length;
+		double originalDataLenght = signal[Y].length;
+		int len = (int) ((originalDataLenght / (double)fs) * (double)freqUpperLimit);
+		int from = (int) ((originalDataLenght / (double)fs) * (double)freqLowerLimit);
 		double[] sumy = new double[len - from];
 		double[] sumx = new double[len - from];
 		for(int i=from; i<len; i++) {
@@ -66,7 +59,7 @@ public class EnergySpectralDensity extends Filter {
 		}
 		
 		for(int i=from; i<len; i++) {
-			sumx[i-from] = ((double)i) * fs / signalLen;
+			sumx[i-from] = ((double)i) * fs / originalDataLenght;
 		}
 		return new double[][] { sumx, sumy };
 	}
