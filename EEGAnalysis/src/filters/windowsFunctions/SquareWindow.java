@@ -1,4 +1,4 @@
-package windowsFunctions;
+package filters.windowsFunctions;
 
 import java.util.Arrays;
 

@@ -1,4 +1,4 @@
-package windowsFunctions;
+package filters.windowsFunctions;
 
 public abstract class Window {
 	private double[] data;

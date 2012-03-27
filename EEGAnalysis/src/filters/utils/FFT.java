@@ -1,4 +1,4 @@
-package filters;
+package filters.utils;
 
 import java.util.Arrays;
 
@@ -14,11 +14,11 @@ import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
 public class FFT extends Filter {
 	
 	public class Data {
-		protected double[] x;
-		protected Complex[] y;
+		public double[] x;
+		public Complex[] y;
 		
-		protected double[] initialX;
-		protected double[] initialY;
+		public double[] initialX;
+		public double[] initialY;
 		
 		public Data(double[] x, Complex[] y) {
 			this.x = x;

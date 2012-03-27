@@ -2,7 +2,7 @@ package synthetizer;
 
 import static org.junit.Assert.*;
 
-import main.Logger;
+import main.utils.Logger;
 
 import org.junit.Test;
 

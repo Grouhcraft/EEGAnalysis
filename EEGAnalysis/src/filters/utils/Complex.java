@@ -1,4 +1,4 @@
-package filters;
+package filters.utils;
 
 public class Complex {	
 	public double im;

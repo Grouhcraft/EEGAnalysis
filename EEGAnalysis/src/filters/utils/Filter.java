@@ -1,6 +1,7 @@
-package filters;
+package filters.utils;
 
 import java.util.List;
+
 
 /**
  * Abstract layer for the filters
@@ -10,6 +11,16 @@ import java.util.List;
 public abstract class Filter {
 	protected final static int X = 0;
 	protected final static int Y = 1;
+	
+	public static class Coord {
+		double x;
+		double y;
+		
+		public Coord(double x, double y) {
+			this.x = x;
+			this.y = y;
+		}
+	}
 	
 	protected static double sq(double x) {
 		return x * x;
@@ -113,5 +124,65 @@ public abstract class Filter {
 	 */
 	protected static boolean isDropping(int pos, double[] data) {
 		return data[pos] > data[pos+1];
+	}
+	
+	public static Coord minCoords(double[][] data) {
+		double[] x = data[X];
+		double[] y = data[Y];
+		double xmin = x[0];
+		double ymin = y[0];
+		for (int i = 1; i < y.length; i++) {
+			if (y[i] < ymin) {
+				xmin = x[i];
+				ymin = y[i];
+			}
+		}
+		return new Coord(xmin, ymin);
+	}
+
+	public static Coord maxCoords(double[][] data) {
+		double[] x = data[X];
+		double[] y = data[Y];
+		double xmax = x[0];
+		double ymax = y[0];
+		for (int i = 1; i < y.length; i++) {
+			if (y[i] > ymax) {
+				xmax = x[i];
+				ymax = y[i];
+			}
+		}
+		return new Coord(xmax, ymax);
+	}
+
+	public static double min(double[][] data) {
+		double[] y = data[Y];
+		double ymin = y[0];
+		for (int i = 1; i < y.length; i++) {
+			if (y[i] < ymin) {
+				ymin = y[i];
+			}
+		}
+		return ymin;
+	}
+
+	public static double max(double[][] data) {
+		double[] y = data[Y];
+		double ymax = y[0];
+		for (int i = 1; i < y.length; i++) {
+			if (y[i] > ymax) {
+				ymax = y[i];
+			}
+		}
+		return ymax;
+	}
+
+	public static Double ratioMaxMin(double[][] data) {
+		double min = min(data);
+		double max = max(data);
+		if (min >= 0 || max <= 0) {
+			System.out.println("The sign of the graph never changes");
+			return null;
+		}
+		return Math.abs(max) / Math.abs(min);
 	}
 }

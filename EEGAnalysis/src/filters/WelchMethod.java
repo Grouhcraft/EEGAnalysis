@@ -2,12 +2,14 @@ package filters;
 
 import java.util.Arrays;
 
-import windowsFunctions.HannWindow;
-import windowsFunctions.SquareWindow;
-import windowsFunctions.Window;
+import filters.utils.Filter;
+import filters.windowsFunctions.HannWindow;
+import filters.windowsFunctions.SquareWindow;
+import filters.windowsFunctions.Window;
 
-import main.Logger;
+
 import main.MainWindow;
+import main.utils.Logger;
 
 /**
  * Welch method is a method to computes a special kind of periodogram

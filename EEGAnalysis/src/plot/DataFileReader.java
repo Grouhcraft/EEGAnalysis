@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import main.Logger;
+import main.utils.Logger;
 
 public class DataFileReader {
 	

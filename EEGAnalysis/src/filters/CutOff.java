@@ -3,7 +3,10 @@ package filters;
 import java.util.ArrayList;
 import java.util.List;
 
-import main.Logger;
+import filters.utils.FFT;
+import filters.utils.Filter;
+
+import main.utils.Logger;
 
 /**
  * Filters the signal by Amplitude or Frequency
@@ -69,43 +72,41 @@ public class CutOff extends Filter {
 	 * @param ampl
 	 * @return filtered signal data
 	 */
-	private static double[][] amplitude(double[][] data, double threshold, AMPLITUDE ampl ) {
+	/**
+	 * @see {@link #lowAmplitude(double[][], double)}
+	 * @see {@link #highAmplitude(double[][], double)}
+	 * @param data
+	 * @param threshold
+	 * @param ampl
+	 * @return filtered signal data
+	 */
+	public static double[][] amplitude(double[][] data, double threshold,
+			AMPLITUDE ampl) {
+		Double ratio = ratioMaxMin(data);
+		if (ratio == null)
+			return data;
+		double min = -threshold / (ratio + 1);
+		double max = threshold * ratio / (ratio + 1);
 		double f[] = data[Y];
-		List<Integer> toErease = new ArrayList<Integer>();
-		
-		int xx = 1;
-		while(xx < f.length-2) {
-			int x = xx;
-			
-			if(isAscending(x, f)) {			
-				x = nextDrop(x, f);
-				if((ampl == AMPLITUDE.High && Math.abs(f[xx] - f[x]) < threshold)
-						|| (ampl == AMPLITUDE.Low && Math.abs(f[xx] - f[x]) > threshold)) {
-					toErease = addRangeTo(toErease, xx, x);
-					//for(int i=xx; i<x; i++) { data[Y][i] = 0; }
+		List<Integer> toErase = new ArrayList<Integer>();
+
+		if (ampl == AMPLITUDE.Low) {
+			System.out.println("Low : min=" + min + "; max=" + max);
+			for (int i = 0; i < f.length; i++) {
+				if (f[i] < min || f[i] > max) {
+					toErase.add(i);
 				}
-				xx = x+1;
-				continue;
-			} 
-			
-			else if (isDropping(x, f)) {	
-				x = nextAscent(x, f);
-				if((ampl == AMPLITUDE.High && Math.abs(f[xx] - f[x]) < threshold) ||
-						(ampl == AMPLITUDE.Low && Math.abs(f[xx] - f[x]) > threshold)) {
-					toErease = addRangeTo(toErease, xx, x);
-					//for(int i=xx; i<x; i++) { data[Y][i] = 0; }
+			}
+		} else if (ampl == AMPLITUDE.High) {
+			System.out.println("High : min=" + min + "; max=" + max);
+			for (int i = 0; i < f.length; i++) {
+				if (f[i] > min && f[i] < max) {
+					toErase.add(i);
 				}
-				xx = x+1;
-				continue;
-			} 
-			
-			else {
-				x = nextNonFlat(x, f);
-				xx = x+1;
-				continue;
 			}
 		}
-		Logger.log("cutoff: " + toErease.size() + " samples droped");
-		return removePoints(toErease, data);
+
+		Logger.log("cutoff: " + toErase.size() + " samples droped");
+		return removePoints(toErase, data);
 	}
 }

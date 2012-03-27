@@ -1,5 +1,8 @@
 package filters;
 
+import filters.utils.Complex;
+import filters.utils.FFT;
+import filters.utils.Filter;
 import main.MainWindow;
 
 /**

@@ -8,8 +8,8 @@ import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
 import gov.noaa.pmel.sgt.swing.JPlotLayout;
 import java.io.File;
-import main.Logger;
 import main.MainWindow;
+import main.utils.Logger;
 
 public class Plot {
 	static class DataSettings  {

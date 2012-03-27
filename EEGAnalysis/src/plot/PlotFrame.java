@@ -22,8 +22,8 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
-import main.Logger;
 import main.MainWindow;
+import main.utils.Logger;
 
 /**
  * PlotFrame is the window containing a plot

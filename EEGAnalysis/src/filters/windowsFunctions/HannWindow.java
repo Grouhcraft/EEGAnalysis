@@ -1,4 +1,4 @@
-package windowsFunctions;
+package filters.windowsFunctions;
 
 public class HannWindow extends Window {
 
