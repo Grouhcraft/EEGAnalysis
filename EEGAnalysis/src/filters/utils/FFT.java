@@ -2,6 +2,8 @@ package filters.utils;
 
 import java.util.Arrays;
 
+import main.utils.Logger;
+
 import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
 
 /**
@@ -50,6 +52,8 @@ public class FFT extends Filter {
 	}
 	
 	public FFT forwardFull() {
+		if(data.initialY.length % 2 > 0)
+			Logger.log("Warning, data length is odd");
 		DoubleFFT_1D fft = new DoubleFFT_1D(data.initialY.length);
 		double[] yData = Arrays.copyOf(data.initialY, data.initialY.length*2);
 		fft.realForwardFull(yData);

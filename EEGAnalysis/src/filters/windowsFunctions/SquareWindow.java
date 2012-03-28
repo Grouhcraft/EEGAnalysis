@@ -20,8 +20,8 @@ public class SquareWindow extends Window {
 	}
 
 	@Override
-	public int getRecommandedOverlappingSize() {
-		return (int)getData().length;
+	public int getRecommandedOverlappingSize(int segmentLength) {
+		return segmentLength;
 	}
 
 }

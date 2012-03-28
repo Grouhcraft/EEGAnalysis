@@ -2,12 +2,14 @@ package plot;
 
 import filters.CutOff;
 import filters.EnergySpectralDensity;
-import filters.WelchMethod;
+import filters.WechWechMethod;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
 import gov.noaa.pmel.sgt.swing.JPlotLayout;
 import java.io.File;
+import java.text.DecimalFormat;
+
 import main.MainWindow;
 import main.utils.Logger;
 
@@ -149,10 +151,21 @@ public class Plot {
 				data = EnergySpectralDensity.compute( data, dataInfo.fs, lfq, hfq );
 			
 			else if (getGraphType() == GraphType.WelchPeriodogram) {
-				data = WelchMethod.compute( data, dataInfo.fs, lfq, hfq);
+				data = WechWechMethod.compute( data, dataInfo.fs, lfq, hfq);
+			} else {
+				data = cleanXAxis(data);
 			}
 		}
 	    return new SimpleLine(data[X], data[Y], null);
+	}
+
+	private double[][] cleanXAxis(double[][] data) {
+		double newData[][] = data.clone();
+		DecimalFormat f = new DecimalFormat("#.##");
+		for(int i=0; i<data[X].length; i++) {
+			newData[X][i] = Double.valueOf(f.format(newData[X][i]));    
+		}
+		return newData;
 	}
 
 	/**

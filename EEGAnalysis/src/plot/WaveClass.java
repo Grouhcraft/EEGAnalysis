@@ -17,7 +17,7 @@ public abstract class WaveClass {
 	}
 	
 	protected final int MAX_AMPLITUDE = 2000;
-	protected final int MAX_FREQUENCY = 2000;
+	protected final int MAX_FREQUENCY = 50;
 	protected String name;
 	
 	public String getName() { 

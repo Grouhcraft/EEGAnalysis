@@ -7,7 +7,7 @@ public abstract class Window {
 		this.setData(data);
 	}
 	public abstract double[] get(double windowSize);	
-	public abstract int getRecommandedOverlappingSize();
+	public abstract int getRecommandedOverlappingSize(int segmentLength);
 	public double[] getData() {
 		return data;
 	}

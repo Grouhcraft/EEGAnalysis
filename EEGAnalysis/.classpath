@@ -3,13 +3,16 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="etc"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="lib/jtransforms-2.4.jar"/>
+	<classpathentry kind="lib" path="lib/jtransforms-2.4.jar" sourcepath="lib/jtransforms-2.4-src.zip">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/EEGAnalysis/lib/jtransforms-2.4-doc.zip!/JTransforms/doc"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="lib/sgt_v30.jar" sourcepath="lib/sgt_src_v30.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:platform:/resource/EEGAnalysis/lib/sgt_javadoc_v30.jar!/"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="C:/Users/knoodrake/workspace/junit-4.10.jar"/>
-	<classpathentry kind="lib" path="miglayout15-swing.jar" sourcepath="miglayout-src.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

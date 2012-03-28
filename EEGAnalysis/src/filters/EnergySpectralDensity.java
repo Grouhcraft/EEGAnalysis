@@ -4,6 +4,7 @@ import filters.utils.Complex;
 import filters.utils.FFT;
 import filters.utils.Filter;
 import main.MainWindow;
+import main.utils.Logger;
 
 /**
  * Energy Spectral Density computation methods
@@ -48,8 +49,11 @@ public class EnergySpectralDensity extends Filter {
 		}
 		FFT fft = new FFT(signal);
 		fft.forward();
-		//double signalLen = (double)fft.getData().y.length;
+		//fft.forwardFull();
+		Logger.log("quick half-size real fft used");
+		
 		double originalDataLenght = signal[Y].length;
+		
 		int len = (int) ((originalDataLenght / (double)fs) * (double)freqUpperLimit);
 		int from = (int) ((originalDataLenght / (double)fs) * (double)freqLowerLimit);
 		double[] sumy = new double[len - from];

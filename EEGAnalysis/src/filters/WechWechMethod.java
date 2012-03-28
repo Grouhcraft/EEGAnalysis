@@ -1,7 +1,6 @@
 package filters;
 
-import java.util.Arrays;
-
+import filters.utils.ChunkedData;
 import filters.utils.Filter;
 import filters.windowsFunctions.HannWindow;
 import filters.windowsFunctions.SquareWindow;
@@ -18,7 +17,7 @@ import main.utils.Logger;
  * @author knoodrake
  *
  */
-public class WelchMethod extends Filter {
+public class WechWechMethod extends Filter {
 	/**
 	 * Wrapper for {@link #compute(double[][], int, int, double, double, double, WindowType, Boolean)}
 	 * Calling it with automatic parameters guessed or found in settings  
@@ -41,10 +40,6 @@ public class WelchMethod extends Filter {
 		
 	}
 	
-	private static int getNumberOfSegments(double dataLen, double segmentLen, double overlapSize) {
-		return (int) Math.floor(((dataLen - segmentLen) / overlapSize) + 1d);
-	}
-	
 	/**
 	 * Computes the periodogram of given signal with welch method
 	 * @param data				The original data, index 0 is X, time, and index 1 is amplitude
@@ -63,39 +58,32 @@ public class WelchMethod extends Filter {
 			double fs,
 			double freqLowerLimit,
 			double freqUpperLimit,
-			Window window,
+			Window win,
 			Boolean logYScale
 			) {
-		
-		int signalLength = data[Y].length;
-		int overlapSize = window.getRecommandedOverlappingSize(segmentLength); 
-		int nSegments = getNumberOfSegments(signalLength, segmentLength, overlapSize);
-		Logger.log("Computed R size=" + overlapSize);
-		Logger.log("Computed K segments=" + nSegments);
-		int from = (int) ((overlapSize/ fs) * freqLowerLimit); 
-		int to = (int) ((overlapSize / fs) * freqUpperLimit);
-		
-		int fromToLen = to - from;
-		Logger.log("fromToLen=" + fromToLen);
+		 
+		ChunkedData chunked = new ChunkedData(data[Y], (int) fs, segmentLength, win.getRecommandedOverlappingSize(segmentLength), true);
+		Logger.log("Computed R size=" + chunked.getOverlapSize());
+		Logger.log("Computed K segments=" + chunked.getNumberOfChunk());
+		int from = (int) ((chunked.getOverlapSize()/ fs) * freqLowerLimit); 
+		int to = (int) ((chunked.getOverlapSize() / fs) * freqUpperLimit);		
 		double[][] powerFrequency = new double[][] { 
 				new double[to - from], 
 				new double[to - from] 
 		};
-		for(int i=from; i<to; i++) powerFrequency[X][i-from] = ((double)i) * fs / overlapSize;
+		for(int i=from; i<to; i++) powerFrequency[X][i-from] = ((double)i) * fs / chunked.getOverlapSize();
 		
-		for(int i=0; i<nSegments; i++) {
-			int segmentStart = i * (segmentLength - overlapSize);
-			double[] dataSegment = Arrays.copyOfRange(data[Y], segmentStart, segmentStart + segmentLength);
-			double[] dataWindow = window.setData(dataSegment).get(overlapSize);
-			double[] psd = EnergySpectralDensity.compute(dataWindow, fs);
+		while(chunked.hasNextChunk()) {
+			double[] psd = EnergySpectralDensity.compute(chunked.getChunk(), fs);
 			for(int ii=from; ii<to; ii++) powerFrequency[Y][ii-from] += psd[ii];
+			chunked.nextChunk();
 		}
 
 		if(logYScale) for(int i=0; i<powerFrequency[Y].length; i++)
-				powerFrequency[Y][i] = Math.log10(powerFrequency[Y][i] / ((double)nSegments));
+				powerFrequency[Y][i] = Math.log10(powerFrequency[Y][i] / ((double)chunked.getNumberOfChunk()));
 		
 		else for(int i=0; i<powerFrequency[Y].length; i++)
-				powerFrequency[Y][i] = powerFrequency[Y][i] / ((double)nSegments); 
+				powerFrequency[Y][i] = powerFrequency[Y][i] / ((double)chunked.getNumberOfChunk()); 
 	
 		return powerFrequency;
 	}

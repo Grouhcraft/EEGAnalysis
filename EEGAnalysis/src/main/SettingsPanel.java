@@ -1,6 +1,7 @@
 package main;
 
 import javax.swing.JPanel;
+
 import java.awt.Color;
 import javax.swing.JSlider;
 import javax.swing.GroupLayout;
@@ -24,7 +25,7 @@ public class SettingsPanel extends JPanel {
 	 * 
 	 */
 	private static final long serialVersionUID = 640029470434166332L;
-
+	
 	/**
 	 * @wbp.parser.constructor
 	 */
@@ -114,31 +115,34 @@ public class SettingsPanel extends JPanel {
 			}
 		});
 		btnNewButton.setFont(new Font("Segoe Script", Font.BOLD, 14));
+		
+		LocationsPanel imagePanel = new LocationsPanel();
 		GroupLayout groupLayout = new GroupLayout(this);
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.TRAILING)
 				.addGroup(groupLayout.createSequentialGroup()
 					.addContainerGap()
-					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addComponent(chckbxUseSquareWindowing, GroupLayout.DEFAULT_SIZE, 283, Short.MAX_VALUE)
-						.addComponent(lblWelchPeriodogram, GroupLayout.DEFAULT_SIZE, 287, Short.MAX_VALUE)
-						.addComponent(separator, GroupLayout.DEFAULT_SIZE, 287, Short.MAX_VALUE)
-						.addComponent(lblTime, GroupLayout.DEFAULT_SIZE, 287, Short.MAX_VALUE)
-						.addComponent(sliderTimeFrom, GroupLayout.DEFAULT_SIZE, 307, Short.MAX_VALUE)
-						.addGroup(groupLayout.createSequentialGroup()
+					.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
+						.addComponent(imagePanel, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 289, Short.MAX_VALUE)
+						.addComponent(chckbxUseSquareWindowing, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 289, Short.MAX_VALUE)
+						.addComponent(lblWelchPeriodogram, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 289, Short.MAX_VALUE)
+						.addComponent(separator, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 289, Short.MAX_VALUE)
+						.addComponent(lblTime, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 289, Short.MAX_VALUE)
+						.addComponent(sliderTimeFrom, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 289, Short.MAX_VALUE)
+						.addGroup(Alignment.LEADING, groupLayout.createSequentialGroup()
 							.addComponent(lblAnalyze)
 							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(sliderTimeDuration, GroupLayout.DEFAULT_SIZE, 196, Short.MAX_VALUE)
+							.addComponent(sliderTimeDuration, GroupLayout.DEFAULT_SIZE, 205, Short.MAX_VALUE)
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(lblSecondes))
-						.addGroup(groupLayout.createSequentialGroup()
+						.addGroup(Alignment.LEADING, groupLayout.createSequentialGroup()
 							.addComponent(lblSegLength)
 							.addPreferredGap(ComponentPlacement.UNRELATED)
 							.addComponent(spinnerWelchSegLen, GroupLayout.PREFERRED_SIZE, 118, GroupLayout.PREFERRED_SIZE))
-						.addComponent(separator_1, GroupLayout.DEFAULT_SIZE, 283, Short.MAX_VALUE)
-						.addComponent(lblWelchAndSpd)
-						.addComponent(chckbxShowYAxisInDB)
-						.addComponent(btnNewButton, GroupLayout.DEFAULT_SIZE, 283, Short.MAX_VALUE))
+						.addComponent(separator_1, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 289, Short.MAX_VALUE)
+						.addComponent(lblWelchAndSpd, Alignment.LEADING)
+						.addComponent(chckbxShowYAxisInDB, Alignment.LEADING)
+						.addComponent(btnNewButton, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 289, Short.MAX_VALUE))
 					.addContainerGap())
 		);
 		groupLayout.setVerticalGroup(
@@ -169,7 +173,9 @@ public class SettingsPanel extends JPanel {
 					.addComponent(lblWelchAndSpd)
 					.addPreferredGap(ComponentPlacement.UNRELATED)
 					.addComponent(chckbxShowYAxisInDB)
-					.addPreferredGap(ComponentPlacement.RELATED, 180, Short.MAX_VALUE)
+					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addComponent(imagePanel, GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE)
+					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(btnNewButton)
 					.addContainerGap())
 		);

@@ -79,7 +79,7 @@ public class DataFileReader {
 		    while(it.hasNext()) {
 		    	p = (Point2D.Double) it.next();
 		    	xArr[i] = p.x / samplingRate;
-		    	yArr[i] = p.y;
+		    	yArr[i] = p.y / 1000;
 		    	i++;
 		    }
 		    

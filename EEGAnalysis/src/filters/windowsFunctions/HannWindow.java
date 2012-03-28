@@ -24,10 +24,10 @@ public class HannWindow extends Window {
 	}
 
 	@Override
-	public int getRecommandedOverlappingSize() {
-		if(getData().length % 2 == 0)
-			return (int) (((double)getData().length) / 2d);
+	public int getRecommandedOverlappingSize(int segmentLength) {
+		if(segmentLength % 2 == 0)
+			return (int) (((double)segmentLength) / 2d);
 		else
-			return (int) ((((double)getData().length) - 1d) / 2d);
+			return (int) ((((double)segmentLength) - 1d) / 2d);
 	}
 }
