@@ -1,9 +1,11 @@
-package plot;
+package graphwindow;
 
 import gov.noaa.pmel.sgt.LineAttribute;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.swing.JPlotLayout;
-
+import graphwindow.plot.IPlot;
+import graphwindow.plot.Plot;
+import graphwindow.plot.WaveformPlot;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -34,9 +36,9 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 
 	private static final long serialVersionUID = 2796714104577643465L;
 	private JPlotLayout plotLayout;
-	private Plot plot;
+	private IPlot plot;
 	private HashMap<String, SGTData> linkedDatas = new HashMap<String, SGTData>();
-	public Plot getPlot() {
+	public IPlot getPlot() {
 		return plot;
 	}
 	
@@ -47,9 +49,8 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 	 * @see PlotFrame#PlotFrame(String, int, File)
 	 */
 	public PlotFrame(String plotId, PlotFrame p) {
-		initialize(plotId, p.getPlot().dataInfo.channel, p.getDataFile());
-		plot.setGraphType(p.getPlot().getGraphType());
-		plot.setWaveClass(p.getPlot().waveClass);
+		initialize(plotId, p.getPlot().getInfos().channel, p.getDataFile());
+		plot.setWaveClass(p.getPlot().getWaveClass());
 		updateGraph();
 	}
 	
@@ -126,7 +127,7 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		btnPrev.setActionCommand("prev");
 		btnNext.setActionCommand("next");
 		
-		this.plot = new Plot(channel, file);
+		this.plot = new WaveformPlot(channel, file);
 		setWaveClass(WaveClass.ALPHA);
 		
 		setVisible(true);
@@ -135,12 +136,12 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getActionCommand().equals("prev")) {
-			if(plot.dataInfo.channel > 1) {
-				plot.dataInfo.channel--;
+			if(plot.getInfos().channel > 1) {
+				plot.getInfos().channel--;
 			}
 		} else if (e.getActionCommand().equals("next")) {
-			if(plot.dataInfo.channel < plot.dataInfo.channelsCount) {
-				plot.dataInfo.channel++;
+			if(plot.getInfos().channel < plot.getInfos().channelsCount) {
+				plot.getInfos().channel++;
 			}
 		}
 		updateGraph();
@@ -156,14 +157,14 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		plotLayout.clear();
 		plotLayout.addData(plot.getData(), new LineAttribute(LineAttribute.SOLID, Color.MAGENTA));
 		plotLayout.setTitles(
-				"Channel #" + plot.dataInfo.channel + "(" + plot.dataInfo.getChannelCode() +")", 
-				"Waves: " + plot.waveClass.getName(), 
-				plot.getDataFile().getName());
+				"Channel #" + plot.getInfos().channel + "(" + plot.getInfos().getChannelCode() +")", 
+				"Waves: " + plot.getWaveClass().getName(), 
+				plot.getInfos().file.getName());
 		for(SGTData linkedData : linkedDatas.values()) {
 			plotLayout.addData(linkedData);
 		}
 
-		if(plot.getGraphType() == GraphType.WaveForm) {
+		if(plot.getClass().isAssignableFrom(WaveformPlot.class)) {
 			try {
 				plotLayout.addData((new DataFileReader()).metaDataReader.readFromPlot(plot));
 			} catch (IOException e) {
@@ -184,21 +185,19 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 	}
 
 	public File getDataFile() {
-		return plot.getDataFile();
+		return plot.getInfos().file;
 	}
 
 	public void setDataFile(File selectedFile) {
-		plot.setDataFile(selectedFile);
+		plot.getInfos().file = selectedFile;
 	}
 
-	/**
-	 * Registers the type of graph (waveform, fft, ..) showed
-	 * and then update the view. 
-	 * @param graphType
-	 * @see {@link GraphType}
-	 */
-	public void setGraphType(GraphType graphType) {
-		plot.setGraphType(graphType);
+	public void setGraphType(Class<? extends Plot> graphType) {
+		try {
+			plot = graphType.getConstructor(IPlot.class).newInstance(plot);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		updateGraph();
 	}
 

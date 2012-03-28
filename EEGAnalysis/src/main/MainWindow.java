@@ -1,5 +1,9 @@
 package main;
 
+import graphwindow.GraphMenu;
+import graphwindow.PlotFrame;
+import graphwindow.WaveClass;
+
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Point;
@@ -10,9 +14,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.prefs.Preferences;
 
-import plot.GraphMenu;
-import plot.PlotFrame;
-import plot.WaveClass;
 
 public class MainWindow {
 

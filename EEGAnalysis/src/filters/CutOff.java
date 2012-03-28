@@ -5,6 +5,7 @@ import java.util.List;
 
 import filters.utils.FFT;
 import filters.utils.Filter;
+import filters.utils.FrequencyRange;
 
 import main.utils.Logger;
 
@@ -19,18 +20,17 @@ public class CutOff extends Filter {
 	/**
 	 * Filters the signal to only keep the given frequency range
 	 * @param data data to filters, modified by copy (original won't be altered)
-	 * @param from frequency range start (in Hz) 
-	 * @param to frequency range end (in Hz)
+	 * @param fr frequency range (in Hz) 
 	 * @param fs sampling rate
 	 * @return a filtered data
 	 */
-	public static double[][] frequencyRange(double[][] data, int from, int to, double fs) {		
+	public static double[][] frequencyRange(double[][] data, FrequencyRange fr, double fs) {		
 		FFT fft = new FFT(data);
 		fft.forward();
 		
 		double signalLen = fft.getData().y.length;
-		int hzFrom = (int) ((signalLen / fs) * from);
-		int hzTo = (int) ((signalLen / fs) * to);
+		int hzFrom = (int) ((signalLen / fs) * fr.getLower());
+		int hzTo = (int) ((signalLen / fs) * fr.getHigher());
 		
 		for(int i=0; i<hzFrom; i++) {
 			fft.getData().y[i].zero();

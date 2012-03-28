@@ -1,4 +1,8 @@
-package plot;
+package graphwindow;
+
+import graphwindow.plot.SpectralDensityPlot;
+import graphwindow.plot.WaveformPlot;
+import graphwindow.plot.WelchPlot;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -151,11 +155,11 @@ public class GraphMenu extends JMenuBar implements ActionListener {
 	public void actionPerformed(ActionEvent arg0) {
 		String c = arg0.getActionCommand();
 		if(c.equals("view_psd")) {
-			getParentWindow().setGraphType(GraphType.EnergySpectralDensity);
+			getParentWindow().setGraphType(SpectralDensityPlot.class);
 		} else if (c.equals("view_waveform")) {
-			getParentWindow().setGraphType(GraphType.WaveForm);
+			getParentWindow().setGraphType(WaveformPlot.class);
 		} else if (c.equals("view_welch")) {
-			getParentWindow().setGraphType(GraphType.WelchPeriodogram);
+			getParentWindow().setGraphType(WelchPlot.class);
 		}
 	}
 }
