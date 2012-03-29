@@ -1,17 +1,24 @@
-package plot;
+package graphwindow;
 
 import gov.noaa.pmel.sgt.LineAttribute;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.swing.JPlotLayout;
-
+import graphwindow.plot.IPlot;
+import graphwindow.plot.Plot;
+import graphwindow.plot.WaveformPlot;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JInternalFrame;
 import javax.swing.JMenuBar;
@@ -19,11 +26,14 @@ import javax.swing.JPanel;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.border.LineBorder;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
 import main.MainWindow;
 import main.utils.Logger;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 /**
  * PlotFrame is the window containing a plot
@@ -33,10 +43,10 @@ import main.utils.Logger;
 public class PlotFrame extends JInternalFrame implements ActionListener {
 
 	private static final long serialVersionUID = 2796714104577643465L;
-	private JPlotLayout plotLayout;
-	private Plot plot;
+	private SGTPlotLayout plotLayout;
+	private IPlot plot;
 	private HashMap<String, SGTData> linkedDatas = new HashMap<String, SGTData>();
-	public Plot getPlot() {
+	public IPlot getPlot() {
 		return plot;
 	}
 	
@@ -47,9 +57,8 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 	 * @see PlotFrame#PlotFrame(String, int, File)
 	 */
 	public PlotFrame(String plotId, PlotFrame p) {
-		initialize(plotId, p.getPlot().dataInfo.channel, p.getDataFile());
-		plot.setGraphType(p.getPlot().getGraphType());
-		plot.setWaveClass(p.getPlot().waveClass);
+		initialize(plotId, p.getPlot().getInfos().channel, p.getDataFile());
+		plot.setWaveClass(p.getPlot().getWaveClass());
 		updateGraph();
 	}
 	
@@ -82,42 +91,43 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		setIconifiable(true);
 		setMaximizable(true);
 		setResizable(true);
-		setSize(600, 400);
+		setSize(600, 500);
+		setMinimumSize(new Dimension(240,250));
 		setTitle("plot #" + plotID);
 		JMenuBar menuBar = new GraphMenu(this);
 		setJMenuBar(menuBar);
+		
 		JPanel panel = new JPanel();
+		JPanel btnPanel = new JPanel();
 		panel.setLayout(new BorderLayout());
-		plotLayout = new JPlotLayout(false, false, false, false, plotID, null, false);
+		btnPanel.setLayout(new GridBagLayout());
+		
+		plotLayout = new SGTPlotLayout(false, false, false, false, plotID, null, false);
 		panel.add(plotLayout, BorderLayout.CENTER);
-
 		
 		JButton btnPrev = new JButton("<< Prev Ch.");
 		JButton btnNext = new JButton("Next Ch. >>");
+		GridBagConstraints c = new GridBagConstraints();
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.gridx = 0;
+		c.weightx = 0.5;
+		btnPanel.add(btnPrev, c);
+		c.gridx = 1;
+		c.weightx = 0.5;
+		btnPanel.add(btnNext, c);
 
 		GroupLayout groupLayout = new GroupLayout(getContentPane());
+		groupLayout.setAutoCreateGaps(true);
+		groupLayout.setAutoCreateContainerGaps(true);
 		groupLayout.setHorizontalGroup(
-			groupLayout.createParallelGroup(Alignment.LEADING)
-				.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-						.addComponent(panel, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 516, Short.MAX_VALUE)
-						.addGroup(groupLayout.createSequentialGroup()
-							.addComponent(btnPrev, GroupLayout.PREFERRED_SIZE, 243, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(btnNext, GroupLayout.DEFAULT_SIZE, 267, Short.MAX_VALUE)))
-					.addContainerGap())
+			groupLayout.createParallelGroup()
+				.addComponent(panel, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.DEFAULT_SIZE)
+				.addComponent(btnPanel, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.DEFAULT_SIZE)
 		);
 		groupLayout.setVerticalGroup(
-			groupLayout.createParallelGroup(Alignment.LEADING)
-				.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
-					.addContainerGap()
-					.addComponent(panel, GroupLayout.DEFAULT_SIZE, 325, Short.MAX_VALUE)
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-						.addComponent(btnPrev)
-						.addComponent(btnNext))
-					.addContainerGap())
+			groupLayout.createSequentialGroup()
+				.addComponent(panel, GroupLayout.PREFERRED_SIZE, 150, GroupLayout.DEFAULT_SIZE)
+				.addComponent(btnPanel, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
 		);
 		getContentPane().setLayout(groupLayout);
 		
@@ -126,7 +136,7 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		btnPrev.setActionCommand("prev");
 		btnNext.setActionCommand("next");
 		
-		this.plot = new Plot(channel, file);
+		this.plot = new WaveformPlot(channel, file);
 		setWaveClass(WaveClass.ALPHA);
 		
 		setVisible(true);
@@ -135,12 +145,12 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getActionCommand().equals("prev")) {
-			if(plot.dataInfo.channel > 1) {
-				plot.dataInfo.channel--;
+			if(plot.getInfos().channel > 1) {
+				plot.getInfos().channel--;
 			}
 		} else if (e.getActionCommand().equals("next")) {
-			if(plot.dataInfo.channel < plot.dataInfo.channelsCount) {
-				plot.dataInfo.channel++;
+			if(plot.getInfos().channel < plot.getInfos().channelsCount) {
+				plot.getInfos().channel++;
 			}
 		}
 		updateGraph();
@@ -156,14 +166,14 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		plotLayout.clear();
 		plotLayout.addData(plot.getData(), new LineAttribute(LineAttribute.SOLID, Color.MAGENTA));
 		plotLayout.setTitles(
-				"Channel #" + plot.dataInfo.channel + "(" + plot.dataInfo.getChannelCode() +")", 
-				"Waves: " + plot.waveClass.getName(), 
-				plot.getDataFile().getName());
+				"Channel #" + plot.getInfos().channel + "(" + plot.getInfos().getChannelCode() +")", 
+				"Waves: " + plot.getWaveClass().getName(), 
+				plot.getInfos().file.getName());
 		for(SGTData linkedData : linkedDatas.values()) {
 			plotLayout.addData(linkedData);
 		}
 
-		if(plot.getGraphType() == GraphType.WaveForm) {
+		if(plot.getClass().isAssignableFrom(WaveformPlot.class)) {
 			try {
 				plotLayout.addData((new DataFileReader()).metaDataReader.readFromPlot(plot));
 			} catch (IOException e) {
@@ -184,21 +194,19 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 	}
 
 	public File getDataFile() {
-		return plot.getDataFile();
+		return plot.getInfos().file;
 	}
 
 	public void setDataFile(File selectedFile) {
-		plot.setDataFile(selectedFile);
+		plot.getInfos().file = selectedFile;
 	}
 
-	/**
-	 * Registers the type of graph (waveform, fft, ..) showed
-	 * and then update the view. 
-	 * @param graphType
-	 * @see {@link GraphType}
-	 */
-	public void setGraphType(GraphType graphType) {
-		plot.setGraphType(graphType);
+	public void setGraphType(Class<? extends Plot> graphType) {
+		try {
+			plot = graphType.getConstructor(IPlot.class).newInstance(plot);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		updateGraph();
 	}
 

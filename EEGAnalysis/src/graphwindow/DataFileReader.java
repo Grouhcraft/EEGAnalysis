@@ -1,9 +1,11 @@
-package plot;
+package graphwindow;
 
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
 import gov.noaa.pmel.util.Point2D;
+import graphwindow.plot.IPlot;
+import graphwindow.plot.Plot.TimeFrame;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,16 +19,7 @@ import main.utils.Logger;
 public class DataFileReader {
 	
 	public class DataReader {
-		/**
-		 * Reads the EEG data from {@link #dataFile}   
-		 * @param file absolute path of the data file
-		 * @param subsamplingFactor 1 = no subSampling, 10 = take 1/10th of the samples, 100 = ... 
-		 * @param channel EEG channel to read
-		 * @param LowCutOff @todo remove that !
-		 * @param HighCutOff @todo remove that !
-		 * @return the SGTData data used by the graph layouts
-		 */
-		public double[][] read(File file, int channel, int samplingRate, int from, int to) {
+		public double[][] read(DataInfos infos, TimeFrame time) {
 			BufferedReader in = null;
 			String line = null;
 			int x,y;
@@ -34,14 +27,14 @@ public class DataFileReader {
 			ArrayList<Point2D> list = new ArrayList<Point2D>();
 			
 		    try {
-				in = new BufferedReader(new FileReader(file));
+				in = new BufferedReader(new FileReader(infos.file));
 				line = in.readLine();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		    
 		    int i=0;
-		    int toSkip = (from * samplingRate);
+		    int toSkip = (time.getFrom() * infos.fs);
 			while(line != null && i<toSkip) {
 				try {
 					line = in.readLine();
@@ -51,11 +44,11 @@ public class DataFileReader {
 				}
 			}
 	    	
-			int toRead = ((to - from) * samplingRate); 
+			int toRead = ((time.getTo() - time.getFrom()) * infos.fs); 
 		    i = 0;
 		    while(line != null && i < toRead) {
 		    	x = i; 
-		    	y = Integer.parseInt(line.split("\t")[channel]);
+		    	y = Integer.parseInt(line.split("\t")[infos.channel]);
 		    	p = new Point2D.Double(x, y);
 		    	list.add(p);
 		    	
@@ -67,8 +60,8 @@ public class DataFileReader {
 				}
 		    }
 		    Logger.log("parsing " + i/1000 + "K samples (over " + i/1000 + "K ones) from " 
-		    		+ samplingRate + "Hz channel " + channel + "'s data => " 
-		    		+ i/samplingRate + "s record"
+		    		+ infos.fs + "Hz channel " + infos.channel + "'s data => " 
+		    		+ i/infos.fs + "s record"
 		    		);
 		    
 		    
@@ -78,7 +71,7 @@ public class DataFileReader {
 		    i = 0;
 		    while(it.hasNext()) {
 		    	p = (Point2D.Double) it.next();
-		    	xArr[i] = p.x / samplingRate;
+		    	xArr[i] = p.x / infos.fs;
 		    	yArr[i] = p.y / 1000;
 		    	i++;
 		    }
@@ -86,17 +79,17 @@ public class DataFileReader {
 		    return new double[][] {xArr, yArr};
 		}
 	}
-	DataReader dataReader = new DataReader();
+	public DataReader dataReader = new DataReader();
 	
 	
 	public class MetaDataReader {
 		
-		public SGTData readFromPlot(Plot plot) throws IOException {
-			String plotFileName = plot.getDataFile().getName();
+		public SGTData readFromPlot(IPlot plot) throws IOException {
+			String plotFileName = plot.getInfos().file.getName();
 			File markerFile = null;
 			String markerFileName = "";
 			if(plotFileName.contains("_cnt")) {
-				markerFileName = plot.getDataFile().getParentFile() + "\\" + plotFileName.replace("_cnt", "_mrk");
+				markerFileName = plot.getInfos().file.getParentFile() + "\\" + plotFileName.replace("_cnt", "_mrk");
 				markerFile = new File(markerFileName); 
 			}
 			if(markerFile == null || !markerFile.exists()) {
@@ -109,9 +102,9 @@ public class DataFileReader {
 					(double)(Double)plot.getData().getYRange().getStart().getObjectValue(), 
 					(double)(Double)plot.getData().getYRange().getEnd().getObjectValue(), 
 					markerFile, 
-					plot.dataInfo.fs, 
-					plot.time.getFrom(), 
-					plot.time.getTo()
+					plot.getInfos().fs, 
+					plot.getTime().getFrom(), 
+					plot.getTime().getTo()
 					);
 		}
 		
