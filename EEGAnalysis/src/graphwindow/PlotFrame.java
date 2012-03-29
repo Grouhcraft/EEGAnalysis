@@ -8,12 +8,17 @@ import graphwindow.plot.Plot;
 import graphwindow.plot.WaveformPlot;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JInternalFrame;
 import javax.swing.JMenuBar;
@@ -21,11 +26,14 @@ import javax.swing.JPanel;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.border.LineBorder;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
 import main.MainWindow;
 import main.utils.Logger;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 /**
  * PlotFrame is the window containing a plot
@@ -35,7 +43,7 @@ import main.utils.Logger;
 public class PlotFrame extends JInternalFrame implements ActionListener {
 
 	private static final long serialVersionUID = 2796714104577643465L;
-	private JPlotLayout plotLayout;
+	private SGTPlotLayout plotLayout;
 	private IPlot plot;
 	private HashMap<String, SGTData> linkedDatas = new HashMap<String, SGTData>();
 	public IPlot getPlot() {
@@ -83,42 +91,43 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		setIconifiable(true);
 		setMaximizable(true);
 		setResizable(true);
-		setSize(600, 400);
+		setSize(600, 500);
+		setMinimumSize(new Dimension(240,250));
 		setTitle("plot #" + plotID);
 		JMenuBar menuBar = new GraphMenu(this);
 		setJMenuBar(menuBar);
+		
 		JPanel panel = new JPanel();
+		JPanel btnPanel = new JPanel();
 		panel.setLayout(new BorderLayout());
-		plotLayout = new JPlotLayout(false, false, false, false, plotID, null, false);
+		btnPanel.setLayout(new GridBagLayout());
+		
+		plotLayout = new SGTPlotLayout(false, false, false, false, plotID, null, false);
 		panel.add(plotLayout, BorderLayout.CENTER);
-
 		
 		JButton btnPrev = new JButton("<< Prev Ch.");
 		JButton btnNext = new JButton("Next Ch. >>");
+		GridBagConstraints c = new GridBagConstraints();
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.gridx = 0;
+		c.weightx = 0.5;
+		btnPanel.add(btnPrev, c);
+		c.gridx = 1;
+		c.weightx = 0.5;
+		btnPanel.add(btnNext, c);
 
 		GroupLayout groupLayout = new GroupLayout(getContentPane());
+		groupLayout.setAutoCreateGaps(true);
+		groupLayout.setAutoCreateContainerGaps(true);
 		groupLayout.setHorizontalGroup(
-			groupLayout.createParallelGroup(Alignment.LEADING)
-				.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-						.addComponent(panel, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 516, Short.MAX_VALUE)
-						.addGroup(groupLayout.createSequentialGroup()
-							.addComponent(btnPrev, GroupLayout.PREFERRED_SIZE, 243, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(btnNext, GroupLayout.DEFAULT_SIZE, 267, Short.MAX_VALUE)))
-					.addContainerGap())
+			groupLayout.createParallelGroup()
+				.addComponent(panel, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.DEFAULT_SIZE)
+				.addComponent(btnPanel, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.DEFAULT_SIZE)
 		);
 		groupLayout.setVerticalGroup(
-			groupLayout.createParallelGroup(Alignment.LEADING)
-				.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
-					.addContainerGap()
-					.addComponent(panel, GroupLayout.DEFAULT_SIZE, 325, Short.MAX_VALUE)
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-						.addComponent(btnPrev)
-						.addComponent(btnNext))
-					.addContainerGap())
+			groupLayout.createSequentialGroup()
+				.addComponent(panel, GroupLayout.PREFERRED_SIZE, 150, GroupLayout.DEFAULT_SIZE)
+				.addComponent(btnPanel, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
 		);
 		getContentPane().setLayout(groupLayout);
 		
