@@ -1,15 +1,16 @@
 package graphwindow;
 
 import gov.noaa.pmel.sgt.LineAttribute;
+import gov.noaa.pmel.sgt.beans.Panel;
 import gov.noaa.pmel.sgt.dm.SGTData;
-import gov.noaa.pmel.sgt.swing.JPlotLayout;
+import graphwindow.graphlayouts.IGraphLayout;
 import graphwindow.plot.IPlot;
 import graphwindow.plot.Plot;
 import graphwindow.plot.WaveformPlot;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -18,22 +19,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JInternalFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.border.LineBorder;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
 import main.MainWindow;
 import main.utils.Logger;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 
 /**
  * PlotFrame is the window containing a plot
@@ -43,9 +38,11 @@ import java.awt.event.ComponentEvent;
 public class PlotFrame extends JInternalFrame implements ActionListener {
 
 	private static final long serialVersionUID = 2796714104577643465L;
-	private SGTPlotLayout plotLayout;
+	private IGraphLayout plotLayout;
 	private IPlot plot;
 	private HashMap<String, SGTData> linkedDatas = new HashMap<String, SGTData>();
+	private String plotId;
+	private JPanel plotPanel;
 	public IPlot getPlot() {
 		return plot;
 	}
@@ -94,16 +91,24 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		setSize(600, 500);
 		setMinimumSize(new Dimension(240,250));
 		setTitle("plot #" + plotID);
+		this.plotId = plotID;
 		JMenuBar menuBar = new GraphMenu(this);
 		setJMenuBar(menuBar);
 		
-		JPanel panel = new JPanel();
+		plotPanel = new JPanel();
 		JPanel btnPanel = new JPanel();
-		panel.setLayout(new BorderLayout());
+		plotPanel.setLayout(new BorderLayout());
 		btnPanel.setLayout(new GridBagLayout());
 		
-		plotLayout = new SGTPlotLayout(false, false, false, false, plotID, null, false);
-		panel.add(plotLayout, BorderLayout.CENTER);
+		plot = new WaveformPlot(channel, file);
+		try {
+			plotLayout = plot.getGraphLayoutType().getConstructor(String.class).newInstance(plotID);
+		} catch (Exception e) {
+			e.printStackTrace();
+			dispose();
+			return;
+		}
+		plotPanel.add((Component) plotLayout, BorderLayout.CENTER);
 		
 		JButton btnPrev = new JButton("<< Prev Ch.");
 		JButton btnNext = new JButton("Next Ch. >>");
@@ -121,12 +126,12 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		groupLayout.setAutoCreateContainerGaps(true);
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup()
-				.addComponent(panel, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.DEFAULT_SIZE)
+				.addComponent(plotPanel, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.DEFAULT_SIZE)
 				.addComponent(btnPanel, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.DEFAULT_SIZE)
 		);
 		groupLayout.setVerticalGroup(
 			groupLayout.createSequentialGroup()
-				.addComponent(panel, GroupLayout.PREFERRED_SIZE, 150, GroupLayout.DEFAULT_SIZE)
+				.addComponent(plotPanel, GroupLayout.PREFERRED_SIZE, 150, GroupLayout.DEFAULT_SIZE)
 				.addComponent(btnPanel, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
 		);
 		getContentPane().setLayout(groupLayout);
@@ -136,8 +141,7 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		btnPrev.setActionCommand("prev");
 		btnNext.setActionCommand("next");
 		
-		this.plot = new WaveformPlot(channel, file);
-		setWaveClass(WaveClass.ALPHA);
+		setWaveClass(WaveClass.NONE);
 		
 		setVisible(true);
 	}	
@@ -161,14 +165,15 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 	 * This has for effect to reperform all the analysis and processing steps. 
 	 */
 	public void updateGraph() {
-		plotLayout.setBatch(true);
+		plotLayout.beginOperations();
 		plot.update();
 		plotLayout.clear();
-		plotLayout.addData(plot.getData(), new LineAttribute(LineAttribute.SOLID, Color.MAGENTA));
-		plotLayout.setTitles(
+		//plotLayout.addData(plot.getData(), new LineAttribute(LineAttribute.SOLID, Color.MAGENTA));
+		plotLayout.addData(plot.getData());
+		plotLayout.setTitles(new String[]{
 				"Channel #" + plot.getInfos().channel + "(" + plot.getInfos().getChannelCode() +")", 
 				"Waves: " + plot.getWaveClass().getName(), 
-				plot.getInfos().file.getName());
+				plot.getInfos().file.getName()});
 		for(SGTData linkedData : linkedDatas.values()) {
 			plotLayout.addData(linkedData);
 		}
@@ -180,7 +185,7 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 				Logger.log(e.getMessage());
 			}
 		}
-		plotLayout.setBatch(false);
+		plotLayout.endOperations();
 	}
 
 	/**
@@ -204,6 +209,11 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 	public void setGraphType(Class<? extends Plot> graphType) {
 		try {
 			plot = graphType.getConstructor(IPlot.class).newInstance(plot);
+			plotLayout = plot.getGraphLayoutType().getConstructor(String.class).newInstance(plotId);
+			plotPanel.remove(0);
+			plotPanel.add((Component) plotLayout);
+			plotPanel.validate();
+			((Component)plot).validate();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

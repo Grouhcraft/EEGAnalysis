@@ -77,7 +77,7 @@ public abstract class Plot implements IPlot {
 				));
 		
 	 
-	    ((SimpleLine) data).setId(getDataId());
+		setDataId(data, getDataId());
 	    data = setMetaData(data);
 		return data;
 	}

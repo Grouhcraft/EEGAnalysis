@@ -3,6 +3,9 @@ package graphwindow.plot;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
+import graphwindow.graphlayouts.IGraphLayout;
+import graphwindow.graphlayouts.LinePlotLayout;
+
 import java.io.File;
 import java.text.DecimalFormat;
 
@@ -38,4 +41,14 @@ public class WaveformPlot extends Plot {
 		return newData;
 	}
 
+	@Override
+	public Class<? extends IGraphLayout> getGraphLayoutType() {
+		return LinePlotLayout.class;
+	}
+
+
+	@Override
+	public void setDataId(SGTData data, String id) {
+		((SimpleLine)data).setId(id);
+	}
 }

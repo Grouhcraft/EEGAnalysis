@@ -5,6 +5,8 @@ import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
 import graphwindow.WaveClass;
+import graphwindow.graphlayouts.IGraphLayout;
+import graphwindow.graphlayouts.LinePlotLayout;
 
 import java.io.File;
 
@@ -32,5 +34,15 @@ public class WelchPlot extends Plot{
 			
 		data = WechWechMethod.compute( data, dataInfo.fs, lfq, hfq);
 	    return new SimpleLine(data[X], data[Y], null);
+	}
+	
+	@Override
+	public Class<? extends IGraphLayout> getGraphLayoutType() {
+		return LinePlotLayout.class;
+	}
+	
+	@Override
+	public void setDataId(SGTData data, String id) {
+		((SimpleLine)data).setId(id);
 	}
 }
