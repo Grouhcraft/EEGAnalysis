@@ -163,4 +163,12 @@ public class ChunkedData {
 	public double[] getData() {
 		return data;
 	}
+	
+	public int getPosition() {
+		return cursor;
+	}
+	
+	public int getChunkPosition() {
+		return chunkCursor;
+	}
 }

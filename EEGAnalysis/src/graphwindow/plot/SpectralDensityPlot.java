@@ -28,7 +28,7 @@ public class SpectralDensityPlot extends Plot{
 	}
 	
 	@Override
-	protected SGTData processSignal(double[][] data) {				
+	protected SGTData processSignal(double[][] data) {
 		int lfq = (waveClass == WaveClass.NONE) ? 0 : (int)waveClass.getFrequencyRange().lower;
 		int hfq = (waveClass == WaveClass.NONE) ? dataInfo.fs / 2 : (int)waveClass.getFrequencyRange().higher;
 		

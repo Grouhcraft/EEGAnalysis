@@ -2,6 +2,7 @@ package graphwindow.plot;
 
 import java.io.File;
 
+import filters.ShortTimeFourier;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleGrid;
@@ -34,10 +35,8 @@ public class ShortTimeFourierPlot extends Plot {
 
 	@Override
 	protected SGTData processSignal(double[][] data) {
-		double[] x = new double[]{0,1.5,2,8};
-		double[] y = new double[]{0,12,2.33,23};
-		double[] z = new double[]{1,2,3,4,8,2.4,7.5,4,2.2,2,5,4,11,2,6,4};
-		return new SimpleGrid(z, x, y, "test");
+		data = ShortTimeFourier.compute(data);
+		return new SimpleGrid(data[Z], data[X], data[Y], "test");
 	}
 
 	@Override

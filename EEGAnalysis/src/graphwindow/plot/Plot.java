@@ -37,6 +37,7 @@ public abstract class Plot implements IPlot {
 	
 	protected final int X = 0;
 	protected final int Y = 1;
+	protected final int Z = 2;
 	public WaveClass waveClass;
 	
 	private SGTData data = null;
@@ -84,20 +85,10 @@ public abstract class Plot implements IPlot {
 	
 	protected abstract SGTData setMetaData(SGTData data);
 	
-	/**
-	 * Apply treatments to the signal data then transforms it to a {@link SimpleLine}, 
-	 * used by the {@link JPlotLayout graph}
-	 * @param data index 0 = X, index 1 = Y
-	 * @return the drawable SimpleLine curve
-	 */
 	protected abstract SGTData processSignal(double[][] data);
 
 	/**
-	 * Constructs the ID string for a data, which allows to track any changes in data settings
-	 * @param file the data file used
-	 * @param channel the EEG channel  
-	 * @param LowCutOff the Low-Amplitude cutOff set
-	 * @param HighCutOff the High-Amplitude cutOff set
+	 * Constructs the ID string for a data
 	 * @return a string representing the data and its settings
 	 */
 	private String getDataId() {

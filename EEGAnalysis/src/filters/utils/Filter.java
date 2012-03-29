@@ -11,6 +11,7 @@ import java.util.List;
 public abstract class Filter {
 	protected final static int X = 0;
 	protected final static int Y = 1;
+	protected final static int Z = 2;
 	
 	public static class Coord {
 		double x;

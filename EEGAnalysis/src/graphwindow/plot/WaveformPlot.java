@@ -26,10 +26,10 @@ public class WaveformPlot extends Plot {
 	    return data;
 	}
 	
-	@Override
-	protected SGTData processSignal(double[][] data) {				
+	@Override	
+	protected SGTData processSignal(double[][] data) {		
 		data = cleanXAxis(data);
-	    return new SimpleLine(data[X], data[Y], null);
+	    return new SimpleLine(((double[][])data)[X], ((double[][])data)[Y], null);
 	}
 	
 	protected double[][] cleanXAxis(double[][] data) {
