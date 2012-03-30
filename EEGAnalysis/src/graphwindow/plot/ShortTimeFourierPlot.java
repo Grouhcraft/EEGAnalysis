@@ -3,6 +3,7 @@ package graphwindow.plot;
 import java.io.File;
 
 import filters.ShortTimeFourier;
+import gov.noaa.pmel.sgt.GridAttribute;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleGrid;

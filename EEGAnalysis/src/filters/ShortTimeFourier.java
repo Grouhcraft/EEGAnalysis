@@ -9,30 +9,45 @@ public class ShortTimeFourier extends Filter {
 	// @TODO
 	public static double[][] compute(double[][] data) {
 		int fs = 100;
-		int timeResolution = 300;
-		ChunkedData chunked = new ChunkedData(data[Y], fs, timeResolution, 1);
-		Logger.log("request array len:" + chunked.getNumberOfChunk());
-		Logger.log("request array len:" + sq(chunked.getNumberOfChunk()));
+		int timeResolution = 100;
+		int freqLowerLimit = 1;
+		int freqUpperLimit = 50;
+		ChunkedData chunked = new ChunkedData(data[Y], fs, timeResolution, 0);
+		int yFqTo = (int) ((timeResolution / (double)fs) * (double)freqUpperLimit);
+		int yFqFrom = (int) ((timeResolution / (double)fs) * (double)freqLowerLimit);
+		int yLen = yFqTo - yFqFrom;
+		Logger.log("request array X len:" + chunked.getNumberOfChunk());
+		Logger.log("request array Y len:" + yLen);
+		Logger.log("chunkLen:" + timeResolution);
+		Logger.log("dataYLen:" + data[Y].length);
 		double[][] stf = new double[][] {
 				new double[chunked.getNumberOfChunk()],
-				null,
-				new double[(int) chunked.getNumberOfChunk() * (data[Y].length/2)]
+				new double[yLen],
+				new double[chunked.getNumberOfChunk() * yLen]
 		};
 		for(int i=0; i < chunked.getNumberOfChunk(); i++) {
-			stf[X][i] = i * timeResolution;
+			stf[X][i] = i;
 		}
 		
 		double[] psd = null;
 		while(chunked.hasNextChunk()) {
 			psd = EnergySpectralDensity.compute(chunked.getChunk(), fs);
-			for(int i=0; i<psd.length; i++) {
-				stf[Z][(chunked.getChunkPosition() * timeResolution)+ i] = psd[i]; 
+			try {
+				for(int i=yFqFrom; i<yFqTo; i++) {
+					stf[Z][(chunked.getChunkPosition()*yLen) + i - yFqFrom] = Math.log(psd[i]); 
+				}
+			} catch (Exception e) {
+				Logger.log("	yFqFrom==" + yFqFrom);
+				Logger.log(" 	yFqTo==" + yFqTo);
+				Logger.log(" 	psdLen==" + psd.length);
+				Logger.log(" 	chunkedPos==" + chunked.getChunkPosition());
+				e.printStackTrace();
+				return null;
 			}
 			chunked.nextChunk();
 		}
-		stf[Y] = new double[psd.length];
-		for(int i=0; i<psd.length; i++) {
-			stf[Y][i] = i;
+		for(int i=yFqFrom; i<yFqTo; i++) {
+			stf[Y][i-yFqFrom] = i;
 		}
 		
 		return stf;

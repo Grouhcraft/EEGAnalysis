@@ -40,7 +40,10 @@ public class ChunkedData {
 	
 	public void setNumberOfChunk(int numberOfChunk) {
 		this.numberOfChunk = numberOfChunk;
-		this.chunkSize = (1 - numberOfChunk) * overlapSize + data.length;
+		if(overlapSize > 0)
+			this.chunkSize = (1 - numberOfChunk) * overlapSize + data.length;
+		else
+			this.chunkSize = (int)Math.floor((double)data.length / (double)numberOfChunk); 
 		if(chunkSize < fs) {
 			throw new IllegalArgumentException("Impossible to have " + numberOfChunk 
 					+ " chunks while keeping this overlapping size of " + overlapSize
@@ -61,7 +64,10 @@ public class ChunkedData {
 		if(overlapSize > chunkSize) {
 			throw new IllegalArgumentException("Overlapping size cannot be greater thant chunksize !");
 		}
-		numberOfChunk = (int)Math.floor((((double)data.length - (double)chunkSize) / (double)overlapSize) + 1d);
+		if(overlapSize > 0)
+			numberOfChunk = (int)Math.floor((((double)data.length - (double)chunkSize) / (double)overlapSize) + (allowPartialChunks ? 1d : 0));
+		else
+			numberOfChunk = (int)Math.floor((double)data.length / (double)chunkSize);
 		if(numberOfChunk < 1) {
 			throw new IllegalArgumentException("Chunk size too big to have at least one chunk");
 		}
@@ -76,9 +82,12 @@ public class ChunkedData {
 		if(overlapSize > chunkSize) {
 			throw new IllegalArgumentException("overlapping cannot be greater than the chunk size");
 		}
-		numberOfChunk = (int)Math.floor((
-				((double)data.length - (double)chunkSize) / (double)overlapSize
-				) + (allowPartialChunks ? 1 : 0));
+		if(overlapSize > 0)
+			numberOfChunk = (int)Math.floor((
+					((double)data.length - (double)chunkSize) / (double)overlapSize
+					) + (allowPartialChunks ? 1d : 0));
+		else
+			numberOfChunk = (int)Math.floor((double)data.length / (double)chunkSize);
 		if(numberOfChunk < 1) {
 			throw new IllegalArgumentException("Chunk size too big to have at least one chunk");
 		}

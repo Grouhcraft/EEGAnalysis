@@ -213,7 +213,6 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 			plotPanel.remove(0);
 			plotPanel.add((Component) plotLayout);
 			plotPanel.validate();
-			((Component)plot).validate();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
