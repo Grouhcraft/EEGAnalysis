@@ -4,8 +4,6 @@ import filters.CutOff;
 import filters.utils.AmplitudeRange;
 import filters.utils.FrequencyRange;
 import gov.noaa.pmel.sgt.dm.SGTData;
-import gov.noaa.pmel.sgt.dm.SimpleLine;
-import gov.noaa.pmel.sgt.swing.JPlotLayout;
 import graphwindow.DataFileReader;
 import graphwindow.DataInfos;
 import graphwindow.WaveClass;

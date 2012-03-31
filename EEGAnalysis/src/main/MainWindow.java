@@ -22,6 +22,7 @@ public class MainWindow {
 	private ArrayList<PlotFrame> plots = new ArrayList<PlotFrame>();
 	private static MainWindow _instance = null;
     private static Preferences prefs;
+    public static Object zoom = null;
     
 	/**
 	 * Préférences keys

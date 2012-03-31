@@ -8,4 +8,7 @@ public interface IGraphLayout {
 	void clear();
 	void setTitle(String title);
 	void setTitles(String[] titles);
+	boolean supportZooming();
+	Object getZoom();
+	void setZoom(Object object);
 }

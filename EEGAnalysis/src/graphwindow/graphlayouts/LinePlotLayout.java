@@ -1,11 +1,11 @@
 package graphwindow.graphlayouts;
 
-import java.awt.Graphics;
 import java.util.Arrays;
 
 import gov.noaa.pmel.sgt.LineAttribute;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.swing.JPlotLayout;
+import gov.noaa.pmel.util.Domain;
 
 public class LinePlotLayout extends JPlotLayout implements IGraphLayout {
 	
@@ -16,23 +16,6 @@ public class LinePlotLayout extends JPlotLayout implements IGraphLayout {
 
 	public LinePlotLayout(String id) {
 		super(false, false, false, false, id, null, false);
-	}
-	
-	@Override
-	public void paintComponent(Graphics g) {
-		/*
-		Logger.log("parent name:" + getParent().getClass().getName());
-		Logger.log("self/parent/gdParent x = " 
-				+ getWidth() + "/" 
-				+ getParent().getWidth() + "/" 
-				+ getParent().getParent().getWidth());
-		
-		Logger.log("Child comp:");
-		for(Component c : getComponents()) {
-			Logger.log("	[" + c.getWidth() + "]" + c.getClass().getName());
-		}
-		*/
-		super.paintComponent(g);
 	}
 
 	@Override
@@ -64,5 +47,31 @@ public class LinePlotLayout extends JPlotLayout implements IGraphLayout {
 	public void setTitles(String[] titles) {
 		String[] t = Arrays.copyOfRange(titles, 0, 3);
 		super.setTitles(t[0], t[1], t[2]);
+	}
+	
+	@Override
+	public void clear() {
+		resetZoom();
+		super.clear();
+	}
+	
+	@Override
+	public boolean supportZooming() {
+		return true;
+	}
+
+	@Override
+	public Object getZoom() {
+		return getZoomBoundsU();
+	}
+
+	@Override
+	public void setZoom(Object object) {
+		try {
+			super.setRangeNoVeto((Domain)object);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

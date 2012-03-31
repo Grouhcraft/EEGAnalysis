@@ -9,9 +9,10 @@ public class ShortTimeFourier extends Filter {
 	// @TODO
 	public static double[][] compute(double[][] data) {
 		int fs = 100;
-		int timeResolution = 100;
-		int freqLowerLimit = 1;
-		int freqUpperLimit = 50;
+		double resolutionFactor = 1;
+		int timeResolution = (int) (fs / resolutionFactor);
+		int freqLowerLimit = (int) (2 * resolutionFactor);
+		int freqUpperLimit = (timeResolution <= fs) ? timeResolution/2 : fs/2;
 		ChunkedData chunked = new ChunkedData(data[Y], fs, timeResolution, 0);
 		int yFqTo = (int) ((timeResolution / (double)fs) * (double)freqUpperLimit);
 		int yFqFrom = (int) ((timeResolution / (double)fs) * (double)freqLowerLimit);

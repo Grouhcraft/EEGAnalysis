@@ -58,9 +58,11 @@ public class ChunkedData {
 
 	public void setChunkSize(int chunkSize) {
 		this.chunkSize = chunkSize;
+		/*
 		if(chunkSize < fs) {
 			throw new IllegalArgumentException("chunk size have to be at least equal to sampling rate");
 		}
+		*/
 		if(overlapSize > chunkSize) {
 			throw new IllegalArgumentException("Overlapping size cannot be greater thant chunksize !");
 		}

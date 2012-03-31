@@ -1,10 +1,15 @@
 package graphwindow.graphlayouts;
 
+import java.awt.Rectangle;
+import java.beans.PropertyVetoException;
 import java.util.Arrays;
 
 import gov.noaa.pmel.sgt.GridAttribute;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.swing.JPlotLayout;
+import gov.noaa.pmel.util.Domain;
+import gov.noaa.pmel.util.Range;
+import gov.noaa.pmel.util.Range2D;
 
 public class GridPlotLayout extends JPlotLayout implements IGraphLayout {
 	
@@ -14,7 +19,7 @@ public class GridPlotLayout extends JPlotLayout implements IGraphLayout {
 	private static final long serialVersionUID = -3782057629938737061L;
 
 	public GridPlotLayout(String id) {
-		super(true, false, false, false, id, null, false);
+		super(true, false, false, false, id, null, true);
 	}
 	
 	@Override
@@ -46,5 +51,32 @@ public class GridPlotLayout extends JPlotLayout implements IGraphLayout {
 	public void setTitles(String[] titles) {
 		String[] t = Arrays.copyOfRange(titles, 0, 3);
 		super.setTitles(t[0], t[1], t[2]);
+	}
+	
+	@Override
+	public void clear() {
+		resetZoom();
+		super.clear();
+	}
+
+	@Override
+	public boolean supportZooming() {
+		return true;
+	}
+	
+	@Override
+	public Object getZoom() {
+		//beginOperations();
+		resetZoom();
+		Rectangle r = (Rectangle) getZoomBounds().getBounds().clone();
+		setZoom(r);
+		//endOperations();
+		return r;
+	}
+
+	@Override
+	public void setZoom(Object object) {
+		resetZoom();
+		getZoomBounds().setBounds((Rectangle)object);		
 	}
 }
