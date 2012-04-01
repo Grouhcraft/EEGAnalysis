@@ -2,14 +2,15 @@ package main;
 
 import graphwindow.GraphMenu;
 import graphwindow.PlotFrame;
-import graphwindow.WaveClass;
-
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Point;
 
 import javax.swing.JFrame;
 import javax.swing.UIManager;
+
+import main.utils.Logger;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.prefs.Preferences;
@@ -81,6 +82,7 @@ public class MainWindow {
 		frmEegAnalysis.getContentPane().add(settingPanel, BorderLayout.EAST);
 		
 		createNewPlot(new File(System.getenv("EEGDATA") + "\\" + R.get("datafile")));
+		Logger.log("plop");
 	}
 
 	private void setDefaultPreferences() {
@@ -92,12 +94,11 @@ public class MainWindow {
 	}
 
 	public void createNewPlot(File selectedFile) {
-		createNewPlot(selectedFile, 1, WaveClass.ALPHA);
+		createNewPlot(selectedFile, 1);
 	}
 	
-	public void createNewPlot(File file, int channel, WaveClass wc) {
+	public void createNewPlot(File file, int channel) {
 		PlotFrame plot = new PlotFrame("EEG data #" + (plots.size()+1) , channel, file);
-		plot.setWaveClass(wc);
 		placePlot(plot);
 	}
 	

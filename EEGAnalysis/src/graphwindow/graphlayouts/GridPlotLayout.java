@@ -1,15 +1,11 @@
 package graphwindow.graphlayouts;
 
 import java.awt.Rectangle;
-import java.beans.PropertyVetoException;
 import java.util.Arrays;
 
 import gov.noaa.pmel.sgt.GridAttribute;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.swing.JPlotLayout;
-import gov.noaa.pmel.util.Domain;
-import gov.noaa.pmel.util.Range;
-import gov.noaa.pmel.util.Range2D;
 
 public class GridPlotLayout extends JPlotLayout implements IGraphLayout {
 	

@@ -11,7 +11,6 @@ import graphwindow.graphlayouts.IGraphLayout;
 
 public class ShortTimeFourierPlot extends Plot {
 
-
 	public ShortTimeFourierPlot(IPlot src) {
 		super(src);
 	}

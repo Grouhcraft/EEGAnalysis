@@ -67,7 +67,7 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 	 * @wbp.parser.constructor
 	 */
 	public PlotFrame(String plotID, int channel, File file) {
-		initialize(plotID, channel, file);
+		initialize(plotID, channel, file);	
 	}
 	
 	/**

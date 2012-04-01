@@ -9,6 +9,7 @@ import graphwindow.DataInfos;
 import graphwindow.WaveClass;
 
 import java.io.File;
+
 import main.MainWindow;
 import main.utils.Logger;
 
