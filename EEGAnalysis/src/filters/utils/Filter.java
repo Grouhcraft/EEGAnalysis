@@ -186,4 +186,12 @@ public abstract class Filter {
 		}
 		return Math.abs(max) / Math.abs(min);
 	}
+
+	public static double[] oneOfTwo(double[] from) {
+		double[] half = new double[from.length/2];
+		for(int i=0; i<from.length/2; i++) {
+			half[i] = from[i*2];
+		}
+		return half;
+	}
 }

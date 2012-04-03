@@ -73,7 +73,7 @@ public class FFT extends Filter {
 		double[] yData = data.initialY;
 		fft.realForward(yData);
 		if(data.initialX != null) {
-			data.x = oneOfTwo(data.initialX);
+			data.x = Filter.oneOfTwo(data.initialX);
 		}
 		data.y = Complex.fromFFTArray(yData);
 		return this;
@@ -83,14 +83,6 @@ public class FFT extends Filter {
 		data.initialY = Complex.toFFTArray(data.y);
 		new DoubleFFT_1D(data.initialY.length).realInverse(data.initialY, false);
 		return this;
-	}
-
-	private double[] oneOfTwo(double[] from) {
-		double[] half = new double[from.length/2];
-		for(int i=0; i<from.length/2; i++) {
-			half[i] = from[i*2];
-		}
-		return half;
 	}
 
 	public Data getData() {

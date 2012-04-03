@@ -9,10 +9,8 @@ import java.io.File;
 import java.text.DecimalFormat;
 
 
-@graphtype(
-		name = "Regular waveform",
-		layout = LinePlotLayout.class
-		)
+@graphtype(	name = "Regular waveform",
+			layout = LinePlotLayout.class )
 
 public class WaveformPlot extends Plot {
 	public WaveformPlot(int channel, File file) {
