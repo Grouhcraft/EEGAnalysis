@@ -1,10 +1,13 @@
-package graphwindow.plot;
+package graphwindow.plot.implementations;
 
 import filters.ShortTimeFourier;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleGrid;
 import graphwindow.graphlayouts.GridPlotLayout;
+import graphwindow.plot.IPlot;
+import graphwindow.plot.Plot;
+import graphwindow.plot.graphtype;
 
 import java.io.File;
 

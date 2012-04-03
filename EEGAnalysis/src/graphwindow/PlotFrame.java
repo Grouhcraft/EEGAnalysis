@@ -4,28 +4,38 @@ import gov.noaa.pmel.sgt.dm.SGTData;
 import graphwindow.graphlayouts.IGraphLayout;
 import graphwindow.plot.IPlot;
 import graphwindow.plot.Plot;
-import graphwindow.plot.WaveformPlot;
 import graphwindow.plot.graphtype;
+import graphwindow.plot.implementations.GraphSetting;
+import graphwindow.plot.implementations.WaveformPlot;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.AnnotationFormatError;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JInternalFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneLayout;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
@@ -45,15 +55,18 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 	private HashMap<String, SGTData> linkedDatas = new HashMap<String, SGTData>();
 	private String plotId;
 	private JPanel plotPanel;
+	private JScrollPane dynSettingsSB;
+	private JButton btnShowSettings;
+	private JPanel dynSettingsPanel;
 	public IPlot getPlot() {
 		return plot;
 	}
 	static {
+		String packageName = IPlot.class.getPackage().getName() + ".implementations.";
 		for(String graphClassName : R.get("graphtypes").split(",")) {
-			String packageName = IPlot.class.getPackage().getName();
 			try {
 				Logger.log("Loading graph type \"" + graphClassName + "\"");
-				IPlot.graphTypes.add((Class<? extends IPlot>) Class.forName(packageName + "." + graphClassName));
+				IPlot.graphTypes.add((Class<? extends IPlot>) Class.forName(packageName + graphClassName));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -125,6 +138,7 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 
 		JButton btnPrev = new JButton("<< Prev Ch.");
 		JButton btnNext = new JButton("Next Ch. >>");
+		btnShowSettings = new JButton("Show settings");
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 0;
@@ -133,26 +147,46 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		c.gridx = 1;
 		c.weightx = 0.5;
 		btnPanel.add(btnNext, c);
+		c.gridx = 2;
+		c.weightx = 0.2;
+		btnPanel.add(btnShowSettings, c);
 
+		dynSettingsPanel = new JPanel();
+		dynSettingsSB = new JScrollPane(dynSettingsPanel);
+		dynSettingsSB.setAlignmentY(TOP_ALIGNMENT);
+		
+		dynSettingsPanel.setBackground(Color.black);
+		dynSettingsPanel.setLayout(new GridBagLayout());
+		c.anchor = GridBagConstraints.NORTH;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		
+		dynSettingsSB.setVisible(false);
+		
 		GroupLayout groupLayout = new GroupLayout(getContentPane());
 		groupLayout.setAutoCreateGaps(true);
 		groupLayout.setAutoCreateContainerGaps(true);
 		groupLayout.setHorizontalGroup(
-			groupLayout.createParallelGroup()
+			groupLayout.createSequentialGroup()
+			.addGroup(groupLayout.createParallelGroup()
 				.addComponent(plotPanel, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.DEFAULT_SIZE)
 				.addComponent(btnPanel, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.DEFAULT_SIZE)
+			).addComponent(dynSettingsSB)
 		);
 		groupLayout.setVerticalGroup(
-			groupLayout.createSequentialGroup()
+			groupLayout.createParallelGroup()
+				.addComponent(dynSettingsSB)
+			.addGroup(groupLayout.createSequentialGroup()
 				.addComponent(plotPanel, GroupLayout.PREFERRED_SIZE, 150, GroupLayout.DEFAULT_SIZE)
 				.addComponent(btnPanel, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
-		);
+		));
 		getContentPane().setLayout(groupLayout);
 
 		btnPrev.addActionListener(this);
 		btnNext.addActionListener(this);
+		btnShowSettings.addActionListener(this);
 		btnPrev.setActionCommand("prev");
 		btnNext.setActionCommand("next");
+		btnShowSettings.setActionCommand("swap_settings_visibility");
 
 		setWaveClass(WaveClass.NONE);
 
@@ -177,8 +211,25 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 
 		});
 
-
 		setVisible(true);
+	}
+
+	private void readPlotSettings() {
+		GridBagConstraints c = new GridBagConstraints();
+		c.fill = GridBagConstraints.HORIZONTAL;
+		for(Field f : plot.getClass().getFields()) {
+			if(f.isAnnotationPresent(GraphSetting.class)) {
+				GraphSetting gs = f.getAnnotation(GraphSetting.class);
+				Component comp = new JButton(gs.label());
+				dynSettingsPanel.add(comp);
+				comp.addPropertyChangeListener("value", new PropertyChangeListener() {
+					@Override
+					public void propertyChange(PropertyChangeEvent arg0) {
+						//TODO
+					}
+				});
+			}
+		}
 	}
 
 	@Override
@@ -191,6 +242,15 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 			if(plot.getInfos().channel < plot.getInfos().channelsCount) {
 				plot.getInfos().channel++;
 			}
+		} else if (e.getActionCommand().equals("swap_settings_visibility")) {
+			if(dynSettingsSB.isVisible()) {
+				dynSettingsSB.setVisible(false);
+				btnShowSettings.setText("Show Settings");
+			} else {
+				dynSettingsSB.setVisible(true);
+				btnShowSettings.setText("Hide Settings");
+			}
+			revalidate();
 		}
 		updateGraph();
 	}
@@ -221,6 +281,7 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 			}
 		}
 		plotLayout.endOperations();
+		readPlotSettings();
 	}
 
 	/**

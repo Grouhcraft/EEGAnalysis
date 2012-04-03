@@ -1,25 +1,28 @@
-package graphwindow.plot;
+package graphwindow.plot.implementations;
 
-import filters.EnergySpectralDensity;
+import filters.WechWechMethod;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
 import graphwindow.WaveClass;
 import graphwindow.graphlayouts.LinePlotLayout;
+import graphwindow.plot.IPlot;
+import graphwindow.plot.Plot;
+import graphwindow.plot.graphtype;
 
 import java.io.File;
 
 @graphtype(
-		name = "Energy spectral density",
+		name = "Welch Periodogram",
 		layout = LinePlotLayout.class
 		)
 
-public class SpectralDensityPlot extends Plot{
-	public SpectralDensityPlot(int channel, File file) {
+public class WelchPlot extends Plot{
+	public WelchPlot(int channel, File file) {
 		super(channel, file);
 	}
 
-	public SpectralDensityPlot(IPlot plot) {
+	public WelchPlot(IPlot plot) {
 		super(plot);
 	}
 
@@ -35,8 +38,7 @@ public class SpectralDensityPlot extends Plot{
 		int lfq = (waveClass == WaveClass.NONE) ? 0 : (int)waveClass.getFrequencyRange().lower;
 		int hfq = (waveClass == WaveClass.NONE) ? dataInfo.fs / 2 : (int)waveClass.getFrequencyRange().higher;
 
-		data = EnergySpectralDensity.compute( data, dataInfo.fs, lfq, hfq );
-
+		data = WechWechMethod.compute( data, dataInfo.fs, lfq, hfq);
 	    return new SimpleLine(data[X], data[Y], null);
 	}
 

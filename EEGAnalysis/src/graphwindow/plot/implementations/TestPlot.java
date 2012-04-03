@@ -1,26 +1,26 @@
-package graphwindow.plot;
+package graphwindow.plot.implementations;
 
+import java.awt.Component;
 import java.util.Arrays;
+
+import javax.swing.JButton;
 
 import main.utils.Logger;
 import math.transform.jwave.Transform;
 import math.transform.jwave.handlers.FastWaveletTransform;
-import math.transform.jwave.handlers.wavelets.Coif06;
-import math.transform.jwave.handlers.wavelets.Daub02;
-import math.transform.jwave.handlers.wavelets.Daub03;
-import math.transform.jwave.handlers.wavelets.Daub04;
-import math.transform.jwave.handlers.wavelets.Haar02;
-import math.transform.jwave.handlers.wavelets.Lege02;
 import math.transform.jwave.handlers.wavelets.Lege06;
 import filters.utils.Filter;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
+import graphwindow.PlotFrame;
 import graphwindow.graphlayouts.LinePlotLayout;
+import graphwindow.plot.IPlot;
+import graphwindow.plot.Plot;
+import graphwindow.plot.graphtype;
 
 @graphtype(	name = "Test !!",
 			layout = LinePlotLayout.class )
-
 
 public class TestPlot extends Plot {
 	public TestPlot(IPlot plot) {
@@ -57,8 +57,9 @@ public class TestPlot extends Plot {
 	    		
 	    return new SimpleLine(data[X], data[Y], null);
 	}
-	private double treshold = 0.5;
 	
+	@GraphSetting(label = "Seuil")
+	public double treshold = 0.5;
 	
 	private double[] iterateScales(double[] data, int currentLevel, int nLevels, double stdDev) {
 		
@@ -115,5 +116,4 @@ public class TestPlot extends Plot {
 	public void setDataId(SGTData data, String id) {
 		((SimpleLine)data).setId(id);
 	}
-
 }
