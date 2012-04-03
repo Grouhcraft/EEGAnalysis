@@ -11,20 +11,20 @@ import main.utils.Logger;
 public class BGDesktopPane extends JDesktopPane {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 837183880331079234L;
 	private Image backImage = null; // member variable
 
 	public BGDesktopPane() {
-		
+
 		try {
 			backImage = new javax.swing.ImageIcon(this.getClass().getResource("../bg.jpg")).getImage();
 		} catch (Exception e) {
 			Logger.log("Could not find file in folder: "
 					+ this.getClass().getResource("../bg.jpg"));
 		}
-		
+
 		setVisible(true);
 		setEnabled(true);
 	}
@@ -35,7 +35,7 @@ public class BGDesktopPane extends JDesktopPane {
 			super.paintComponent(g);
 		} else {
 			Graphics2D g2d = (Graphics2D) g;
-			
+
 			double mw = backImage.getWidth(null);
 			double mh = backImage.getHeight(null);
 			double sw = getWidth() / mw;

@@ -5,10 +5,10 @@ import java.io.File;
 public class DataInfos  {
 	public int 		channelsCount 	= 59;
 	public int	 	fs 				= 100;
-	public File 	file 			= null; 
+	public File 	file 			= null;
 	public File 	markerFile 		= null;
 	public int		channel 		= 1;
-	public String[] channelsCodes 	= new String[] 
+	public String[] channelsCodes 	= new String[]
 			{ "AF3", "AF4", "F5", "F3", "F1",
 			"Fz", "F2", "F4", "F6", "FC5", "FC3", "FC1", "FCz", "FC2",
 			"FC4", "FC6", "CFC7", "CFC5", "CFC3", "CFC1", "CFC2", "CFC4",

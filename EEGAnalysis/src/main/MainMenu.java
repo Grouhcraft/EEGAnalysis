@@ -12,7 +12,7 @@ import javax.swing.JMenuItem;
 public class MainMenu extends JMenuBar {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -3507152594933758384L;
 	private static File currentDir = null;

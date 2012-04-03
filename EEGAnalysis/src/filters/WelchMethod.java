@@ -2,26 +2,24 @@ package filters;
 
 import java.util.Arrays;
 
+import main.MainWindow;
+import main.utils.Logger;
 import filters.utils.Filter;
 import filters.windowsFunctions.HannWindow;
 import filters.windowsFunctions.SquareWindow;
 import filters.windowsFunctions.Window;
 
-
-import main.MainWindow;
-import main.utils.Logger;
-
 /**
  * Welch method is a method to computes a special kind of periodogram
  * averaged by time to reduce variance and therfore noise.
- * Multiple window functions are provided to compute the periodogram 
+ * Multiple window functions are provided to compute the periodogram
  * @author knoodrake
  *
  */
 public class WelchMethod extends Filter {
 	/**
 	 * Wrapper for {@link #compute(double[][], int, int, double, double, double, WindowType, Boolean)}
-	 * Calling it with automatic parameters guessed or found in settings  
+	 * Calling it with automatic parameters guessed or found in settings
 	 * @param data	The original data, index 0 is X, time, and index 1 is amplitude
 	 * @param fs	Sampling rate
 	 * @param lfq	Lower frequency (in Hz) to show up
@@ -30,21 +28,21 @@ public class WelchMethod extends Filter {
 	 */
 	static public double[][] compute(double[][] data, double fs, int lfq, int hfq) {
 		int segLen = MainWindow.getPrefs().getInt(MainWindow.PREF_WELCH_SEG_LENGTH, 1000);
-		
+
 		Window w = (MainWindow.getPrefs().getBoolean(MainWindow.PREF_WELCH_USE_SQ_WIN, false))
 				? new SquareWindow() : new HannWindow() ;
-		
+
 		boolean logYScale = (MainWindow.getPrefs().getBoolean(MainWindow.PREF_PERIO_USE_DBSCALE, false))
 				? true : false;
-		
+
 		return compute(data, segLen, fs, lfq, hfq, w, logYScale);
-		
+
 	}
-	
+
 	private static int getNumberOfSegments(double dataLen, double segmentLen, double overlapSize) {
 		return (int) Math.floor(((dataLen - segmentLen) / overlapSize) + 1d);
 	}
-	
+
 	/**
 	 * Computes the periodogram of given signal with welch method
 	 * @param data				The original data, index 0 is X, time, and index 1 is amplitude
@@ -58,31 +56,31 @@ public class WelchMethod extends Filter {
 	 * @see #compute(double[][], double, int, int)
 	 */
 	static public double[][] compute(
-			double[][] data, 
-			int segmentLength, 
+			double[][] data,
+			int segmentLength,
 			double fs,
 			double freqLowerLimit,
 			double freqUpperLimit,
 			Window window,
 			Boolean logYScale
 			) {
-		
+
 		int signalLength = data[Y].length;
-		int overlapSize = window.getRecommandedOverlappingSize(segmentLength); 
+		int overlapSize = window.getRecommandedOverlappingSize(segmentLength);
 		int nSegments = getNumberOfSegments(signalLength, segmentLength, overlapSize);
 		Logger.log("Computed R size=" + overlapSize);
 		Logger.log("Computed K segments=" + nSegments);
-		int from = (int) ((overlapSize/ fs) * freqLowerLimit); 
+		int from = (int) ((overlapSize/ fs) * freqLowerLimit);
 		int to = (int) ((overlapSize / fs) * freqUpperLimit);
-		
+
 		int fromToLen = to - from;
 		Logger.log("fromToLen=" + fromToLen);
-		double[][] powerFrequency = new double[][] { 
-				new double[to - from], 
-				new double[to - from] 
+		double[][] powerFrequency = new double[][] {
+				new double[to - from],
+				new double[to - from]
 		};
-		for(int i=from; i<to; i++) powerFrequency[X][i-from] = ((double)i) * fs / overlapSize;
-		
+		for(int i=from; i<to; i++) powerFrequency[X][i-from] = i * fs / overlapSize;
+
 		for(int i=0; i<nSegments; i++) {
 			int segmentStart = i * (segmentLength - overlapSize);
 			double[] dataSegment = Arrays.copyOfRange(data[Y], segmentStart, segmentStart + segmentLength);
@@ -92,11 +90,11 @@ public class WelchMethod extends Filter {
 		}
 
 		if(logYScale) for(int i=0; i<powerFrequency[Y].length; i++)
-				powerFrequency[Y][i] = Math.log10(powerFrequency[Y][i] / ((double)nSegments));
-		
+				powerFrequency[Y][i] = Math.log10(powerFrequency[Y][i] / nSegments);
+
 		else for(int i=0; i<powerFrequency[Y].length; i++)
-				powerFrequency[Y][i] = powerFrequency[Y][i] / ((double)nSegments); 
-	
+				powerFrequency[Y][i] = powerFrequency[Y][i] / nSegments;
+
 		return powerFrequency;
 	}
 }

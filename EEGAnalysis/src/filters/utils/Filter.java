@@ -12,33 +12,33 @@ public abstract class Filter {
 	protected final static int X = 0;
 	protected final static int Y = 1;
 	protected final static int Z = 2;
-	
+
 	public static class Coord {
 		double x;
 		double y;
-		
+
 		public Coord(double x, double y) {
 			this.x = x;
 			this.y = y;
 		}
 	}
-	
+
 	protected static double sq(double x) {
 		return x * x;
 	}
-	
+
 	protected static double abs(double x) {
 		return Math.abs(x);
 	}
-	
+
 	protected static double sqrt(double x) {
 		return Math.sqrt(x);
 	}
-	
+
 	protected static double module(Complex c) {
 		return sqrt(sq(c.im) + sq(c.real));
 	}
-	
+
 	/**
 	 * Erases values from a signal data array
 	 * @param remove list of values to removes
@@ -48,18 +48,18 @@ public abstract class Filter {
 	protected static double[][] removePoints(List<?> remove, double[][] from) {
 		double[] xArr = new double[from[Y].length - remove.size()];
 		double[] yArr = new double[from[Y].length - remove.size()];
-		
+
 		for(int i=0, ii=0; i<from[Y].length; i++) {
 			if(!remove.contains(i)) {
-				xArr[ii] = (double) i;
+				xArr[ii] = i;
 				yArr[ii] = from[Y][i];
 				ii++;
 			}
 		}
-		
+
 		return new double[][] { xArr, yArr };
 	}
-	
+
 	/**
 	 * Advance the position to the next point where the curve start to decline
 	 * @param pos current position in the data array
@@ -70,7 +70,7 @@ public abstract class Filter {
 		while((pos+1 < data.length-1) && (data[pos] < data[pos+1] || data[pos] == data[pos+1])) {pos++;}
 		return pos;
 	}
-	
+
 	/**
 	 * Advance the position to the next point where the curve start to go up
 	 * @param pos current position in the data array
@@ -81,7 +81,7 @@ public abstract class Filter {
 		while((pos+1 < data.length-1) && (data[pos] > data[pos+1] || data[pos] == data[pos+1])) {pos++;}
 		return pos;
 	}
-	
+
 	/**
 	 * Advance the position to the next point where the curve isn't flat (growing or declining)
 	 * @param pos
@@ -92,7 +92,7 @@ public abstract class Filter {
 		while((pos+1 < data.length-1) && (data[pos] == data[pos+1])) {pos++;}
 		return pos;
 	}
-	
+
 	/**
 	 * Adds a range of integers to an integer List
 	 * @param list
@@ -106,7 +106,7 @@ public abstract class Filter {
 		}
 		return list;
 	}
-	
+
 	/**
 	 * Returns true if the curve is ascending at the given position
 	 * @param pos
@@ -116,7 +116,7 @@ public abstract class Filter {
 	protected static boolean isAscending(int pos, double[] data) {
 		return data[pos] < data[pos+1];
 	}
-	
+
 	/**
 	 * Returns true if the curve is dropping at the given position
 	 * @param pos
@@ -126,7 +126,7 @@ public abstract class Filter {
 	protected static boolean isDropping(int pos, double[] data) {
 		return data[pos] > data[pos+1];
 	}
-	
+
 	public static Coord minCoords(double[][] data) {
 		double[] x = data[X];
 		double[] y = data[Y];

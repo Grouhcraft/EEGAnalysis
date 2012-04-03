@@ -1,10 +1,10 @@
 package main;
 
-import java.util.ListResourceBundle;
+import java.util.ResourceBundle;
 
 public class R {
 	public static String get(String key) {
-		return ListResourceBundle.getBundle("eeg").getString(key);
+		return ResourceBundle.getBundle("eeg").getString(key);
 	}
 
 	public static Integer getInt(String key) {

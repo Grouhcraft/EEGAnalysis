@@ -3,9 +3,9 @@ package filters.utils;
 public class FrequencyRange implements IRange<Double> {
 	public double lower = 0.0;
 	public double higher = 0.0;
-	
+
 	public FrequencyRange() {}
-	
+
 	public FrequencyRange(double lower, double higher) {
 		this.lower = lower;
 		this.higher = higher;

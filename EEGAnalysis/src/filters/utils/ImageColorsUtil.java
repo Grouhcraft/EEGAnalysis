@@ -11,15 +11,15 @@ import java.awt.image.RGBImageFilter;
 /**
  * This class is used for making an Image in which a designated color is made
  * transparent.
- * 
+ *
  * @author Faisal Feroz
- * 
+ *
  */
 public class ImageColorsUtil {
 
 	/**
 	 * This method makes the color in image transparent.
-	 * 
+	 *
 	 * @param im
 	 *            The image who's color needs to be made transparent.
 	 * @param color
@@ -33,6 +33,7 @@ public class ImageColorsUtil {
 			// the color we are looking for... Alpha bits are set to opaque
 			public int markerRGB = color.getRGB() | 0xFF000000;
 
+			@Override
 			public final int filterRGB(int x, int y, int rgb) {
 				if ((rgb | 0xFF000000) == markerRGB) {
 					// Mark the alpha bits as zero - transparent

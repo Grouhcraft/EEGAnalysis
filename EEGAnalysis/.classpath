@@ -14,5 +14,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="C:/Users/knoodrake/workspace/junit-4.10.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/jwave-svn-ro"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

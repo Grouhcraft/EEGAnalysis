@@ -1,9 +1,8 @@
 package graphwindow;
 
-import graphwindow.plot.ShortTimeFourierPlot;
-import graphwindow.plot.SpectralDensityPlot;
-import graphwindow.plot.WaveformPlot;
-import graphwindow.plot.WelchPlot;
+import graphwindow.plot.IPlot;
+import graphwindow.plot.Plot;
+import graphwindow.plot.graphtype;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -27,7 +26,7 @@ public class GraphMenu extends JMenuBar implements ActionListener {
 	private PlotFrame parentWindow;
 	private JMenu linkMenu;
 	private static ArrayList<GraphMenu> _instances = new ArrayList<GraphMenu>();
-
+	private static final String VIEWGRAPH_CMDSTR = "viewgraph";
 
 	public PlotFrame getParentWindow() {
 		return parentWindow;
@@ -37,7 +36,7 @@ public class GraphMenu extends JMenuBar implements ActionListener {
 	public void finalize() {
 		_instances.remove(this);
 	}
-	
+
 	public GraphMenu(PlotFrame parentWindow) {
 		GraphMenu._instances.add(this);
 		this.parentWindow = parentWindow;
@@ -65,13 +64,13 @@ public class GraphMenu extends JMenuBar implements ActionListener {
 		});
 		file.add(loadDataFile);
 		add(file);
-		
+
 		JMenu waveClasses = new JMenu("Wave classes");
 		for(Field c : WaveClass.class.getDeclaredFields()) {
 			if(WaveClass.class.getName().equals( c.getType().getName())) {
 				JMenuItem item = new JMenuItem(c.getName());
 				item.addActionListener(new ActionListener() {
-					
+
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						try {
@@ -79,37 +78,30 @@ public class GraphMenu extends JMenuBar implements ActionListener {
 						} catch (Exception e1) {
 							e1.printStackTrace();
 						}
-					
+
 					}
 				});
 				waveClasses.add(item);
 			}
 		}
 		add(waveClasses);
-		
+
 		JMenu graphType = new JMenu("Visualize..");
-		JMenuItem PSDItem= new JMenuItem("Energy Spectral Density Periodogram");
-		JMenuItem waveItem = new JMenuItem("Waveform");
-		JMenuItem welchItem = new JMenuItem("Welch Periodogram");
-		JMenuItem stfItem = new JMenuItem("Short Time Fourier");
-		PSDItem.setActionCommand("view_psd");
-		waveItem.setActionCommand("view_waveform");
-		welchItem.setActionCommand("view_welch");
-		stfItem.setActionCommand("view_stf");
-		PSDItem.addActionListener(this);
-		waveItem.addActionListener(this);
-		welchItem.addActionListener(this);
-		stfItem.addActionListener(this);
-		graphType.add(welchItem);
-		graphType.add(PSDItem);
-		graphType.add(waveItem);
-		graphType.add(stfItem);
+		for(Class<? extends IPlot> plotClass : IPlot.graphTypes) {
+			if(plotClass.isAnnotationPresent(graphtype.class)) {
+				graphtype gt = plotClass.getAnnotation(graphtype.class);
+				JMenuItem item = new JMenuItem(gt.name());
+				item.setActionCommand(VIEWGRAPH_CMDSTR + ":" + plotClass.getName());
+				item.addActionListener(this);
+				graphType.add(item);
+			}
+		}
 		add(graphType);
-		
+
 		JMenu clone = new JMenu("Clone");
 		JMenuItem cloneItem = new JMenuItem("Clone this plot");
 		cloneItem.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				MainWindow.getInstance().createNewPlot(getParentWindow());
@@ -117,12 +109,12 @@ public class GraphMenu extends JMenuBar implements ActionListener {
 		});
 		clone.add(cloneItem);
 		add(clone);
-		
+
 		linkMenu = new JMenu("Link with plot..");
 		linkMenu.setVisible(false);
 		add(linkMenu);
 	}
-	
+
 	public static void updatePlotsLinkMenu() {
 		for(final GraphMenu menu : _instances) {
 			if(MainWindow.getInstance() == null) return;
@@ -139,11 +131,11 @@ public class GraphMenu extends JMenuBar implements ActionListener {
 					menu.linkMenu.add(plotEntry);
 				}
 			}
-			if(menu.linkMenu.getSubElements().length > 0) { 
+			if(menu.linkMenu.getSubElements().length > 0) {
 				menu.linkMenu.setVisible(true);
 				JMenuItem clearLinkedGraphs = new JMenuItem("* Clear linked datas *");
 				clearLinkedGraphs.addActionListener(new ActionListener() {
-					
+
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
 						menu.getParentWindow().unlinkAll();
@@ -156,17 +148,22 @@ public class GraphMenu extends JMenuBar implements ActionListener {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		String c = arg0.getActionCommand();
-		if(c.equals("view_psd")) {
-			getParentWindow().setGraphType(SpectralDensityPlot.class);
-		} else if (c.equals("view_waveform")) {
-			getParentWindow().setGraphType(WaveformPlot.class);
-		} else if (c.equals("view_welch")) {
-			getParentWindow().setGraphType(WelchPlot.class);
-		} else if (c.equals("view_stf")) {
-			getParentWindow().setGraphType(ShortTimeFourierPlot.class);
+		String[] cmd = arg0.getActionCommand().split(":");
+		if(cmd.length == 2 && cmd[0].equals(VIEWGRAPH_CMDSTR)) {
+			for(Class<? extends IPlot> gt : IPlot.graphTypes) {
+				if(gt.getName().equals(cmd[1])) {
+					try {
+						getParentWindow().setGraphType((Class<? extends Plot>) Class.forName(gt.getName()));
+					} catch (ClassNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					break;
+				}
+			}
 		}
 	}
 }

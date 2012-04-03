@@ -1,14 +1,14 @@
 package filters.utils;
 
-public class Complex {	
+public class Complex {
 	public double im;
 	public double real;
-	
+
 	public Complex(double im, double real) {
 		this.im =  im;
 		this.real = real;
 	}
-	
+
 	public static Complex[] fromFFTArray(double[] in) {
 		Complex[] c = new Complex[in.length/2];
 		for(int i=0; i<in.length/2; i++) {
@@ -25,9 +25,9 @@ public class Complex {
 		}
 		return d;
 	}
-	
+
 	public void zero() {
-		this.im = 0;
-		this.real = 0;
+		im = 0;
+		real = 0;
 	}
 }

@@ -1,7 +1,7 @@
 package synthetizer;
 
-import static org.junit.Assert.*;
-
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.fail;
 import main.utils.Logger;
 
 import org.junit.Test;

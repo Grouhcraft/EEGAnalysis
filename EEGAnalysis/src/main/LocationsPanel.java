@@ -4,27 +4,23 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+
 import javax.swing.JPanel;
 
 import filters.utils.ImageColorsUtil;
 
 public class LocationsPanel extends JPanel {
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 5647450659672604274L;
-	private static Image locationsImage = null;
-
-	public LocationsPanel() {
+	private static Image locationsImage;
+	static {
 		try {
-			locationsImage = new javax.swing.ImageIcon(this.getClass().getResource("../channels_loc.jpg")).getImage();
+			locationsImage = new javax.swing.ImageIcon(LocationsPanel.class.getResource("../channels_loc.jpg")).getImage();
 			locationsImage = ImageColorsUtil.makeColorTransparent(locationsImage, Color.WHITE);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Override
 	public void paintComponent(Graphics g) {
 		if(locationsImage == null) {

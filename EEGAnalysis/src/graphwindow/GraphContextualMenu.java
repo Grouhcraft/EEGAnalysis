@@ -9,7 +9,7 @@ import javax.swing.JPopupMenu;
 
 public class GraphContextualMenu extends JPopupMenu implements ActionListener {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 5872282492000995707L;
 	JMenuItem copyZoomItem;
@@ -18,7 +18,7 @@ public class GraphContextualMenu extends JPopupMenu implements ActionListener {
 
 	public GraphContextualMenu(PlotFrame parentWindow, boolean withZoomingFeatures) {
 		super();
-		this.setParentWindow(parentWindow);
+		setParentWindow(parentWindow);
 		if(withZoomingFeatures) {
 			copyZoomItem = new JMenuItem("Copy zoom");
 			pasteZoomItem = new JMenuItem("Paste zoom");

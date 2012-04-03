@@ -3,54 +3,53 @@ package filters.utils;
 import java.util.Arrays;
 
 import main.utils.Logger;
-
 import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
 
 /**
- * Computes <a href="https://en.wikipedia.org/wiki/Discrete_Fourier_transform">DFT</a> 
- * through <a href="https://en.wikipedia.org/wiki/Fast_Fourier_transform">FFT</a> 
+ * Computes <a href="https://en.wikipedia.org/wiki/Discrete_Fourier_transform">DFT</a>
+ * through <a href="https://en.wikipedia.org/wiki/Fast_Fourier_transform">FFT</a>
  * using the JTransforms library
  * @author knoodrake
  *
  */
 public class FFT extends Filter {
-	
+
 	public class Data {
 		public double[] x;
 		public Complex[] y;
-		
+
 		public double[] initialX;
 		public double[] initialY;
-		
+
 		public Data(double[] x, Complex[] y) {
 			this.x = x;
 			this.y = y;
 		}
-		
+
 		public Data(double[] initialData) {
-			this.initialY = initialData;
+			initialY = initialData;
 		}
-		
+
 		public Data(double[][] initialData) {
-			this.initialX = initialData[X];
-			this.initialY = initialData[Y];
+			initialX = initialData[X];
+			initialY = initialData[Y];
 		}
-		
+
 		private Data() {}
 	}
 	private Data data = new Data();
-	
+
 	public FFT() {}
-	
+
 	public FFT(double[] data) {
 		this.data.initialY = data.clone();
 	}
-	
+
 	public FFT(double[][] data) {
 		this.data.initialX = data[X].clone();
 		this.data.initialY = data[Y].clone();
 	}
-	
+
 	public FFT forwardFull() {
 		if(data.initialY.length % 2 > 0)
 			Logger.log("Warning, data length is odd");
@@ -64,7 +63,7 @@ public class FFT extends Filter {
 		data.y = Complex.fromFFTArray(yData);
 		return this;
 	}
-	
+
 	/**
 	 * Compute the DFT of the signal
 	 * @return itself
@@ -85,7 +84,7 @@ public class FFT extends Filter {
 		new DoubleFFT_1D(data.initialY.length).realInverse(data.initialY, false);
 		return this;
 	}
-	
+
 	private double[] oneOfTwo(double[] from) {
 		double[] half = new double[from.length/2];
 		for(int i=0; i<from.length/2; i++) {
@@ -93,7 +92,7 @@ public class FFT extends Filter {
 		}
 		return half;
 	}
-	
+
 	public Data getData() {
 		return data;
 	}
@@ -105,8 +104,8 @@ public class FFT extends Filter {
 
 	public double[][] getInitialData() {
 		return new double[][] {
-			this.data.initialX,
-			this.data.initialY
+			data.initialX,
+			data.initialY
 		};
 	}
 }

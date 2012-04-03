@@ -17,7 +17,7 @@ import java.util.Iterator;
 import main.utils.Logger;
 
 public class DataFileReader {
-	
+
 	public class DataReader {
 		public double[][] read(DataInfos infos, TimeFrame time) {
 			BufferedReader in = null;
@@ -25,14 +25,14 @@ public class DataFileReader {
 			int x,y;
 			Point2D.Double p = null;
 			ArrayList<Point2D> list = new ArrayList<Point2D>();
-			
+
 		    try {
 				in = new BufferedReader(new FileReader(infos.file));
 				line = in.readLine();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		    
+
 		    int i=0;
 		    int toSkip = (time.getFrom() * infos.fs);
 			while(line != null && i<toSkip) {
@@ -43,15 +43,15 @@ public class DataFileReader {
 					e.printStackTrace();
 				}
 			}
-	    	
-			int toRead = ((time.getTo() - time.getFrom()) * infos.fs); 
+
+			int toRead = ((time.getTo() - time.getFrom()) * infos.fs);
 		    i = 0;
 		    while(line != null && i < toRead) {
-		    	x = i; 
+		    	x = i;
 		    	y = Integer.parseInt(line.split("\t")[infos.channel]);
 		    	p = new Point2D.Double(x, y);
 		    	list.add(p);
-		    	
+
 		    	i++;
 		    	try {
 	    			line = in.readLine();
@@ -59,12 +59,12 @@ public class DataFileReader {
 					e.printStackTrace();
 				}
 		    }
-		    Logger.log("parsing " + i/1000 + "K samples (over " + i/1000 + "K ones) from " 
-		    		+ infos.fs + "Hz channel " + infos.channel + "'s data => " 
+		    Logger.log("parsing " + i/1000 + "K samples (over " + i/1000 + "K ones) from "
+		    		+ infos.fs + "Hz channel " + infos.channel + "'s data => "
 		    		+ i/infos.fs + "s record"
 		    		);
-		    
-		    
+
+
 		    double xArr[] = new double[list.size()];
 		    double yArr[] = new double[list.size()];
 		    Iterator<Point2D> it = list.iterator();
@@ -75,39 +75,39 @@ public class DataFileReader {
 		    	yArr[i] = p.y / 1000;
 		    	i++;
 		    }
-		    
+
 		    return new double[][] {xArr, yArr};
 		}
 	}
 	public DataReader dataReader = new DataReader();
-	
-	
+
+
 	public class MetaDataReader {
-		
+
 		public SGTData readFromPlot(IPlot plot) throws IOException {
 			String plotFileName = plot.getInfos().file.getName();
 			File markerFile = null;
 			String markerFileName = "";
 			if(plotFileName.contains("_cnt")) {
 				markerFileName = plot.getInfos().file.getParentFile() + "\\" + plotFileName.replace("_cnt", "_mrk");
-				markerFile = new File(markerFileName); 
+				markerFile = new File(markerFileName);
 			}
 			if(markerFile == null || !markerFile.exists()) {
 				throw new IOException("Unable to find or open marker file:" + markerFileName);
 			}
-			
+
 			return new DataFileReader().metaDataReader.read(
-					(double)(Double)plot.getData().getXRange().getStart().getObjectValue(),
-					(double)(Double)plot.getData().getXRange().getEnd().getObjectValue(),
-					(double)(Double)plot.getData().getYRange().getStart().getObjectValue(), 
-					(double)(Double)plot.getData().getYRange().getEnd().getObjectValue(), 
-					markerFile, 
-					plot.getInfos().fs, 
-					plot.getTime().getFrom(), 
+					(Double)plot.getData().getXRange().getStart().getObjectValue(),
+					(Double)plot.getData().getXRange().getEnd().getObjectValue(),
+					(Double)plot.getData().getYRange().getStart().getObjectValue(),
+					(Double)plot.getData().getYRange().getEnd().getObjectValue(),
+					markerFile,
+					plot.getInfos().fs,
+					plot.getTime().getFrom(),
 					plot.getTime().getTo()
 					);
 		}
-		
+
 		/**
 		 * @TODO !
 		 * @param startLimit
@@ -121,9 +121,9 @@ public class DataFileReader {
 		 * @return
 		 */
 		public SGTData read(
-				double startLimit, 
-				double endLimit, 
-				double minYValue, 
+				double startLimit,
+				double endLimit,
+				double minYValue,
 				double maxYValue,
 				File markerFile,
 				int samplingRate,
@@ -164,16 +164,16 @@ public class DataFileReader {
 		    	xArr[i] = (double)i / (double)samplingRate;
 		    	yArr[i] = 0;
 		    }
-		    
+
 		    int cueDuration = 4 * samplingRate;
 		    for(int i=0; i<times.size(); i++) {
-		    	for(int y=0; y<cueDuration && (int)(times.get(i) - fromSample) + y < yArr.length; y++) {		    		
-			    	yArr[(int)(times.get(i) - fromSample) + y] 
+		    	for(int y=0; y<cueDuration && (int)(times.get(i) - fromSample) + y < yArr.length; y++) {
+			    	yArr[(int)(times.get(i) - fromSample) + y]
 			    			= directions.get(i) == 1 ? maxYValue : minYValue;
 		    	}
 		    }
 		    SimpleLine markers = new SimpleLine(xArr, yArr, null);
-		    markers.setId("markers");	
+		    markers.setId("markers");
 		    markers.setXMetaData(new SGTMetaData("Cues", "", false, false));
 		    markers.setYMetaData(new SGTMetaData("", "", false, false));
 		    return markers;

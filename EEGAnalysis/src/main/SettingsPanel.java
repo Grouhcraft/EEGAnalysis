@@ -1,31 +1,31 @@
 package main;
 
-import javax.swing.JPanel;
-
 import java.awt.Color;
-import javax.swing.JSlider;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
-import javax.swing.JLabel;
-import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.JSeparator;
-import javax.swing.JCheckBox;
-import java.awt.Font;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSeparator;
+import javax.swing.JSlider;
+import javax.swing.JSpinner;
+import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.UIManager;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class SettingsPanel extends JPanel {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 640029470434166332L;
-	
+
 	/**
 	 * @wbp.parser.constructor
 	 */
@@ -34,6 +34,7 @@ public class SettingsPanel extends JPanel {
 		setBorder(UIManager.getBorder("ScrollPane.border"));
 		JSlider sliderTimeFrom = new JSlider();
 		sliderTimeFrom.addChangeListener(new ChangeListener() {
+			@Override
 			public void stateChanged(ChangeEvent arg0) {
 				MainWindow.getPrefs().putInt(MainWindow.PREF_TIME_FROM, ((JSlider)arg0.getSource()).getValue());
 			}
@@ -44,11 +45,11 @@ public class SettingsPanel extends JPanel {
 		sliderTimeFrom.setPaintLabels(true);
 		sliderTimeFrom.setPaintTicks(true);
 		sliderTimeFrom.setValue(MainWindow.getPrefs().getInt(MainWindow.PREF_TIME_FROM, 30));
-		
+
 		JLabel lblTime = new JLabel("Analyze from time:");
-		
+
 		JLabel lblAnalyze = new JLabel("Taking");
-		
+
 		JSlider sliderTimeDuration = new JSlider();
 		sliderTimeDuration.setMajorTickSpacing(5);
 		sliderTimeDuration.setMinorTickSpacing(1);
@@ -57,65 +58,70 @@ public class SettingsPanel extends JPanel {
 		sliderTimeDuration.setSnapToTicks(true);
 		sliderTimeDuration.setPaintLabels(true);
 		sliderTimeDuration.setPaintTicks(true);
-		sliderTimeDuration.setValue(MainWindow.getPrefs().getInt(MainWindow.PREF_TIME_DURATION, 30));	
+		sliderTimeDuration.setValue(MainWindow.getPrefs().getInt(MainWindow.PREF_TIME_DURATION, 30));
 		sliderTimeDuration.addChangeListener(new ChangeListener() {
+			@Override
 			public void stateChanged(ChangeEvent arg0) {
 				int value = ((JSlider)arg0.getSource()).getValue();
 				MainWindow.getPrefs().putInt(MainWindow.PREF_TIME_DURATION, value==0 ? 1 : value);
 			}
 		});
-		
+
 		JLabel lblSecondes = new JLabel("secondes");
-		
+
 		JSeparator separator = new JSeparator();
 		separator.setBackground(Color.GRAY);
 		separator.setForeground(Color.DARK_GRAY);
-		
+
 		JCheckBox chckbxUseSquareWindowing = new JCheckBox("Use square windowing instead of Hann");
 		chckbxUseSquareWindowing.addChangeListener(new ChangeListener() {
+			@Override
 			public void stateChanged(ChangeEvent e) {
 				MainWindow.getPrefs().putBoolean(MainWindow.PREF_WELCH_USE_SQ_WIN, ((JCheckBox)e.getSource()).isSelected());
 			}
 		});
 		chckbxUseSquareWindowing.setSelected(MainWindow.getPrefs().getBoolean(MainWindow.PREF_WELCH_USE_SQ_WIN, false));
-		
+
 		JLabel lblWelchPeriodogram = new JLabel("Welch Periodogram");
 		lblWelchPeriodogram.setFont(new Font("Tahoma", Font.BOLD, 11));
-		
+
 		JLabel lblSegLength = new JLabel("Segments length");
-		
+
 		JSpinner spinnerWelchSegLen = new JSpinner();
 		spinnerWelchSegLen.addChangeListener(new ChangeListener() {
+			@Override
 			public void stateChanged(ChangeEvent e) {
-				MainWindow.getPrefs().putInt(MainWindow.PREF_WELCH_SEG_LENGTH, (int)(Integer)((JSpinner)e.getSource()).getValue());
+				MainWindow.getPrefs().putInt(MainWindow.PREF_WELCH_SEG_LENGTH, (Integer)((JSpinner)e.getSource()).getValue());
 			}
 		});
 		spinnerWelchSegLen.setModel(new SpinnerNumberModel(800, 200, 6000, 200));
 		spinnerWelchSegLen.setValue(MainWindow.getPrefs().getInt(MainWindow.PREF_WELCH_SEG_LENGTH, 800));
-		
+
 		JSeparator separator_1 = new JSeparator();
 		separator_1.setForeground(Color.DARK_GRAY);
 		separator_1.setBackground(Color.GRAY);
-		
+
 		JLabel lblWelchAndSpd = new JLabel("Welch and SPD");
 		lblWelchAndSpd.setFont(new Font("Segoe UI", Font.BOLD, 12));
-		
+
 		JCheckBox chckbxShowYAxisInDB = new JCheckBox("Show Y axis in dB (logarithmic)");
 		chckbxShowYAxisInDB.setSelected(MainWindow.getPrefs().getBoolean(MainWindow.PREF_PERIO_USE_DBSCALE, true));
 		chckbxShowYAxisInDB.addChangeListener(new ChangeListener() {
+			@Override
 			public void stateChanged(ChangeEvent e) {
 				MainWindow.getPrefs().putBoolean(MainWindow.PREF_PERIO_USE_DBSCALE, ((JCheckBox)e.getSource()).isSelected());
 			}
 		});
-		
+
 		JButton btnNewButton = new JButton("Upda' ze fuckin' graphs");
 		btnNewButton.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				MainWindow.getInstance().updateEveryGraphs();
 			}
 		});
 		btnNewButton.setFont(new Font("Segoe Script", Font.BOLD, 14));
-		
+
 		LocationsPanel imagePanel = new LocationsPanel();
 		GroupLayout groupLayout = new GroupLayout(this);
 		groupLayout.setHorizontalGroup(

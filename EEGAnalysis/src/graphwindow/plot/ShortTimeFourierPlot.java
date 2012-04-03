@@ -1,27 +1,23 @@
 package graphwindow.plot;
 
-import java.io.File;
-
 import filters.ShortTimeFourier;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleGrid;
 import graphwindow.graphlayouts.GridPlotLayout;
-import graphwindow.graphlayouts.IGraphLayout;
+
+import java.io.File;
+
+@graphtype(	name = "Short Time Fourier",
+			layout = GridPlotLayout.class )
 
 public class ShortTimeFourierPlot extends Plot {
-
 	public ShortTimeFourierPlot(IPlot src) {
 		super(src);
 	}
 
 	public ShortTimeFourierPlot(int channel, File file) {
 		super(channel, file);
-	}
-	
-	@Override
-	public Class<? extends IGraphLayout> getGraphLayoutType() {
-		return GridPlotLayout.class;
 	}
 
 	@Override

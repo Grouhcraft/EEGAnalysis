@@ -3,11 +3,10 @@ package filters;
 import java.util.ArrayList;
 import java.util.List;
 
+import main.utils.Logger;
 import filters.utils.FFT;
 import filters.utils.Filter;
 import filters.utils.FrequencyRange;
-
-import main.utils.Logger;
 
 /**
  * Filters the signal by Amplitude or Frequency
@@ -16,22 +15,22 @@ import main.utils.Logger;
  */
 public class CutOff extends Filter {
 	protected static enum AMPLITUDE { High, Low }
-	
+
 	/**
 	 * Filters the signal to only keep the given frequency range
 	 * @param data data to filters, modified by copy (original won't be altered)
-	 * @param fr frequency range (in Hz) 
+	 * @param fr frequency range (in Hz)
 	 * @param fs sampling rate
 	 * @return a filtered data
 	 */
-	public static double[][] frequencyRange(double[][] data, FrequencyRange fr, double fs) {		
+	public static double[][] frequencyRange(double[][] data, FrequencyRange fr, double fs) {
 		FFT fft = new FFT(data);
 		fft.forward();
-		
+
 		double signalLen = fft.getData().y.length;
 		int hzFrom = (int) ((signalLen / fs) * fr.getLower());
 		int hzTo = (int) ((signalLen / fs) * fr.getHigher());
-		
+
 		for(int i=0; i<hzFrom; i++) {
 			fft.getData().y[i].zero();
 		}
@@ -41,21 +40,21 @@ public class CutOff extends Filter {
 		fft.inverse();
 		return fft.getInitialData();
 	}
-	
+
 	/**
 	 * Apply a Low cut-off filter to the data
-	 * @param data 
+	 * @param data
 	 * @param threshold above which data will be erased
 	 * @return the filtered data, which usually contains less samples, since some have been erased
 	 * @see {@link #highAmplitude(double[][], double)}
 	 */
 	public static double[][] lowAmplitude(double[][] data, double threshold) {
-		return amplitude(data, threshold, AMPLITUDE.Low); 
+		return amplitude(data, threshold, AMPLITUDE.Low);
 	}
-	
+
 	/**
 	 * Apply a High cut-off filter to the data
-	 * @param data 
+	 * @param data
 	 * @param threshold bellow which data will be erased
 	 * @return the filtered data, which usually contains less samples, since some have been erased
 	 * @see {@link #lowAmplitude(double[][], double)}
@@ -63,7 +62,7 @@ public class CutOff extends Filter {
 	public static double[][] highAmplitude(double[][] data, double threshold) {
 		return amplitude(data, threshold, AMPLITUDE.High);
 	}
-	
+
 	/**
 	 * @see {@link #lowAmplitude(double[][], double)}
 	 * @see {@link #highAmplitude(double[][], double)}
