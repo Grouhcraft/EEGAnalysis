@@ -4,8 +4,9 @@ import filters.WechWechMethod;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
-import graphwindow.WaveClass;
+import graphwindow.data.WaveClass;
 import graphwindow.graphlayouts.LinePlotLayout;
+import graphwindow.plot.GraphSetting;
 import graphwindow.plot.IPlot;
 import graphwindow.plot.Plot;
 import graphwindow.plot.graphtype;
@@ -18,6 +19,9 @@ import java.io.File;
 		)
 
 public class WelchPlot extends Plot{
+	@GraphSetting("Limit the Fq band to current waveclass one")
+	public boolean limitFrequencyToWaveClass = true;
+	
 	public WelchPlot(int channel, File file) {
 		super(channel, file);
 	}
@@ -34,9 +38,16 @@ public class WelchPlot extends Plot{
 	}
 
 	@Override
-	protected SGTData processSignal(double[][] data) {
-		int lfq = (waveClass == WaveClass.NONE) ? 0 : (int)waveClass.getFrequencyRange().lower;
-		int hfq = (waveClass == WaveClass.NONE) ? dataInfo.fs / 2 : (int)waveClass.getFrequencyRange().higher;
+	protected SGTData processSignal() {
+		double[][] data = getRawData();
+		int lfq,hfq;
+		if(limitFrequencyToWaveClass) {
+			lfq = (waveClass == WaveClass.NONE) ? 0 : (int)(double)waveClass.getFrequencyRange().getLower();
+			hfq = (waveClass == WaveClass.NONE) ? dataInfo.fs / 2 : (int)(double)waveClass.getFrequencyRange().getHigher();
+		} else {
+			lfq = 0;
+			hfq = dataInfo.fs / 2;
+		}
 
 		data = WechWechMethod.compute( data, dataInfo.fs, lfq, hfq);
 	    return new SimpleLine(data[X], data[Y], null);

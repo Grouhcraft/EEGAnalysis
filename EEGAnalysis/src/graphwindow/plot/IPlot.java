@@ -1,8 +1,8 @@
 package graphwindow.plot;
 
 import gov.noaa.pmel.sgt.dm.SGTData;
-import graphwindow.DataInfos;
-import graphwindow.WaveClass;
+import graphwindow.data.DataInfos;
+import graphwindow.data.WaveClass;
 import graphwindow.plot.Plot.TimeFrame;
 
 import java.util.ArrayList;

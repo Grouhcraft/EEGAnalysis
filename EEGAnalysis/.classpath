@@ -15,5 +15,11 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="C:/Users/knoodrake/workspace/junit-4.10.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jwave-svn-ro"/>
+	<classpathentry kind="lib" path="C:/Users/knoodrake/workspace/rhino1_7R3/js.jar" sourcepath="C:/Users/knoodrake/workspace/rhino1_7R3/src">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Users/knoodrake/workspace/rhino1_7R3/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/knoodrake/workspace/rsyntaxtextarea.jar" sourcepath="C:/Users/knoodrake/workspace/rsyntaxtextarea_2.0.2_Source.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

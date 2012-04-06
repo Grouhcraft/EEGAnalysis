@@ -8,9 +8,9 @@ import filters.CutOff;
 import filters.utils.AmplitudeRange;
 import filters.utils.FrequencyRange;
 import gov.noaa.pmel.sgt.dm.SGTData;
-import graphwindow.DataFileReader;
-import graphwindow.DataInfos;
-import graphwindow.WaveClass;
+import graphwindow.data.DataFileReader;
+import graphwindow.data.DataInfos;
+import graphwindow.data.WaveClass;
 
 public abstract class Plot implements IPlot {
 	public static class TimeFrame {
@@ -44,7 +44,8 @@ public abstract class Plot implements IPlot {
 	}
 
 	private SGTData data = null;
-
+	protected double[][] rawData = null;
+	
 	public Plot(int channel, File file) {
 		dataInfo.file = file;
 		dataInfo.channel = channel;
@@ -64,22 +65,20 @@ public abstract class Plot implements IPlot {
 		boolean test = false;
 		SGTData data;
 		Logger.log("Test mode: " + (test ? true : false));
-		double[][] rawData = new DataFileReader().dataReader.read(dataInfo, time);
+		rawData = new DataFileReader().dataReader.read(dataInfo, time);
 
 		if(waveClass != WaveClass.NONE) {
 			Logger.log("showing frequency range [" + freqRange.lower + " ; " + freqRange.higher + "]");
 			rawData = CutOff.frequencyRange(rawData, freqRange, dataInfo.fs);
 		}
 
-		// Real data
-		if(!test) data = processSignal(rawData);
-
-		// Test sinusoidal
-		else data = processSignal(synthetizer.Sinusoidal.merge(
-					synthetizer.Sinusoidal.generate(5, dataInfo.fs, time.getTo() - time.getFrom(), 0.10, 1),
-					synthetizer.Sinusoidal.generate(15, dataInfo.fs, time.getTo() - time.getFrom(), 0.05, 1)
+		// Test sin waves
+		if(test) setRawData(filters.utils.synthetizer.Sinusoidal.merge(
+					filters.utils.synthetizer.Sinusoidal.generate(5, dataInfo.fs, time.getTo() - time.getFrom(), 0.10, 1),
+					filters.utils.synthetizer.Sinusoidal.generate(15, dataInfo.fs, time.getTo() - time.getFrom(), 0.05, 1)
 				));
 
+		data = processSignal();
 		setDataId(data, getDataId());
 	    data = setMetaData(data);
 		return data;
@@ -87,7 +86,7 @@ public abstract class Plot implements IPlot {
 
 	protected abstract SGTData setMetaData(SGTData data);
 
-	protected abstract SGTData processSignal(double[][] data);
+	protected abstract SGTData processSignal();
 
 	/**
 	 * Constructs the ID string for a data
@@ -142,5 +141,13 @@ public abstract class Plot implements IPlot {
 		//TODO: verify that wc' range object is not overwritten
 		amplitudeCutoff = wc.getAmplitudeRange();
 		freqRange = wc.getFrequencyRange();
+	}
+
+	public double[][] getRawData() {
+		return rawData;
+	}
+
+	public void setRawData(double[][] rawData) {
+		this.rawData = rawData;
 	}
 }

@@ -1,4 +1,4 @@
-package graphwindow;
+package graphwindow.data;
 
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
@@ -96,7 +96,7 @@ public class DataFileReader {
 				throw new IOException("Unable to find or open marker file:" + markerFileName);
 			}
 
-			return new DataFileReader().metaDataReader.read(
+			return new DataFileReader().getMetaDataReader().read(
 					(Double)plot.getData().getXRange().getStart().getObjectValue(),
 					(Double)plot.getData().getXRange().getEnd().getObjectValue(),
 					(Double)plot.getData().getYRange().getStart().getObjectValue(),
@@ -179,5 +179,11 @@ public class DataFileReader {
 		    return markers;
 		}
 	}
-	MetaDataReader metaDataReader = new MetaDataReader();
+	private MetaDataReader metaDataReader = new MetaDataReader();
+	public MetaDataReader getMetaDataReader() {
+		return metaDataReader;
+	}
+	public void setMetaDataReader(MetaDataReader metaDataReader) {
+		this.metaDataReader = metaDataReader;
+	}
 }

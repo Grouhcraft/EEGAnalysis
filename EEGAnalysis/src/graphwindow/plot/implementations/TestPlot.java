@@ -1,20 +1,25 @@
 package graphwindow.plot.implementations;
 
-import java.awt.Component;
 import java.util.Arrays;
 
-import javax.swing.JButton;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.NativeJavaArray;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
 
 import main.utils.Logger;
 import math.transform.jwave.Transform;
 import math.transform.jwave.handlers.FastWaveletTransform;
 import math.transform.jwave.handlers.wavelets.Lege06;
 import filters.utils.Filter;
+import filters.utils.FrequencyRange;
+import filters.utils.Range;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
-import graphwindow.PlotFrame;
 import graphwindow.graphlayouts.LinePlotLayout;
+import graphwindow.plot.GraphButton;
+import graphwindow.plot.GraphSetting;
 import graphwindow.plot.IPlot;
 import graphwindow.plot.Plot;
 import graphwindow.plot.graphtype;
@@ -33,10 +38,38 @@ public class TestPlot extends Plot {
 	    ((SimpleLine)data).setYMetaData(new SGTMetaData("Potential", "µV", false, false));
 	    return data;
 	}
-
+	
+	@GraphSetting(value="range", limits={1,20})
+	public FrequencyRange range = new FrequencyRange(3.4, 9);
+	
+	@GraphSetting(value="numberLimited", limits={1,20})
+	public int numLimited = 3;
+	
+	//@GraphSetting("test semi-enum")
+	//public String aliment = null;
+	
+	public enum _enum { VAL_A, VAL_B }
+	
+	@GraphSetting("test vrai enum")
+	public _enum foo = _enum.VAL_A;
+	
+	@GraphSetting(value="Etapes", list={1,3,6})
+	public int scales = 3;
+	
+	@GraphSetting("Test !")
+	public String plop = "test string";
+	
+	@GraphSetting("Test booleen")
+	public boolean trueFalse = true;
+	
+	@GraphButton("do That")
+	public void doSomething() {
+		Logger.log("doSomething() called !!");
+	}
+	
 	@Override
-	protected SGTData processSignal(double[][] data) {
-		int scales = 3;
+	protected SGTData processSignal() {
+		double[][] data = getRawData();
 	    Transform t = new Transform(new FastWaveletTransform(new Lege06(), scales));
 	    
 	    data[Y] = t.forward(data[Y]);
@@ -58,7 +91,7 @@ public class TestPlot extends Plot {
 	    return new SimpleLine(data[X], data[Y], null);
 	}
 	
-	@GraphSetting(label = "Seuil")
+	@GraphSetting("Seuil")
 	public double treshold = 0.5;
 	
 	private double[] iterateScales(double[] data, int currentLevel, int nLevels, double stdDev) {
@@ -80,7 +113,7 @@ public class TestPlot extends Plot {
     	}
     	return completeLevel;
 	}
-	
+
 	private double[] processScale(double[] data, double stdDev) {
 		return threeshold(data, treshold * stdDev);
 	}
@@ -115,5 +148,47 @@ public class TestPlot extends Plot {
 	@Override
 	public void setDataId(SGTData data, String id) {
 		((SimpleLine)data).setId(id);
+	}
+	
+	@GraphSetting(value="Script", rows=10, js=true)
+	public String script = 	"/**\n * plot data => var X[], var Y[], var dataLength\n"
+							+ "*/\n"
+							+ "for(var i=0; i<dataLength; i++) \n{\n"
+							+ "\t// Y[i] = Y[i]*2;\n"
+							+ "}\n";
+	
+	@GraphSetting("Results")
+	public String scriptResult = "";
+	
+	@GraphButton("Run script")
+	public void runScript() {
+		Context cx = Context.enter();
+		double[][] data = getRawData();
+		try {
+			Scriptable scope = cx.initStandardObjects();		
+			
+			Object js_x = Context.javaToJS(data[X], scope);
+			Object js_y = Context.javaToJS(data[Y], scope);
+			Object js_len =Context.javaToJS(data[X].length, scope);
+			ScriptableObject.putProperty(scope, "X", js_x);
+			ScriptableObject.putProperty(scope, "Y", js_y);
+			ScriptableObject.putProperty(scope, "dataLength", js_len);
+			
+			Object result = cx.evaluateString(scope, script, "<cmd>", 1, null);
+			
+			double[] js_result_x = (double[]) ((NativeJavaArray)scope.get("X", scope)).unwrap();
+			double[] js_result_y = (double[]) ((NativeJavaArray)scope.get("Y", scope)).unwrap();
+			data[X] = js_result_x;
+			data[Y] = js_result_y;
+			setRawData(data);
+			
+			scriptResult = "DONE.";
+			update();
+		} catch (Exception e) {
+			scriptResult = "ERROR: " + Context.toString(e.getMessage());
+			e.printStackTrace();
+		} finally {
+			Context.exit();
+		}
 	}
 }

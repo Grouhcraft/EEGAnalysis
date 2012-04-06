@@ -6,10 +6,7 @@ import filters.utils.Filter;
 
 public class ShortTimeFourier extends Filter {
 
-	// @TODO
-	public static double[][] compute(double[][] data) {
-		int fs = 100;
-		double resolutionFactor = 1;
+	public static double[][] compute(double[][] data, double resolutionFactor, int fs) {
 		int timeResolution = (int) (fs / resolutionFactor);
 		int freqLowerLimit = (int) (2 * resolutionFactor);
 		int freqUpperLimit = (timeResolution <= fs) ? timeResolution/2 : fs/2;

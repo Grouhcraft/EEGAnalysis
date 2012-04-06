@@ -1,4 +1,4 @@
-package graphwindow;
+package graphwindow.data;
 
 import filters.utils.AmplitudeRange;
 import filters.utils.FrequencyRange;

@@ -4,7 +4,7 @@ import filters.EnergySpectralDensity;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
-import graphwindow.WaveClass;
+import graphwindow.data.WaveClass;
 import graphwindow.graphlayouts.LinePlotLayout;
 import graphwindow.plot.IPlot;
 import graphwindow.plot.Plot;
@@ -34,9 +34,10 @@ public class SpectralDensityPlot extends Plot{
 	}
 
 	@Override
-	protected SGTData processSignal(double[][] data) {
-		int lfq = (waveClass == WaveClass.NONE) ? 0 : (int)waveClass.getFrequencyRange().lower;
-		int hfq = (waveClass == WaveClass.NONE) ? dataInfo.fs / 2 : (int)waveClass.getFrequencyRange().higher;
+	protected SGTData processSignal() {
+		double[][] data = getRawData();
+		int lfq = (waveClass == WaveClass.NONE) ? 0 : (int)(double) waveClass.getFrequencyRange().getLower();
+		int hfq = (waveClass == WaveClass.NONE) ? dataInfo.fs / 2 : (int)(double) waveClass.getFrequencyRange().getHigher();
 
 		data = EnergySpectralDensity.compute( data, dataInfo.fs, lfq, hfq );
 

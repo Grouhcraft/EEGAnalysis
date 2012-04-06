@@ -1,4 +1,4 @@
-package synthetizer;
+package filters.utils.synthetizer;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.fail;

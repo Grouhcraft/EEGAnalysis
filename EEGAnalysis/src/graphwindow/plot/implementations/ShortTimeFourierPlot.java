@@ -5,6 +5,7 @@ import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleGrid;
 import graphwindow.graphlayouts.GridPlotLayout;
+import graphwindow.plot.GraphSetting;
 import graphwindow.plot.IPlot;
 import graphwindow.plot.Plot;
 import graphwindow.plot.graphtype;
@@ -15,6 +16,9 @@ import java.io.File;
 			layout = GridPlotLayout.class )
 
 public class ShortTimeFourierPlot extends Plot {
+	@GraphSetting(value="Resolution (factor)", limits={0.1,10})
+	public double resolutionFactor = 1;
+
 	public ShortTimeFourierPlot(IPlot src) {
 		super(src);
 	}
@@ -32,8 +36,9 @@ public class ShortTimeFourierPlot extends Plot {
 	}
 
 	@Override
-	protected SGTData processSignal(double[][] data) {
-		data = ShortTimeFourier.compute(data);
+	protected SGTData processSignal() {
+		double[][] data = getRawData();
+		data = ShortTimeFourier.compute(data, resolutionFactor, dataInfo.fs);
 		return new SimpleGrid(data[Z], data[X], data[Y], "test");
 	}
 

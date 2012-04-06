@@ -1,5 +1,6 @@
 package graphwindow;
 
+import graphwindow.data.WaveClass;
 import graphwindow.plot.IPlot;
 import graphwindow.plot.Plot;
 import graphwindow.plot.graphtype;

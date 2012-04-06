@@ -1,4 +1,4 @@
-package graphwindow;
+package graphwindow.data;
 
 import java.io.File;
 

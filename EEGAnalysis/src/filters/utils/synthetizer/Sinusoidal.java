@@ -1,4 +1,4 @@
-package synthetizer;
+package filters.utils.synthetizer;
 
 /**
  * A simple sinusoidal wave generator and merger.
