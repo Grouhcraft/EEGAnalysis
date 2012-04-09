@@ -40,7 +40,7 @@ public class SettingsPanel extends JPanel {
 			}
 		});
 		sliderTimeFrom.setMajorTickSpacing(20);
-		sliderTimeFrom.setMinorTickSpacing(5);
+		sliderTimeFrom.setMinorTickSpacing(1);
 		sliderTimeFrom.setSnapToTicks(true);
 		sliderTimeFrom.setPaintLabels(true);
 		sliderTimeFrom.setPaintTicks(true);

@@ -45,7 +45,7 @@ public class SpectralDensityPlot extends Plot{
 	}
 
 	@Override
-	public void setDataId(SGTData data, String id) {
+	public void setDataId(Object data, String id) {
 		((SimpleLine)data).setId(id);
 	}
 

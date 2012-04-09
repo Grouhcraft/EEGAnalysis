@@ -22,7 +22,7 @@ public class DataFileReader {
 		public double[][] read(DataInfos infos, TimeFrame time) {
 			BufferedReader in = null;
 			String line = null;
-			int x,y;
+			double x,y = 0;
 			Point2D.Double p = null;
 			ArrayList<Point2D> list = new ArrayList<Point2D>();
 
@@ -48,7 +48,15 @@ public class DataFileReader {
 		    i = 0;
 		    while(line != null && i < toRead) {
 		    	x = i;
-		    	y = Integer.parseInt(line.split("\t")[infos.channel]);
+		    	if(infos.areChannelsAveraged) {
+		    		String[] splitted = line.split("\t");
+		    		for(int chan : infos.channelsToAverage) {
+		    			y += Double.parseDouble(splitted[chan]);
+		    		}
+		    		y /= (double)infos.channelsToAverage.length;
+		    	} else {
+		    		y = Integer.parseInt(line.split("\t")[infos.channel]);
+		    	}
 		    	p = new Point2D.Double(x, y);
 		    	list.add(p);
 
@@ -59,10 +67,11 @@ public class DataFileReader {
 					e.printStackTrace();
 				}
 		    }
+		     
 		    Logger.log("parsing " + i/1000 + "K samples (over " + i/1000 + "K ones) from "
 		    		+ infos.fs + "Hz channel " + infos.channel + "'s data => "
-		    		+ i/infos.fs + "s record"
-		    		);
+		    		+ i/infos.fs + "s record");
+		    Logger.log("Channels averaging: " + infos.areChannelsAveraged);
 
 
 		    double xArr[] = new double[list.size()];
@@ -97,10 +106,10 @@ public class DataFileReader {
 			}
 
 			return new DataFileReader().getMetaDataReader().read(
-					(Double)plot.getData().getXRange().getStart().getObjectValue(),
-					(Double)plot.getData().getXRange().getEnd().getObjectValue(),
-					(Double)plot.getData().getYRange().getStart().getObjectValue(),
-					(Double)plot.getData().getYRange().getEnd().getObjectValue(),
+					(Double)plot.getXRange().getLower(),
+					(Double)plot.getXRange().getHigher(),
+					(Double)plot.getYRange().getLower(),
+					(Double)plot.getYRange().getHigher(),
 					markerFile,
 					plot.getInfos().fs,
 					plot.getTime().getFrom(),

@@ -1,5 +1,6 @@
 package graphwindow.plot;
 
+import filters.utils.Range;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import graphwindow.data.DataInfos;
 import graphwindow.data.WaveClass;
@@ -21,11 +22,19 @@ public interface IPlot {
 	 */
 	void update();
 
-	SGTData getData();
+	Object getData();
 
-	void setDataId(SGTData data, String id);
+	void setDataId(Object data, String id);
 
 	void setWaveClass(WaveClass waveClass);
 
 	TimeFrame getTime();
+
+	Range<Double> getXRange();
+	
+	Range<Double> getYRange();
+
+	boolean areChannelsAveraged();
+
+	void setChannelsAveraged(boolean areChannelsAveraged);
 }

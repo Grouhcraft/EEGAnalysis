@@ -341,6 +341,7 @@ public class GraphSettingsPanel extends JScrollPane {
 		parseFields(plot);
 		parseMethods(plot);
 		addUpdateButton(plot);
+		revalidate();
 	}
 
 	private void addUpdateButton(final IPlot plot) {

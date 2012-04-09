@@ -1,6 +1,7 @@
 package graphwindow;
 
 import gov.noaa.pmel.sgt.dm.SGTData;
+import gov.noaa.pmel.sgt.swing.JPlotLayout;
 import graphwindow.data.DataFileReader;
 import graphwindow.data.WaveClass;
 import graphwindow.graphlayouts.IGraphLayout;
@@ -44,7 +45,7 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 	private static final long serialVersionUID = 2796714104577643465L;
 	private IGraphLayout plotLayout;
 	private IPlot plot;
-	private HashMap<String, SGTData> linkedDatas = new HashMap<String, SGTData>();
+	private HashMap<String, Object> linkedDatas = new HashMap<String, Object>();
 	private String plotId;
 	private JPanel plotPanel;
 	private JButton btnShowSettings;
@@ -127,18 +128,23 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		}
 		plotPanel.add((Component) plotLayout, BorderLayout.CENTER);
 
+		JButton btnAvg	= new JButton("View Avg.");
 		JButton btnPrev = new JButton("<< Prev Ch.");
 		JButton btnNext = new JButton("Next Ch. >>");
 		btnShowSettings = new JButton("Show settings");
+		
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 0;
-		c.weightx = 0.5;
-		btnPanel.add(btnPrev, c);
+		c.weightx = 0.2;
+		btnPanel.add(btnAvg, c);
 		c.gridx = 1;
 		c.weightx = 0.5;
-		btnPanel.add(btnNext, c);
+		btnPanel.add(btnPrev, c);
 		c.gridx = 2;
+		c.weightx = 0.5;
+		btnPanel.add(btnNext, c);
+		c.gridx = 3;
 		c.weightx = 0.2;
 		btnPanel.add(btnShowSettings, c);
 
@@ -153,7 +159,7 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 			.addGroup(groupLayout.createParallelGroup()
 				.addComponent(plotPanel, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.DEFAULT_SIZE)
 				.addComponent(btnPanel, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.DEFAULT_SIZE)
-			).addComponent(dynSettingsPanel)
+			).addComponent(dynSettingsPanel, 175, 200, 500)
 		);
 		groupLayout.setVerticalGroup(
 			groupLayout.createParallelGroup()
@@ -166,9 +172,11 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 
 		btnPrev.addActionListener(this);
 		btnNext.addActionListener(this);
+		btnAvg.addActionListener(this);
 		btnShowSettings.addActionListener(this);
 		btnPrev.setActionCommand("prev");
 		btnNext.setActionCommand("next");
+		btnAvg.setActionCommand("avg_channels");
 		btnShowSettings.setActionCommand("swap_settings_visibility");
 
 		setWaveClass(WaveClass.NONE);
@@ -216,6 +224,8 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 				btnShowSettings.setText("Hide Settings");
 			}
 			revalidate();
+		} else if(e.getActionCommand().equals("avg_channels")) {
+			plot.setChannelsAveraged(!plot.areChannelsAveraged());
 		}
 		updateGraph();
 	}
@@ -228,13 +238,12 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		plotLayout.beginOperations();
 		plot.update();
 		plotLayout.clear();
-		//plotLayout.addData(plot.getData(), new LineAttribute(LineAttribute.SOLID, Color.MAGENTA));
 		plotLayout.addData(plot.getData());
 		plotLayout.setTitles(new String[]{
 				"Channel #" + plot.getInfos().channel + "(" + plot.getInfos().getChannelCode() +")",
 				"Waves: " + plot.getWaveClass().getName(),
 				plot.getInfos().file.getName()});
-		for(SGTData linkedData : linkedDatas.values()) {
+		for(Object linkedData : linkedDatas.values()) {
 			plotLayout.addData(linkedData);
 		}
 
@@ -245,9 +254,13 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 				Logger.log(e.getMessage());
 			}
 		}
-		plotLayout.endOperations();
 		dynSettingsPanel.parseSettingsFrom(plot);
-		dynSettingsPanel.revalidate();
+		plotLayout.endOperations();
+	}
+	
+	public void updateLayout() {
+		((JPlotLayout)plotLayout). resetZoom();
+		((JPlotLayout)plotLayout).revalidate();
 	}
 
 	/**

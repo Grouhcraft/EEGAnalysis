@@ -7,6 +7,8 @@ import gov.noaa.pmel.util.Domain;
 
 import java.util.Arrays;
 
+import main.utils.Logger;
+
 public class LinePlotLayout extends JPlotLayout implements IGraphLayout {
 
 	/**
@@ -62,15 +64,14 @@ public class LinePlotLayout extends JPlotLayout implements IGraphLayout {
 
 	@Override
 	public Object getZoom() {
-		return getZoomBoundsU();
+		return getRange();
 	}
 
 	@Override
 	public void setZoom(Object object) {
-		try {
+		try {			
 			super.setRangeNoVeto((Domain)object);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

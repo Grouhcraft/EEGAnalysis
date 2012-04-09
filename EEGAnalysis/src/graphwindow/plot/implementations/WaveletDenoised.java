@@ -22,19 +22,21 @@ import graphwindow.plot.graphtype;
 public class WaveletDenoised extends Plot {
 	
 	@GraphSetting("Seuil")
-	public double treshold = 0.5;
+	public double treshold = 3;
 	
 	@GraphSetting("Etapes")
 	public int scales = 3;
 	
 	public enum Wavelet {
 		Lege02, Lege04, Lege06,
-		Haar02, Haar02Orthogonal,
-		Coif06
+		Haar02, 
+		Haar02Orthogonal,
+		Coif06, 
+		Daub02, Daub03, Daub04
 	} 
 	
 	@GraphSetting("Wavelet function")
-	public Wavelet wavelet = Wavelet.Lege06;
+	public Wavelet wavelet = Wavelet.Daub04;
 	
 	public WaveletDenoised(IPlot plot) {
 		super(plot);
@@ -78,7 +80,7 @@ public class WaveletDenoised extends Plot {
 		}
 	}
 	
-	private double[] iterateScales(double[] data, int currentLevel, int nLevels, double stdDev) {
+	protected double[] iterateScales(double[] data, int currentLevel, int nLevels, double stdDev) {
 		
 		double[] firstHalf = Arrays.copyOfRange(data, 0, data.length / 2);
 		double[] secondHalf = Arrays.copyOfRange(data, data.length / 2, data.length);
@@ -98,21 +100,21 @@ public class WaveletDenoised extends Plot {
     	return completeLevel;
 	}
 
-	private double[] processScale(double[] data, double stdDev) {
+	protected double[] processScale(double[] data, double stdDev) {
 		return threeshold(data, treshold * stdDev);
 	}
 
-	private double[] threeshold(double[] ds, double k) {
+	protected double[] threeshold(double[] ds, double k) {
 		for(int i=0; i<ds.length; i++)
 			if(Math.abs(ds[i]) <= k) ds[i] = 0;
 		return ds;
 	}
 	
-	private double getStdDev(double[] data) { 
+	protected double getStdDev(double[] data) { 
 		return Math.sqrt(getVariance(data)); 
 	}
 
-	private double getVariance(double[] ds) {
+	protected double getVariance(double[] ds) {
 		double mean = getAverage(ds);
 		double v = 0;
 		double x; 
@@ -123,14 +125,14 @@ public class WaveletDenoised extends Plot {
 		return v/ds.length;
 	}
 	
-	private double getAverage(double[] ds) {
+	protected double getAverage(double[] ds) {
 		double t = 0;
 		for(double i : ds) t+=i;
 		return t / ds.length;
 	}
 
 	@Override
-	public void setDataId(SGTData data, String id) {
+	public void setDataId(Object data, String id) {
 		((SimpleLine)data).setId(id);
 	}
 }

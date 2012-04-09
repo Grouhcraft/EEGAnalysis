@@ -11,6 +11,7 @@ import main.utils.Logger;
 import math.transform.jwave.Transform;
 import math.transform.jwave.handlers.FastWaveletTransform;
 import math.transform.jwave.handlers.wavelets.Lege06;
+import filters.utils.FFT;
 import filters.utils.Filter;
 import filters.utils.FrequencyRange;
 import filters.utils.Range;
@@ -38,55 +39,19 @@ public class TestPlot extends Plot {
 	    ((SimpleLine)data).setYMetaData(new SGTMetaData("Potential", "µV", false, false));
 	    return data;
 	}
-	
-	@GraphSetting(value="range", limits={1,20})
-	public FrequencyRange range = new FrequencyRange(3.4, 9);
-	
-	@GraphSetting(value="numberLimited", limits={1,20})
-	public int numLimited = 3;
-	
-	//@GraphSetting("test semi-enum")
-	//public String aliment = null;
-	
-	public enum _enum { VAL_A, VAL_B }
-	
-	@GraphSetting("test vrai enum")
-	public _enum foo = _enum.VAL_A;
-	
+
 	@GraphSetting(value="Etapes", list={1,3,6})
 	public int scales = 3;
-	
-	@GraphSetting("Test !")
-	public String plop = "test string";
-	
-	@GraphSetting("Test booleen")
-	public boolean trueFalse = true;
-	
-	@GraphButton("do That")
-	public void doSomething() {
-		Logger.log("doSomething() called !!");
-	}
 	
 	@Override
 	protected SGTData processSignal() {
 		double[][] data = getRawData();
 	    Transform t = new Transform(new FastWaveletTransform(new Lege06(), scales));
 	    
-	    data[Y] = t.forward(data[Y]);
-	    
+	    data[Y] = t.forward(data[Y]);	    
 	    data[Y] = iterateScales(data[Y], 1, scales, getStdDev(data[Y]));
-	    
 	    data[Y] = t.reverse(data[Y]);
-	    
-	    Logger.log("dyl " + data[Y].length);
-	    Logger.log("dxl " + data[X].length);
-	    
-	    //data[Y] = Arrays.copyOf(data[Y], (int) Math.floor(data[Y].length/2));
-	   
 	    data[X] = Filter.oneOfTwo(data[X]);
-	    
-	    Logger.log("dyl " + data[Y].length);
-	    Logger.log("dxl " + data[X].length);
 	    		
 	    return new SimpleLine(data[X], data[Y], null);
 	}
@@ -146,7 +111,7 @@ public class TestPlot extends Plot {
 	}
 
 	@Override
-	public void setDataId(SGTData data, String id) {
+	public void setDataId(Object data, String id) {
 		((SimpleLine)data).setId(id);
 	}
 	
@@ -174,7 +139,9 @@ public class TestPlot extends Plot {
 			ScriptableObject.putProperty(scope, "Y", js_y);
 			ScriptableObject.putProperty(scope, "dataLength", js_len);
 			
-			Object result = cx.evaluateString(scope, script, "<cmd>", 1, null);
+			String cmd = "var filters = JavaImporter(Packages.filters.utils.FFT); with(filters){" + script + "}";
+			
+			cx.evaluateString(scope, cmd, "<cmd>", 1, null);
 			
 			double[] js_result_x = (double[]) ((NativeJavaArray)scope.get("X", scope)).unwrap();
 			double[] js_result_y = (double[]) ((NativeJavaArray)scope.get("Y", scope)).unwrap();
@@ -183,7 +150,8 @@ public class TestPlot extends Plot {
 			setRawData(data);
 			
 			scriptResult = "DONE.";
-			update();
+			//update();
+			this.setData(new SimpleLine(data[X], data[Y], null));
 		} catch (Exception e) {
 			scriptResult = "ERROR: " + Context.toString(e.getMessage());
 			e.printStackTrace();

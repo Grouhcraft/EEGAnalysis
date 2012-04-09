@@ -25,14 +25,23 @@ public class WechWechMethod extends Filter {
 	 * @param hfq	Higher frequency (in Hz) to show up
 	 * @return		the periodogram plot data
 	 */
-	static public double[][] compute(double[][] data, double fs, int lfq, int hfq) {
-		int segLen = MainWindow.getPrefs().getInt(MainWindow.PREF_WELCH_SEG_LENGTH, 1000);
+	static public double[][] compute(
+			double[][] data, 
+			double fs, 
+			int lfq, 
+			int hfq,
+			int segLen,
+			boolean useSquareWindow,
+			boolean logYScale
+			) {
+		//int segLen = MainWindow.getPrefs().getInt(MainWindow.PREF_WELCH_SEG_LENGTH, 1000);
 
-		Window w = (MainWindow.getPrefs().getBoolean(MainWindow.PREF_WELCH_USE_SQ_WIN, false))
-				? new SquareWindow() : new HannWindow() ;
+		//Window w = (MainWindow.getPrefs().getBoolean(MainWindow.PREF_WELCH_USE_SQ_WIN, false))
+		//		? new SquareWindow() : new HannWindow() ;
+		Window w = useSquareWindow ? new SquareWindow() : new HannWindow(); 
 
-		boolean logYScale = (MainWindow.getPrefs().getBoolean(MainWindow.PREF_PERIO_USE_DBSCALE, false))
-				? true : false;
+		//boolean logYScale = (MainWindow.getPrefs().getBoolean(MainWindow.PREF_PERIO_USE_DBSCALE, false))
+		//		? true : false;
 
 		return compute(data, segLen, fs, lfq, hfq, w, logYScale);
 

@@ -7,6 +7,7 @@ import main.utils.Logger;
 import filters.CutOff;
 import filters.utils.AmplitudeRange;
 import filters.utils.FrequencyRange;
+import filters.utils.Range;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import graphwindow.data.DataFileReader;
 import graphwindow.data.DataInfos;
@@ -44,7 +45,7 @@ public abstract class Plot implements IPlot {
 	}
 
 	private SGTData data = null;
-	protected double[][] rawData = null;
+	protected double[][] rawData = null; 
 	
 	public Plot(int channel, File file) {
 		dataInfo.file = file;
@@ -56,12 +57,12 @@ public abstract class Plot implements IPlot {
 		dataInfo.channel = src.getInfos().channel;
 		setWaveClass(src.getWaveClass());
 	}
-
+	
 	/**
 	 * Reads the EEG data from {@link #dataFile}
 	 * @return the SGTData data used by the graph layouts
 	 */
-	private SGTData readTheData() {
+	public void update() {
 		boolean test = false;
 		SGTData data;
 		Logger.log("Test mode: " + (test ? true : false));
@@ -81,7 +82,7 @@ public abstract class Plot implements IPlot {
 		data = processSignal();
 		setDataId(data, getDataId());
 	    data = setMetaData(data);
-		return data;
+		this.setData(data);
 	}
 
 	protected abstract SGTData setMetaData(SGTData data);
@@ -98,13 +99,17 @@ public abstract class Plot implements IPlot {
 				+ "_" + time.getFrom() + "_" + time.getTo()
 				+ "_" + freqRange.higher + "_" + freqRange.lower;
 	}
-
-	/**
-	 * Reloads and parse data from file
-	 */
+	
 	@Override
-	public void update() {
-		data = readTheData();
+	public boolean areChannelsAveraged() {
+		return dataInfo.areChannelsAveraged;
+	}
+
+	@Override
+	public void setChannelsAveraged(boolean areChannelsAveraged) {
+		if(areChannelsAveraged() == areChannelsAveraged) return;
+		dataInfo.areChannelsAveraged = areChannelsAveraged;
+		update();
 	}
 
 	@Override
@@ -143,11 +148,31 @@ public abstract class Plot implements IPlot {
 		freqRange = wc.getFrequencyRange();
 	}
 
-	public double[][] getRawData() {
+	protected double[][] getRawData() {
 		return rawData;
 	}
 
-	public void setRawData(double[][] rawData) {
+	protected void setRawData(double[][] rawData) {
 		this.rawData = rawData;
+	}
+
+	public void setData(SGTData data) {
+		this.data = data;
+	}
+	
+	@Override
+	public Range<Double> getXRange() {
+		return new Range<Double>(
+				(Double)data.getXRange().getStart().getObjectValue(),
+				(Double)data.getXRange().getEnd().getObjectValue()
+				);
+	}
+
+	@Override
+	public Range<Double> getYRange() {
+		return new Range<Double>(
+				(Double)data.getYRange().getStart().getObjectValue(),
+				(Double)data.getYRange().getEnd().getObjectValue()
+				);
 	}
 }
