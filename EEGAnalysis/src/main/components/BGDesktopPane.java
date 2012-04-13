@@ -20,10 +20,10 @@ public class BGDesktopPane extends JDesktopPane {
 	public BGDesktopPane() {
 
 		try {
-			backImage = new javax.swing.ImageIcon(this.getClass().getResource("../bg.jpg")).getImage();
+			backImage = new javax.swing.ImageIcon(this.getClass().getResource("/bg.jpg")).getImage();
 		} catch (Exception e) {
 			Logger.log("Could not find file in folder: "
-					+ this.getClass().getResource("../bg.jpg"));
+					+ this.getClass().getResource("/bg.jpg"));
 		}
 
 		setVisible(true);
