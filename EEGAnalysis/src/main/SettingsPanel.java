@@ -79,7 +79,7 @@ public class SettingsPanel extends JPanel {
 		});
 		btnNewButton.setFont(new Font("Segoe Script", Font.BOLD, 14));
 
-		LocationsPanel imagePanel = new LocationsPanel();
+		ChanPositionsPanel imagePanel = new ChanPositionsPanel();
 		GroupLayout groupLayout = new GroupLayout(this);
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.TRAILING)

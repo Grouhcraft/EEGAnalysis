@@ -13,7 +13,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/EEGAnalysis/lib/sgt_javadoc_v30.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/knoodrake/workspace/junit-4.10.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jwave-svn-ro"/>
 	<classpathentry kind="lib" path="C:/Users/knoodrake/workspace/rhino1_7R3/js.jar" sourcepath="C:/Users/knoodrake/workspace/rhino1_7R3/src">
 		<attributes>

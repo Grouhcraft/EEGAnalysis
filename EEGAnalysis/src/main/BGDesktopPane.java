@@ -6,7 +6,8 @@ import java.awt.Image;
 
 import javax.swing.JDesktopPane;
 
-import main.utils.Logger;
+import utils.Logger;
+
 
 public class BGDesktopPane extends JDesktopPane {
 
