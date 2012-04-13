@@ -1,7 +1,7 @@
 package filters.implementations;
 
-import utils.Complex;
 import utils.Logger;
+import utils.types.Complex;
 import filters.Filter;
 
 /**

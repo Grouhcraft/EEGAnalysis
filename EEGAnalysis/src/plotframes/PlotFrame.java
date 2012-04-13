@@ -23,6 +23,9 @@ import javax.swing.JPanel;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
+import plotframes.components.GraphContextualMenu;
+import plotframes.components.GraphMenu;
+import plotframes.components.GraphSettingsPanel;
 import plotframes.data.WaveClass;
 import plotframes.graphlayouts.IGraphLayout;
 import plotframes.plots.IPlot;

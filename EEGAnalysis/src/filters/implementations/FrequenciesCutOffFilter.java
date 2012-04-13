@@ -3,8 +3,8 @@ package filters.implementations;
 import java.util.ArrayList;
 import java.util.List;
 
-import utils.FrequencyRange;
 import utils.Logger;
+import utils.types.FrequencyRange;
 
 import filters.Filter;
 

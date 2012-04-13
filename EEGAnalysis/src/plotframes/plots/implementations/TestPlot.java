@@ -14,7 +14,7 @@ import plotframes.plots.annotations.GraphButton;
 import plotframes.plots.annotations.GraphSetting;
 import plotframes.plots.annotations.graphtype;
 
-import utils.Range;
+import utils.types.Range;
 
 import math.transform.jwave.Transform;
 import math.transform.jwave.handlers.FastWaveletTransform;

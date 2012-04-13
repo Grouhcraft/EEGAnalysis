@@ -1,4 +1,4 @@
-package utils;
+package utils.types;
 
 public class FrequencyRange extends Range<Double> {
 	public FrequencyRange() {

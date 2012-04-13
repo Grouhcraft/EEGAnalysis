@@ -7,9 +7,9 @@ import plotframes.data.DataInfos;
 import plotframes.data.WaveClass;
 import plotframes.plots.annotations.GraphSetting;
 
-import utils.AmplitudeRange;
-import utils.FrequencyRange;
 import utils.Logger;
+import utils.types.AmplitudeRange;
+import utils.types.FrequencyRange;
 
 import main.MainWindow;
 import filters.generators.SineWaveGenerator;

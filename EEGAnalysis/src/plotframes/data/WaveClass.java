@@ -1,7 +1,7 @@
 package plotframes.data;
 
-import utils.AmplitudeRange;
-import utils.FrequencyRange;
+import utils.types.AmplitudeRange;
+import utils.types.FrequencyRange;
 
 /**
  * Define the various waves classes emitted by the brain

@@ -1,4 +1,4 @@
-package plotframes;
+package plotframes.components;
 
 
 import java.awt.event.ActionEvent;
@@ -12,6 +12,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
+import plotframes.PlotFrame;
 import plotframes.data.WaveClass;
 import plotframes.plots.IPlot;
 import plotframes.plots.Plot;

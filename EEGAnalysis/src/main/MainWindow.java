@@ -12,8 +12,12 @@ import java.util.prefs.Preferences;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 
-import plotframes.GraphMenu;
+import main.components.BGDesktopPane;
+import main.components.MainMenu;
+import main.components.SettingsPanel;
+
 import plotframes.PlotFrame;
+import plotframes.components.GraphMenu;
 
 import utils.Logger;
 

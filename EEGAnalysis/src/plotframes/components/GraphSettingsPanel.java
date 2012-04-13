@@ -1,4 +1,4 @@
-package plotframes;
+package plotframes.components;
 
 
 import java.awt.Component;
@@ -36,12 +36,13 @@ import javax.swing.text.JTextComponent;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
+import plotframes.PlotFrame;
 import plotframes.plots.IPlot;
 import plotframes.plots.annotations.GraphButton;
 import plotframes.plots.annotations.GraphSetting;
 
 import utils.Logger;
-import utils.Range;
+import utils.types.Range;
 
 public class GraphSettingsPanel extends JScrollPane {
 

@@ -2,8 +2,8 @@ package filters.implementations;
 
 import java.util.Arrays;
 
-import utils.Complex;
 import utils.Logger;
+import utils.types.Complex;
 
 import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
 import filters.Filter;

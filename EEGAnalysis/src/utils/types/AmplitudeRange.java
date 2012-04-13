@@ -1,4 +1,4 @@
-package utils;
+package utils.types;
 
 public class AmplitudeRange extends Range<Integer> {
 	public AmplitudeRange() {}

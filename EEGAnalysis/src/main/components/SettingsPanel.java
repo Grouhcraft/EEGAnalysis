@@ -1,4 +1,4 @@
-package main;
+package main.components;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -16,6 +16,8 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import main.MainWindow;
 
 public class SettingsPanel extends JPanel {
 	/**

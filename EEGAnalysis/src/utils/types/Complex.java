@@ -1,4 +1,4 @@
-package utils;
+package utils.types;
 
 public class Complex {
 	public double im;

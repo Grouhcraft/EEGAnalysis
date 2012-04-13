@@ -1,4 +1,4 @@
-package utils;
+package utils.types;
 
 public class Range<T extends Number> {
 	public T lower;

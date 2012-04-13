@@ -14,7 +14,7 @@ import plotframes.plots.Plot;
 import plotframes.plots.annotations.GraphSetting;
 import plotframes.plots.annotations.graphtype;
 
-import utils.Range;
+import utils.types.Range;
 
 @graphtype(
 		name = "Energy spectral density",

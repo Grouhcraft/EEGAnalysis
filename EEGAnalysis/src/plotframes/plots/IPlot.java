@@ -7,7 +7,7 @@ import plotframes.data.DataInfos;
 import plotframes.data.WaveClass;
 import plotframes.plots.Plot.TimeFrame;
 
-import utils.Range;
+import utils.types.Range;
 
 
 public interface IPlot {
