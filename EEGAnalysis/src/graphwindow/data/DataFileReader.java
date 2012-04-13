@@ -151,8 +151,8 @@ public class DataFileReader {
 		    double toSample = to * samplingRate;
 		    minYValue += Math.abs(minYValue/10);
 		    maxYValue -= maxYValue/10;
-		    ArrayList<Double> times = new ArrayList<Double>();
-		    ArrayList<Integer> directions = new ArrayList<Integer>();
+		    ArrayList<Double> times = new ArrayList<>();
+		    ArrayList<Integer> directions = new ArrayList<>();
 		    while(line != null) {
 		    	double d = Double.parseDouble(line.split("\t")[0]);
 		    	if(d > fromSample && d < toSample) {
@@ -166,7 +166,7 @@ public class DataFileReader {
 					e.printStackTrace();
 				}
 		    }
-		    endLimit = Math.ceil(endLimit);
+		    //endLimit = Math.ceil(endLimit);
 		    double[] xArr = new double[(int) (toSample - fromSample)];
 		    double[] yArr = new double[xArr.length];
 		    for(int i=0; i<xArr.length; i++) {

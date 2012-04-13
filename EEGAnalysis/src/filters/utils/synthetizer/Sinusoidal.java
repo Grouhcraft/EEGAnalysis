@@ -20,16 +20,16 @@ public class Sinusoidal {
 	 * the wave data where index 0 is X and 1 is Y
 	 */
 	public static double[][] generate(double freq, double fs, double len, double ampl, double phase) {
-		double freq_RPS = 2 * Math.PI * freq;
-
+		double freq_RPS = 2. * Math.PI * freq;
+		
 		double[][] curve = new double[][] {
 				new double[(int) (len * fs)],
 				new double[(int) (len * fs)]
 		};
 
 		for(double i=0; i<curve[X].length; i++) {
-			double y = ampl * Math.sin((i+phase) * (freq_RPS/fs));
-			curve[X][(int) i] = i;
+			double y = ampl * Math.sin((i * (freq_RPS/fs))+phase);
+			curve[X][(int) i] = i/fs;
 			curve[Y][(int) i] = y;
 		}
 

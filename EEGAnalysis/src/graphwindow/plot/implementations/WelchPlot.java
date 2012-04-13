@@ -1,6 +1,7 @@
 package graphwindow.plot.implementations;
 
-import filters.WechWechMethod;
+import filters.WelchMethod;
+import filters.utils.Range;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
@@ -41,15 +42,15 @@ public class WelchPlot extends Plot{
 	}
 
 	@Override
-	protected SGTData setMetaData(SGTData data) {
+	protected Object setMetaData(Object data) {
 		((SimpleLine)data).setXMetaData(new SGTMetaData("Frequency", "Hz", false, false));
 	    ((SimpleLine)data).setYMetaData(new SGTMetaData("Magnitude", "dBµV²", false, false));
 	    return data;
 	}
 
 	@Override
-	protected SGTData processSignal() {
-		double[][] data = getRawData();
+	protected Object processSignal() {
+		double[][] rawdata = getRawData();
 		int lfq,hfq;
 		if(limitFrequencyToWaveClass) {
 			lfq = (waveClass == WaveClass.NONE) ? 0 : (int)(double)waveClass.getFrequencyRange().getLower();
@@ -59,12 +60,29 @@ public class WelchPlot extends Plot{
 			hfq = dataInfo.fs / 2;
 		}
 
-		data = WechWechMethod.compute( data, dataInfo.fs, lfq, hfq, segmentLen, useSquareWindow, useLogScale);
-	    return new SimpleLine(data[X], data[Y], null);
+		rawdata = WelchMethod.compute( rawdata, dataInfo.fs, lfq, hfq, segmentLen, useSquareWindow, useLogScale);
+	    return new SimpleLine(rawdata[X], rawdata[Y], null);
 	}
 
 	@Override
 	public void setDataId(Object data, String id) {
 		((SimpleLine)data).setId(id);
+	}
+	
+	
+	@Override
+	public Range<Double> getXRange() {
+		return new Range<Double>(
+				(Double)((SGTData)getData()).getXRange().getStart().getObjectValue(),
+				(Double)((SGTData)getData()).getXRange().getEnd().getObjectValue()
+				);
+	}
+
+	@Override
+	public Range<Double> getYRange() {
+		return new Range<Double>(
+				(Double)((SGTData)getData()).getYRange().getStart().getObjectValue(),
+				(Double)((SGTData)getData()).getYRange().getEnd().getObjectValue()
+				);
 	}
 }

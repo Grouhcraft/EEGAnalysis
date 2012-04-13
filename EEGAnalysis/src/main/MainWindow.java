@@ -29,11 +29,8 @@ public class MainWindow {
 	/**
 	 * Préférences keys
 	 */
-	public final static String PREF_WELCH_SEG_LENGTH = "welch.segmentsLength";
-	public final static String PREF_WELCH_USE_SQ_WIN = "welch.useSquareWindowing";
 	public final static String PREF_TIME_DURATION= "time.duration";
 	public final static String PREF_TIME_FROM = "time.from";
-	public final static String PREF_PERIO_USE_DBSCALE = "periodograms.useDBScale";
 
 	/**
 	 * Launch the application.
@@ -88,11 +85,8 @@ public class MainWindow {
 	}
 
 	private void setDefaultPreferences() {
-		getPrefs().putInt(PREF_WELCH_SEG_LENGTH, 800);
-		getPrefs().putBoolean(PREF_WELCH_USE_SQ_WIN, false);
 		getPrefs().putInt(PREF_TIME_DURATION, 30);
 		getPrefs().putInt(PREF_TIME_FROM, 10);
-		getPrefs().putBoolean(PREF_PERIO_USE_DBSCALE, true);
 	}
 
 	public void createNewPlot(File selectedFile) {

@@ -7,13 +7,10 @@ import org.mozilla.javascript.NativeJavaArray;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
-import main.utils.Logger;
 import math.transform.jwave.Transform;
 import math.transform.jwave.handlers.FastWaveletTransform;
 import math.transform.jwave.handlers.wavelets.Lege06;
-import filters.utils.FFT;
 import filters.utils.Filter;
-import filters.utils.FrequencyRange;
 import filters.utils.Range;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
@@ -34,7 +31,7 @@ public class TestPlot extends Plot {
 	}
 	
 	@Override
-	protected SGTData setMetaData(SGTData data) {
+	protected Object setMetaData(Object data) {
 	    ((SimpleLine)data).setXMetaData(new SGTMetaData("Time", "secondes", false, false));
 	    ((SimpleLine)data).setYMetaData(new SGTMetaData("Potential", "µV", false, false));
 	    return data;
@@ -158,5 +155,21 @@ public class TestPlot extends Plot {
 		} finally {
 			Context.exit();
 		}
+	}
+	
+	@Override
+	public Range<Double> getXRange() {
+		return new Range<Double>(
+				(Double)((SGTData)getData()).getXRange().getStart().getObjectValue(),
+				(Double)((SGTData)getData()).getXRange().getEnd().getObjectValue()
+				);
+	}
+
+	@Override
+	public Range<Double> getYRange() {
+		return new Range<Double>(
+				(Double)((SGTData)getData()).getYRange().getStart().getObjectValue(),
+				(Double)((SGTData)getData()).getYRange().getEnd().getObjectValue()
+				);
 	}
 }

@@ -1,6 +1,7 @@
 package graphwindow.plot.implementations;
 
 import filters.ShortTimeFourier;
+import filters.utils.Range;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleGrid;
@@ -28,7 +29,7 @@ public class ShortTimeFourierPlot extends Plot {
 	}
 
 	@Override
-	protected SGTData setMetaData(SGTData data) {
+	protected Object setMetaData(Object data) {
 		((SimpleGrid)data).setXMetaData(new SGTMetaData("X", "a", false, false));
 	    ((SimpleGrid)data).setYMetaData(new SGTMetaData("Y", "b", false, false));
 	    ((SimpleGrid)data).setZMetaData(new SGTMetaData("Z", "c", false, false));
@@ -39,11 +40,29 @@ public class ShortTimeFourierPlot extends Plot {
 	protected SGTData processSignal() {
 		double[][] data = getRawData();
 		data = ShortTimeFourier.compute(data, resolutionFactor, dataInfo.fs);
+		data[X] = shiftTimeValues(data[X], time.getFrom());
 		return new SimpleGrid(data[Z], data[X], data[Y], "test");
 	}
 
 	@Override
 	public void setDataId(Object data, String id) {
 		((SimpleGrid)data).setId(id);
+	}
+	
+	
+	@Override
+	public Range<Double> getXRange() {
+		return new Range<Double>(
+				(Double)((SGTData)getData()).getXRange().getStart().getObjectValue(),
+				(Double)((SGTData)getData()).getXRange().getEnd().getObjectValue()
+				);
+	}
+
+	@Override
+	public Range<Double> getYRange() {
+		return new Range<Double>(
+				(Double)((SGTData)getData()).getYRange().getStart().getObjectValue(),
+				(Double)((SGTData)getData()).getYRange().getEnd().getObjectValue()
+				);
 	}
 }

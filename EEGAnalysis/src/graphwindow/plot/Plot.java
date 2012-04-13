@@ -7,8 +7,7 @@ import main.utils.Logger;
 import filters.CutOff;
 import filters.utils.AmplitudeRange;
 import filters.utils.FrequencyRange;
-import filters.utils.Range;
-import gov.noaa.pmel.sgt.dm.SGTData;
+import filters.utils.synthetizer.Sinusoidal;
 import graphwindow.data.DataFileReader;
 import graphwindow.data.DataInfos;
 import graphwindow.data.WaveClass;
@@ -44,7 +43,7 @@ public abstract class Plot implements IPlot {
 		return name;
 	}
 
-	private SGTData data = null;
+	private Object data = null;
 	protected double[][] rawData = null; 
 	
 	public Plot(int channel, File file) {
@@ -63,37 +62,76 @@ public abstract class Plot implements IPlot {
 	 * @return the SGTData data used by the graph layouts
 	 */
 	public void update() {
-		boolean test = false;
-		SGTData data;
-		Logger.log("Test mode: " + (test ? true : false));
-		rawData = new DataFileReader().dataReader.read(dataInfo, time);
-
+		Object data;
+		readData();
+		
 		if(waveClass != WaveClass.NONE) {
 			Logger.log("showing frequency range [" + freqRange.lower + " ; " + freqRange.higher + "]");
-			rawData = CutOff.frequencyRange(rawData, freqRange, dataInfo.fs);
+			setRawData(CutOff.frequencyRange(getRawData(), freqRange, dataInfo.fs));
 		}
-
-		// Test sin waves
-		if(test) setRawData(filters.utils.synthetizer.Sinusoidal.merge(
-					filters.utils.synthetizer.Sinusoidal.generate(5, dataInfo.fs, time.getTo() - time.getFrom(), 0.10, 1),
-					filters.utils.synthetizer.Sinusoidal.generate(15, dataInfo.fs, time.getTo() - time.getFrom(), 0.05, 1)
-				));
-
+		
 		data = processSignal();
-		setDataId(data, getDataId());
+		setDataId(data, getDataId());		
 	    data = setMetaData(data);
-		this.setData(data);
+	    setData(data);
+	}
+	
+	@GraphSetting("Test mode ?")
+	public boolean testMode = true;
+	
+	@GraphSetting("Noise amount (Test mode)")
+	public int testModeAmountOfNoise = 0;
+	
+	@GraphSetting("Phase (test mode)")
+	public double testModePhase = 1.;
+	
+	@GraphSetting("Freq (test mode)")
+	public double testModeFreq = 5.;
+	
+	/**
+	 * Reads the raw data from the source input (eg. data file)
+	 * and registers it with {@link #setRawData(double[][])}.
+	 * The data can then be accessed with {@link #getRawData()}
+	 */
+	protected void readData() {
+		Logger.log("Test mode: " + (testMode ? true : false));
+
+		/*
+		if(testMode) setRawData(GaussianWhiteNoise.addNoise(Sinusoidal.merge(
+				Sinusoidal.generate(testModeFreq, dataInfo.fs, time.getTo() - time.getFrom(), 0.10, testModePhase),
+				Sinusoidal.generate(testModeFreq*2, dataInfo.fs, time.getTo() - time.getFrom(), 0.05, testModePhase)
+			),testModeAmountOfNoise));
+		*/
+		if(testMode) setRawData(Sinusoidal.generate(testModeFreq, dataInfo.fs, time.getTo() - time.getFrom(), 0.10, testModePhase));
+		
+		else	setRawData(new DataFileReader().dataReader.read(dataInfo, time));
 	}
 
-	protected abstract SGTData setMetaData(SGTData data);
+	/**
+	 * Sets the metadata in the data object if needed.
+	 * Meta datas can be anything, depending on the plot.
+	 * For instance, the labels.
+	 * @param data
+	 * @return the data Object now containing the meta data
+	 */
+	protected abstract Object setMetaData(Object data);
 
-	protected abstract SGTData processSignal();
+	/**
+	 * Applies the needed treatments to the raw signal 
+	 * and return it in a data Object form, corresponding
+	 * to whatever the plot component can handle.<br/>
+	 * Note: The raw data can be accessed by {@link #getRawData()} 
+	 * @return the plottable Object data
+	 */
+	protected abstract Object processSignal();
 
 	/**
 	 * Constructs the ID string for a data
 	 * @return a string representing the data and its settings
 	 */
 	private String getDataId() {
+		// FIXME use something more like:
+		// dataInfo.hashCode() + data.hashCode();
 		return dataInfo.file.getPath()
 				+ "_" + dataInfo.channel + "_" + amplitudeCutoff.lower + "_" + amplitudeCutoff.higher
 				+ "_" + time.getFrom() + "_" + time.getTo()
@@ -113,7 +151,7 @@ public abstract class Plot implements IPlot {
 	}
 
 	@Override
-	public SGTData getData() {
+	public Object getData() {
 		return data;
 	}
 
@@ -131,6 +169,21 @@ public abstract class Plot implements IPlot {
 	public WaveClass getWaveClass() {
 		return waveClass;
 	}
+	
+	/**
+	 * Tool method usable by time-domain plot implementations to shift the
+	 * x-axis by <i>n</i> seconds.<br/>It's just a<br/>
+	 * <code>for each x : x = x + n</code>
+	 * @param timeArr values to shift
+	 * @param seconds number of secondes to shift. Usualy corresponds to the starting point in data
+	 * @return shiffted values array
+	 */
+	protected double[] shiftTimeValues(double[] timeArr, double seconds) {
+		double[] newArr = new double[timeArr.length];
+		for(int i=0; i<timeArr.length; i++)
+			newArr[i] = timeArr[i] + seconds;
+		return newArr;
+	}
 
 	/**
 	 * Register the various settings related to the selected {@link WavesClasses wave class}
@@ -143,36 +196,30 @@ public abstract class Plot implements IPlot {
 	@Override
 	public void setWaveClass(WaveClass wc) {
 		waveClass = wc;
-		//TODO: verify that wc' range object is not overwritten
+		//TODO verify that wc' range object is not overwritten
 		amplitudeCutoff = wc.getAmplitudeRange();
 		freqRange = wc.getFrequencyRange();
 	}
 
+	/**
+	 * Returns the raw data
+	 */
 	protected double[][] getRawData() {
 		return rawData;
 	}
 
+	/**
+	 * Registers the raw data
+	 */
 	protected void setRawData(double[][] rawData) {
 		this.rawData = rawData;
 	}
 
-	public void setData(SGTData data) {
+	/**
+	 * Registers the data in its plot data object form.<br/>
+	 * The type of the Object depends on the plot layout component.
+	 */
+	public void setData(Object data) {
 		this.data = data;
-	}
-	
-	@Override
-	public Range<Double> getXRange() {
-		return new Range<Double>(
-				(Double)data.getXRange().getStart().getObjectValue(),
-				(Double)data.getXRange().getEnd().getObjectValue()
-				);
-	}
-
-	@Override
-	public Range<Double> getYRange() {
-		return new Range<Double>(
-				(Double)data.getYRange().getStart().getObjectValue(),
-				(Double)data.getYRange().getEnd().getObjectValue()
-				);
 	}
 }

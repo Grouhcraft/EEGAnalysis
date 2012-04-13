@@ -7,7 +7,6 @@ import graphwindow.plot.IPlot;
 
 import java.awt.Component;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -20,13 +19,8 @@ import java.awt.event.KeyListener;
 import java.lang.annotation.AnnotationFormatError;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.security.KeyStore.Entry;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
-
-import javax.print.attribute.standard.JobName;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -41,16 +35,10 @@ import javax.swing.SpinnerListModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Highlighter;
-import javax.swing.text.Highlighter.Highlight;
-import javax.swing.text.Highlighter.HighlightPainter;
 import javax.swing.text.JTextComponent;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
-import org.fife.ui.rtextarea.RTextArea;
-
 import main.utils.Logger;
 
 public class GraphSettingsPanel extends JScrollPane {
@@ -61,7 +49,7 @@ public class GraphSettingsPanel extends JScrollPane {
 	private static final long serialVersionUID = -89899500613999721L;
 	private JPanel panel = new JPanel();
 	private PlotFrame parentFrame;
-	private HashMap<Field, Object[]> annoted = new HashMap<Field, Object[]>(); 
+	private HashMap<Field, Object[]> annoted = new HashMap<>(); 
 	
 	public GraphSettingsPanel(PlotFrame parent) {
 		this.parentFrame = parent;
@@ -89,9 +77,9 @@ public class GraphSettingsPanel extends JScrollPane {
 		}
 		if(o instanceof Enum) {
 			Object[] possibleValues = ((Enum<?>)o).getDeclaringClass().getEnumConstants();
-			comp = new JComboBox(possibleValues);
-			((JComboBox)comp).setSelectedItem(o);
-			((JComboBox)comp).addItemListener(new ItemListener() {
+			comp = new JComboBox<Object>(possibleValues);
+			((JComboBox<?>)comp).setSelectedItem(o);
+			((JComboBox<?>)comp).addItemListener(new ItemListener() {
 				
 				@Override
 				public void itemStateChanged(ItemEvent arg0) {
@@ -323,14 +311,14 @@ public class GraphSettingsPanel extends JScrollPane {
 				} else if( comp instanceof JSpinner ) {
 					((JSpinner)comp).setValue(((Number)value).doubleValue());
 				} else if( comp instanceof JPanel ) {
-					//TODO
+					// FIXME value update of multi-components settings (like range: 2 spinners)  
 					try {
 						throw new Exception("Unimplemented !");
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				} else if( comp instanceof JComboBox ) {
-					((JComboBox)comp).setSelectedItem(value);
+					((JComboBox<?>)comp).setSelectedItem(value);
 				}
 			}
 		});

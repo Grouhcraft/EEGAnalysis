@@ -23,20 +23,65 @@ public abstract class Filter {
 		}
 	}
 
+	/**
+	 * Returns the squared value
+	 * @param x
+	 */
 	protected static double sq(double x) {
 		return x * x;
 	}
 
+	/**
+	 * Returns the absolute value
+	 * @param x
+	 */
 	protected static double abs(double x) {
 		return Math.abs(x);
 	}
 
+	/**
+	 * Computes the squar root
+	 * @param x
+	 */
 	protected static double sqrt(double x) {
 		return Math.sqrt(x);
 	}
 
-	protected static double module(Complex c) {
+	/**
+	 * Computes the module of a complex
+	 * @param c
+	 */
+	public static double module(Complex c) {
 		return sqrt(sq(c.im) + sq(c.real));
+	}
+	
+	/**
+	 * Computes the variance
+	 * @param ds
+	 */
+	public static double variance(double[] ds) {
+		double mean = average(ds);
+		double v = 0;
+		for(double i : ds) v += sq(mean - i);		
+		return v/ds.length;
+	}
+	
+	/**
+	 * Computes the mean
+	 * @param ds
+	 */
+	public static double average(double[] ds) {
+		double t = 0;
+		for(double i : ds) t+=i;
+		return t / ds.length;
+	}
+	
+	/**
+	 * Computes the standard deviation
+	 * @param data
+	 */
+	public static double stdDeviation(double[] data) { 
+		return sqrt(variance(data)); 
 	}
 
 	/**
@@ -45,7 +90,7 @@ public abstract class Filter {
 	 * @param from signal data to be cleaned
 	 * @return cleaned data array
 	 */
-	protected static double[][] removePoints(List<?> remove, double[][] from) {
+	public static double[][] removePoints(List<?> remove, double[][] from) {
 		double[] xArr = new double[from[Y].length - remove.size()];
 		double[] yArr = new double[from[Y].length - remove.size()];
 
@@ -66,7 +111,7 @@ public abstract class Filter {
 	 * @param data
 	 * @return the new position
 	 */
-	protected static int nextDrop(int pos, double[] data) {
+	public static int nextDrop(int pos, double[] data) {
 		while((pos+1 < data.length-1) && (data[pos] < data[pos+1] || data[pos] == data[pos+1])) {pos++;}
 		return pos;
 	}
@@ -77,7 +122,7 @@ public abstract class Filter {
 	 * @param data
 	 * @return the new position
 	 */
-	protected static int nextAscent(int pos, double[] data) {
+	public static int nextAscent(int pos, double[] data) {
 		while((pos+1 < data.length-1) && (data[pos] > data[pos+1] || data[pos] == data[pos+1])) {pos++;}
 		return pos;
 	}
@@ -86,9 +131,9 @@ public abstract class Filter {
 	 * Advance the position to the next point where the curve isn't flat (growing or declining)
 	 * @param pos
 	 * @param data
-	 * @return
+	 * @return the new position
 	 */
-	protected static int nextNonFlat(int pos, double[] data) {
+	public static int nextNonFlat(int pos, double[] data) {
 		while((pos+1 < data.length-1) && (data[pos] == data[pos+1])) {pos++;}
 		return pos;
 	}
@@ -100,7 +145,7 @@ public abstract class Filter {
 	 * @param to range end
 	 * @return the filled list
 	 */
-	protected static List<Integer> addRangeTo(List<Integer> list, int from, int to) {
+	public static List<Integer> addRangeTo(List<Integer> list, int from, int to) {
 		for(int i=from; i<=to; i++) {
 			list.add(i);
 		}
@@ -111,9 +156,8 @@ public abstract class Filter {
 	 * Returns true if the curve is ascending at the given position
 	 * @param pos
 	 * @param data
-	 * @return
 	 */
-	protected static boolean isAscending(int pos, double[] data) {
+	public static boolean isAscending(int pos, double[] data) {
 		return data[pos] < data[pos+1];
 	}
 
@@ -121,12 +165,16 @@ public abstract class Filter {
 	 * Returns true if the curve is dropping at the given position
 	 * @param pos
 	 * @param data
-	 * @return
 	 */
-	protected static boolean isDropping(int pos, double[] data) {
+	public static boolean isDropping(int pos, double[] data) {
 		return data[pos] > data[pos+1];
 	}
 
+	/**
+	 * Finds the minimal y coordinate in a data 
+	 * @param data
+	 * @return the x/y of the minimal y value
+	 */
 	public static Coord minCoords(double[][] data) {
 		double[] x = data[X];
 		double[] y = data[Y];
@@ -141,6 +189,11 @@ public abstract class Filter {
 		return new Coord(xmin, ymin);
 	}
 
+	/**
+	 * Finds the maximal y coordinate in a data 
+	 * @param data
+	 * @return the x/y of the maximal y value
+	 */
 	public static Coord maxCoords(double[][] data) {
 		double[] x = data[X];
 		double[] y = data[Y];
@@ -155,6 +208,11 @@ public abstract class Filter {
 		return new Coord(xmax, ymax);
 	}
 
+	/**
+	 * Finds the minimal y value in a data
+	 * @param data
+	 * @return the minimal y value
+	 */
 	public static double min(double[][] data) {
 		double[] y = data[Y];
 		double ymin = y[0];
@@ -166,6 +224,11 @@ public abstract class Filter {
 		return ymin;
 	}
 
+	/**
+	 * Finds the maximale y value in a data
+	 * @param data
+	 * @return the maximale y value
+	 */
 	public static double max(double[][] data) {
 		double[] y = data[Y];
 		double ymax = y[0];
@@ -187,6 +250,11 @@ public abstract class Filter {
 		return Math.abs(max) / Math.abs(min);
 	}
 
+	/**
+	 * Drops n/2 values (keeping one value every two)
+	 * @param from
+	 * @return half-sized array
+	 */
 	public static double[] oneOfTwo(double[] from) {
 		double[] half = new double[from.length/2];
 		for(int i=0; i<from.length/2; i++) {

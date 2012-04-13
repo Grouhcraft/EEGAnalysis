@@ -7,8 +7,6 @@ import gov.noaa.pmel.util.Domain;
 
 import java.util.Arrays;
 
-import main.utils.Logger;
-
 public class LinePlotLayout extends JPlotLayout implements IGraphLayout {
 
 	/**

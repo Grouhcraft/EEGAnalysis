@@ -2,11 +2,11 @@ package graphwindow.plot.implementations;
 
 import java.util.Arrays;
 
-import main.utils.Logger;
 import math.transform.jwave.Transform;
 import math.transform.jwave.handlers.FastWaveletTransform;
 import math.transform.jwave.handlers.wavelets.WaveletInterface;
 import filters.utils.Filter;
+import filters.utils.Range;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
@@ -43,35 +43,25 @@ public class WaveletDenoised extends Plot {
 	}
 	
 	@Override
-	protected SGTData setMetaData(SGTData data) {
+	protected Object setMetaData(Object data) {
 	    ((SimpleLine)data).setXMetaData(new SGTMetaData("Time", "secondes", false, false));
 	    ((SimpleLine)data).setYMetaData(new SGTMetaData("Potential", "µV", false, false));
 	    return data;
 	}
 	
 	@Override
-	protected SGTData processSignal() {
+	protected Object processSignal() {
 		double[][] data = getRawData();
 		try {
 			String pkg = "math.transform.jwave.handlers.wavelets.";
-			WaveletInterface wl = (WaveletInterface) getClass().forName(pkg + wavelet.name()).newInstance();
+			WaveletInterface wl = (WaveletInterface) Class.forName(pkg + wavelet.name()).newInstance();
 		    Transform t = new Transform(new FastWaveletTransform(wl, scales));
 		    
 		    data[Y] = t.forward(data[Y]);
-		    
-		    data[Y] = iterateScales(data[Y], 1, scales, getStdDev(data[Y]));
-		    
+		    data[Y] = iterateScales(data[Y], 1, scales);
 		    data[Y] = t.reverse(data[Y]);
-		    
-		    Logger.log("dyl " + data[Y].length);
-		    Logger.log("dxl " + data[X].length);
-		    
-		    //data[Y] = Arrays.copyOf(data[Y], (int) Math.floor(data[Y].length/2));
-		   
 		    data[X] = Filter.oneOfTwo(data[X]);
-		    
-		    Logger.log("dyl " + data[Y].length);
-		    Logger.log("dxl " + data[X].length);
+		    data[X] = shiftTimeValues(data[X], time.getFrom());
 		    		
 		    return new SimpleLine(data[X], data[Y], null);
 		} catch (Exception e) {
@@ -80,22 +70,21 @@ public class WaveletDenoised extends Plot {
 		}
 	}
 	
-	protected double[] iterateScales(double[] data, int currentLevel, int nLevels, double stdDev) {
-		
+	protected double[] iterateScales(double[] data, int currentLevel, int nLevels) {
 		double[] firstHalf = Arrays.copyOfRange(data, 0, data.length / 2);
-		double[] secondHalf = Arrays.copyOfRange(data, data.length / 2, data.length);
+		double[] secondHalf = Arrays.copyOfRange(data, firstHalf.length, firstHalf.length*2);
 		
-		firstHalf = processScale(firstHalf, stdDev);
+		secondHalf = processScale(secondHalf, Filter.stdDeviation(secondHalf));
 		
 		if(currentLevel < nLevels)
-			secondHalf = iterateScales(secondHalf, currentLevel+1, nLevels, getStdDev(firstHalf));
+			firstHalf = iterateScales(firstHalf, currentLevel+1, nLevels);
 		else
-			secondHalf = processScale(secondHalf, stdDev);
+			firstHalf = processScale(firstHalf, Filter.stdDeviation(firstHalf));
 		
     	double[] completeLevel = new double[data.length];
-    	completeLevel = Arrays.copyOfRange(firstHalf, 0, firstHalf.length);
-    	for(int i=firstHalf.length; i<completeLevel.length; i++) {
-    		completeLevel[i] = secondHalf[i-firstHalf.length];
+    	completeLevel = Arrays.copyOfRange(secondHalf, 0, secondHalf.length);
+    	for(int i=secondHalf.length; i<completeLevel.length; i++) {
+    		completeLevel[i] = firstHalf[i-secondHalf.length];
     	}
     	return completeLevel;
 	}
@@ -109,31 +98,27 @@ public class WaveletDenoised extends Plot {
 			if(Math.abs(ds[i]) <= k) ds[i] = 0;
 		return ds;
 	}
-	
-	protected double getStdDev(double[] data) { 
-		return Math.sqrt(getVariance(data)); 
-	}
-
-	protected double getVariance(double[] ds) {
-		double mean = getAverage(ds);
-		double v = 0;
-		double x; 
-		for(double i : ds) {
-			x = mean - i;
-			v += x*x;
-		}
-		return v/ds.length;
-	}
-	
-	protected double getAverage(double[] ds) {
-		double t = 0;
-		for(double i : ds) t+=i;
-		return t / ds.length;
-	}
 
 	@Override
 	public void setDataId(Object data, String id) {
 		((SimpleLine)data).setId(id);
+	}
+	
+	
+	@Override
+	public Range<Double> getXRange() {
+		return new Range<Double>(
+				(Double)((SGTData)getData()).getXRange().getStart().getObjectValue(),
+				(Double)((SGTData)getData()).getXRange().getEnd().getObjectValue()
+				);
+	}
+
+	@Override
+	public Range<Double> getYRange() {
+		return new Range<Double>(
+				(Double)((SGTData)getData()).getYRange().getStart().getObjectValue(),
+				(Double)((SGTData)getData()).getYRange().getEnd().getObjectValue()
+				);
 	}
 }
 

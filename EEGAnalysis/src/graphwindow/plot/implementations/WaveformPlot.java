@@ -1,5 +1,6 @@
 package graphwindow.plot.implementations;
 
+import filters.utils.Range;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
@@ -29,7 +30,7 @@ public class WaveformPlot extends Plot {
 	}
 
 	@Override
-	protected SGTData setMetaData(SGTData data) {
+	protected Object setMetaData(Object data) {
 	    ((SimpleLine)data).setXMetaData(new SGTMetaData("Time", "secondes", false, false));
 	    ((SimpleLine)data).setYMetaData(new SGTMetaData("Potential", "µV", false, false));
 	    return data;
@@ -39,6 +40,7 @@ public class WaveformPlot extends Plot {
 	protected SGTData processSignal() {
 		double[][] data = getRawData();
 		if(cleanXAxis) data = cleanXAxis(data);
+		data[X] = shiftTimeValues(data[X], time.getFrom());
 	    return new SimpleLine(data[X], data[Y], null);
 	}
 
@@ -56,4 +58,20 @@ public class WaveformPlot extends Plot {
 		((SimpleLine)data).setId(id);
 	}
 
+	
+	@Override
+	public Range<Double> getXRange() {
+		return new Range<Double>(
+				(Double)((SGTData)getData()).getXRange().getStart().getObjectValue(),
+				(Double)((SGTData)getData()).getXRange().getEnd().getObjectValue()
+				);
+	}
+
+	@Override
+	public Range<Double> getYRange() {
+		return new Range<Double>(
+				(Double)((SGTData)getData()).getYRange().getStart().getObjectValue(),
+				(Double)((SGTData)getData()).getYRange().getEnd().getObjectValue()
+				);
+	}
 }

@@ -1,6 +1,5 @@
 package filters;
 
-import main.MainWindow;
 import main.utils.Logger;
 import filters.utils.Complex;
 import filters.utils.FFT;
@@ -24,20 +23,6 @@ public class EnergySpectralDensity extends Filter {
 	 * 		The periodogram plot data
 	 */
 	public static double[][] compute(
-			double[][] signal,
-			double fs,
-			double freqLowerLimit,
-			double freqUpperLimit
-	) {
-		boolean logYScale = (MainWindow.getPrefs().getBoolean(MainWindow.PREF_PERIO_USE_DBSCALE, false))
-				? true : false;
-		return compute(signal, fs, freqLowerLimit, freqUpperLimit, logYScale);
-	}
-
-	/**
-	 * @see {@link #compute(double[][], double, double)}
-	 */
-	private static double[][] compute(
 			double[][] signal,
 			double fs,
 			double freqLowerLimit,

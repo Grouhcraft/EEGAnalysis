@@ -159,7 +159,6 @@ public class GraphMenu extends JMenuBar implements ActionListener {
 					try {
 						getParentWindow().setGraphType((Class<? extends Plot>) Class.forName(gt.getName()));
 					} catch (ClassNotFoundException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					break;

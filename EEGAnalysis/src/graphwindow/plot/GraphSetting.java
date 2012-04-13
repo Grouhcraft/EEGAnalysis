@@ -6,8 +6,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import filters.utils.Range;
-
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 @Documented
@@ -22,11 +20,11 @@ public @interface GraphSetting {
 	/**
 	 * Limit the value to a specific list
 	 * Suitable only for number variables  
-	 */
+	 */	
 	double[] list() default {};
 	
 	/**
-	 * Mandatory, label.
+	 * The label.
 	 */
 	String value() default "";
 	
@@ -38,5 +36,9 @@ public @interface GraphSetting {
 	 */
 	int rows() default 1;
 
+	/**
+	 * If true, it will be a javascript editor 
+	 */
 	boolean js() default false; 
+	
 }

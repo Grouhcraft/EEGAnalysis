@@ -1,8 +1,6 @@
 package graphwindow;
 
-import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.swing.JPlotLayout;
-import graphwindow.data.DataFileReader;
 import graphwindow.data.WaveClass;
 import graphwindow.graphlayouts.IGraphLayout;
 import graphwindow.plot.IPlot;
@@ -20,7 +18,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.IOException;
 import java.lang.annotation.AnnotationFormatError;
 import java.util.HashMap;
 
@@ -45,7 +42,7 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 	private static final long serialVersionUID = 2796714104577643465L;
 	private IGraphLayout plotLayout;
 	private IPlot plot;
-	private HashMap<String, Object> linkedDatas = new HashMap<String, Object>();
+	private HashMap<String, Object> linkedDatas = new HashMap<>();
 	private String plotId;
 	private JPanel plotPanel;
 	private JButton btnShowSettings;
@@ -207,15 +204,16 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if(e.getActionCommand().equals("prev")) {
-			if(plot.getInfos().channel > 1) {
+		switch(e.getActionCommand()) {
+		case "prev":
+			if(plot.getInfos().channel > 1) 
 				plot.getInfos().channel--;
-			}
-		} else if (e.getActionCommand().equals("next")) {
-			if(plot.getInfos().channel < plot.getInfos().channelsCount) {
+			break;
+		case "next":
+			if(plot.getInfos().channel < plot.getInfos().channelsCount)
 				plot.getInfos().channel++;
-			}
-		} else if (e.getActionCommand().equals("swap_settings_visibility")) {
+			break;
+		case "swap_settings_visibility":
 			if(dynSettingsPanel.isVisible()) {
 				dynSettingsPanel.setVisible(false);
 				btnShowSettings.setText("Show Settings");
@@ -224,8 +222,10 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 				btnShowSettings.setText("Hide Settings");
 			}
 			revalidate();
-		} else if(e.getActionCommand().equals("avg_channels")) {
+			break;
+		case "avg_channels":
 			plot.setChannelsAveraged(!plot.areChannelsAveraged());
+			break;
 		}
 		updateGraph();
 	}
@@ -246,7 +246,7 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		for(Object linkedData : linkedDatas.values()) {
 			plotLayout.addData(linkedData);
 		}
-
+/*
 		if(plot.getClass().isAssignableFrom(WaveformPlot.class)) {
 			try {
 				plotLayout.addData((new DataFileReader()).getMetaDataReader().readFromPlot(plot));
@@ -254,12 +254,13 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 				Logger.log(e.getMessage());
 			}
 		}
+		*/
 		dynSettingsPanel.parseSettingsFrom(plot);
 		plotLayout.endOperations();
 	}
 	
 	public void updateLayout() {
-		((JPlotLayout)plotLayout). resetZoom();
+		((JPlotLayout)plotLayout).resetZoom();
 		((JPlotLayout)plotLayout).revalidate();
 	}
 
@@ -305,8 +306,9 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 			plotPanel.validate();
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			updateGraph();
 		}
-		updateGraph();
 	}
 
 	/**
