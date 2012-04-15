@@ -1,7 +1,6 @@
 package filters.implementations;
 
 import utils.ChunkedData;
-import utils.Logger;
 import filters.Filter;
 
 public class ShortTimeFourierFilter extends Filter {
@@ -14,10 +13,7 @@ public class ShortTimeFourierFilter extends Filter {
 		int yFqTo = (int) ((timeResolution / (double)fs) * freqUpperLimit);
 		int yFqFrom = (int) ((timeResolution / (double)fs) * freqLowerLimit);
 		int yLen = yFqTo - yFqFrom;
-		Logger.log("request array X len:" + chunked.getNumberOfChunk());
-		Logger.log("request array Y len:" + yLen);
-		Logger.log("chunkLen:" + timeResolution);
-		Logger.log("dataYLen:" + data[Y].length);
+
 		double[][] stf = new double[][] {
 				new double[chunked.getNumberOfChunk()],
 				new double[yLen],
@@ -28,22 +24,20 @@ public class ShortTimeFourierFilter extends Filter {
 		}
 
 		double[] psd = null;
-		while(chunked.hasNextChunk()) {
-			psd = EnergySpectralDensityFilter.compute(chunked.getChunk(), fs);
-			try {
-				for(int i=yFqFrom; i<yFqTo; i++) {
+		try {
+			while(chunked.hasNextChunk()) {
+				psd = EnergySpectralDensityFilter.compute(chunked.getChunk(), fs);
+				for(int i=yFqFrom; i<yFqTo; i++)
 					stf[Z][(chunked.getChunkPosition()*yLen) + i - yFqFrom] = Math.log(psd[i]);
-				}
-			} catch (Exception e) {
-				Logger.log("	yFqFrom==" + yFqFrom);
-				Logger.log(" 	yFqTo==" + yFqTo);
-				Logger.log(" 	psdLen==" + psd.length);
-				Logger.log(" 	chunkedPos==" + chunked.getChunkPosition());
-				e.printStackTrace();
-				return null;
+				chunked.nextChunk();
 			}
-			chunked.nextChunk();
+			psd = EnergySpectralDensityFilter.compute(chunked.getChunk(), fs);
+			for(int i=yFqFrom; i<yFqTo; i++)
+				stf[Z][(chunked.getChunkPosition()*yLen) + i - yFqFrom] = Math.log(psd[i]);
+		} catch (Exception e) {	
+			e.printStackTrace();
 		}
+		
 		for(int i=yFqFrom; i<yFqTo; i++) {
 			stf[Y][i-yFqFrom] = i;
 		}

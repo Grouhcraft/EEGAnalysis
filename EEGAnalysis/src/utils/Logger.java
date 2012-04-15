@@ -1,6 +1,6 @@
 package utils;
 
-public class Logger {
+public class Logger{
 
 	public static void log(Object txt) {
 		StackTraceElement s = Thread.currentThread().getStackTrace()[2];
