@@ -8,7 +8,7 @@ import filters.Filter;
  * Energy Spectral Density computation methods
  * @author knoodrake
  */
-public class EnergySpectralDensityFilter extends Filter {
+public class SpectralDensityFilter extends Filter {
 
 	/**
 	 * Computes a simple Energy SD periodogram for the given 2D signal.

@@ -1,12 +1,13 @@
 package plotframes.plots.implementations;
 
-import filters.implementations.EnergySpectralDensityFilter;
+import filters.implementations.SpectralDensityFilter;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
 
 import java.io.File;
 
+import plotframes.data.EEGSource;
 import plotframes.data.WaveClass;
 import plotframes.graphlayouts.LinePlotLayout;
 import plotframes.plots.IPlot;
@@ -26,8 +27,8 @@ public class SpectralDensityPlot extends Plot{
 	@GraphSetting("Use logarithmic Y scale")
 	public boolean useLogScale = true;
 	
-	public SpectralDensityPlot(int channel, File file) {
-		super(channel, file);
+	public SpectralDensityPlot(int channel, EEGSource dataSrc) {
+		super(channel, dataSrc);
 	}
 
 	public SpectralDensityPlot(IPlot plot) {
@@ -47,7 +48,7 @@ public class SpectralDensityPlot extends Plot{
 		int lfq = (waveClass == WaveClass.NONE) ? 0 : (int)(double) waveClass.getFrequencyRange().getLower();
 		int hfq = (waveClass == WaveClass.NONE) ? dataInfo.fs / 2 : (int)(double) waveClass.getFrequencyRange().getHigher();
 
-		data = EnergySpectralDensityFilter.compute( data, dataInfo.fs, lfq, hfq, useLogScale );
+		data = SpectralDensityFilter.compute( data, dataInfo.fs, lfq, hfq, useLogScale );
 
 	    return new SimpleLine(data[X], data[Y], null);
 	}

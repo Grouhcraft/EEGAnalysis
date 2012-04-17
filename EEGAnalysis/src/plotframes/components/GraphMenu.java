@@ -13,6 +13,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
 import plotframes.PlotFrame;
+import plotframes.data.EEGSourceFile;
 import plotframes.data.WaveClass;
 import plotframes.plots.IPlot;
 import plotframes.plots.Plot;
@@ -49,7 +50,8 @@ public class GraphMenu extends JMenuBar implements ActionListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fileChooser;
-				currentDir = getParentWindow().getDataFile().getParentFile();
+				if(getParentWindow().getDataSource().isFile()) 
+					currentDir = ((EEGSourceFile)getParentWindow().getDataSource()).getFile().getParentFile();
 				if (currentDir == null) {
 					fileChooser = new JFileChooser();
 				} else {
@@ -58,7 +60,7 @@ public class GraphMenu extends JMenuBar implements ActionListener {
 				int returnVal = fileChooser.showOpenDialog(getParent());
 			    if(returnVal == JFileChooser.APPROVE_OPTION) {
 			    	File selectedFile = fileChooser.getSelectedFile();
-					getParentWindow().setDataFile(selectedFile);
+					getParentWindow().setDataSource(new EEGSourceFile(selectedFile));
 					System.out.println(selectedFile.getPath());
 					getParentWindow().updateGraph();
 			    }

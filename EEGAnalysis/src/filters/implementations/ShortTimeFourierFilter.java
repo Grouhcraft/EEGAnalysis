@@ -26,12 +26,12 @@ public class ShortTimeFourierFilter extends Filter {
 		double[] psd = null;
 		try {
 			while(chunked.hasNextChunk()) {
-				psd = EnergySpectralDensityFilter.compute(chunked.getChunk(), fs);
+				psd = SpectralDensityFilter.compute(chunked.getChunk(), fs);
 				for(int i=yFqFrom; i<yFqTo; i++)
 					stf[Z][(chunked.getChunkPosition()*yLen) + i - yFqFrom] = Math.log(psd[i]);
 				chunked.nextChunk();
 			}
-			psd = EnergySpectralDensityFilter.compute(chunked.getChunk(), fs);
+			psd = SpectralDensityFilter.compute(chunked.getChunk(), fs);
 			for(int i=yFqFrom; i<yFqTo; i++)
 				stf[Z][(chunked.getChunkPosition()*yLen) + i - yFqFrom] = Math.log(psd[i]);
 		} catch (Exception e) {	

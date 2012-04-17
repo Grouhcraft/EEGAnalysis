@@ -1,12 +1,8 @@
 package plotframes.data;
 
-import java.io.File;
-
 public class DataInfos  {
 	public int 		channelsCount 	= 59;
 	public int	 	fs 				= 100;
-	public File 	file 			= null;
-	public File 	markerFile 		= null;
 	public int		channel 		= -1;
 	public boolean 	areChannelsAveraged = false;
 	

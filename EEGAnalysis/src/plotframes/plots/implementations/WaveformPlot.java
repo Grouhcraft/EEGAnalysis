@@ -7,6 +7,7 @@ import gov.noaa.pmel.sgt.dm.SimpleLine;
 import java.io.File;
 import java.text.DecimalFormat;
 
+import plotframes.data.EEGSource;
 import plotframes.graphlayouts.LinePlotLayout;
 import plotframes.plots.IPlot;
 import plotframes.plots.Plot;
@@ -23,8 +24,8 @@ public class WaveformPlot extends Plot {
 	@GraphSetting("Clean X - Axis values")
 	public boolean cleanXAxis = true;
 	
-	public WaveformPlot(int channel, File file) {
-		super(channel, file);
+	public WaveformPlot(int channel, EEGSource dataSrc) {
+		super(channel, dataSrc);
 	}
 
 	public WaveformPlot(IPlot plot) {

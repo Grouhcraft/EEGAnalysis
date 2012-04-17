@@ -26,6 +26,8 @@ import javax.swing.event.InternalFrameEvent;
 import plotframes.components.GraphContextualMenu;
 import plotframes.components.GraphMenu;
 import plotframes.components.GraphSettingsPanel;
+import plotframes.data.EEGSource;
+import plotframes.data.EEGSourceFile;
 import plotframes.data.WaveClass;
 import plotframes.graphlayouts.IGraphLayout;
 import plotframes.plots.IPlot;
@@ -74,7 +76,7 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 	 * @see PlotFrame#PlotFrame(String, int, File)
 	 */
 	public PlotFrame(String plotId, PlotFrame p) {
-		initialize(plotId, p.getPlot().getInfos().channel, p.getDataFile());
+		initialize(plotId, p.getPlot().getInfos().channel, p.getDataSource());
 		plot.setWaveClass(p.getPlot().getWaveClass());
 		updateGraph();
 	}
@@ -88,7 +90,7 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 	 * @wbp.parser.constructor
 	 */
 	public PlotFrame(String plotID, int channel, File file) {
-		initialize(plotID, channel, file);
+		initialize(plotID, channel, new EEGSourceFile(file));
 	}
 
 	/**
@@ -97,7 +99,7 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 	 * @param channel
 	 * @param file
 	 */
-	private void initialize(String plotID, int channel, File file) {
+	private void initialize(String plotID, int channel, EEGSource dataSrc) {
 		addInternalFrameListener(new InternalFrameAdapter() {
 			@Override
 			public void internalFrameClosed(InternalFrameEvent arg0) {
@@ -120,7 +122,7 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		plotPanel.setLayout(new BorderLayout());
 		btnPanel.setLayout(new GridBagLayout());
 
-		plot = new WaveformPlot(channel, file);
+		plot = new WaveformPlot(channel, dataSrc);
 		try {
 			plotLayout = getGraphTypeFor(plot.getClass()).getConstructor(String.class).newInstance(plotID);
 		} catch (Exception e) {
@@ -247,7 +249,7 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		plotLayout.setTitles(new String[]{
 				"Channel #" + plot.getInfos().channel + "(" + plot.getInfos().getChannelCode() +")",
 				"Waves: " + plot.getWaveClass().getName(),
-				plot.getInfos().file.getName()});
+				plot.getDataSource().getName()});
 		for(Object linkedData : linkedDatas.values()) {
 			plotLayout.addData(linkedData);
 		}
@@ -279,12 +281,12 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		updateGraph();
 	}
 
-	public File getDataFile() {
-		return plot.getInfos().file;
+	public EEGSource getDataSource() {
+		return plot.getDataSource();
 	}
 
-	public void setDataFile(File selectedFile) {
-		plot.getInfos().file = selectedFile;
+	public void setDataSource(EEGSource dataSource) {
+		plot.setDataSource(dataSource);
 	}
 
 	/**

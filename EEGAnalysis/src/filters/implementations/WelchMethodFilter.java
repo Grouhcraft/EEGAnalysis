@@ -81,7 +81,7 @@ public class WelchMethodFilter extends Filter {
 
 		// computes the spectral density of each chunk
 		while(chunked.hasNextChunk()) {
-			double[] psd = EnergySpectralDensityFilter.compute(chunked.getChunk(), fs);
+			double[] psd = SpectralDensityFilter.compute(chunked.getChunk(), fs);
 			for(int ii=from; ii<to; ii++) powerFrequency[Y][ii-from] += psd[ii];
 			chunked.nextChunk();
 		}

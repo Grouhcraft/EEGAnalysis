@@ -4,10 +4,10 @@ package plotframes.plots;
 import java.util.ArrayList;
 
 import plotframes.data.DataInfos;
+import plotframes.data.EEGSource;
 import plotframes.data.WaveClass;
-import plotframes.plots.Plot.TimeFrame;
-
 import utils.types.Range;
+import utils.types.TimeFrame;
 
 
 public interface IPlot {
@@ -67,4 +67,8 @@ public interface IPlot {
 	 * @param areChannelsAveraged
 	 */
 	void setChannelsAveraged(boolean areChannelsAveraged);
+
+	EEGSource getDataSource();
+	
+	void setDataSource(EEGSource dataSource);
 }

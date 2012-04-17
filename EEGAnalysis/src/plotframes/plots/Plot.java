@@ -1,96 +1,85 @@
 package plotframes.plots;
 
-import java.io.File;
-
-import plotframes.data.DataFileReader;
 import plotframes.data.DataInfos;
+import plotframes.data.EEGSource;
 import plotframes.data.WaveClass;
 import plotframes.plots.annotations.GraphSetting;
-
 import utils.Logger;
 import utils.types.AmplitudeRange;
 import utils.types.FrequencyRange;
-
-import main.MainWindow;
+import utils.types.TimeFrame;
+import filters.generators.GaussianWhiteNoiseGenerator;
 import filters.generators.SineWaveGenerator;
-import filters.implementations.FrequenciesCutOffFilter;
+import filters.implementations.BandPassFilter;
 
 public abstract class Plot implements IPlot {
-	public static class TimeFrame {
-		public int getFrom() {
-			return MainWindow.getPrefs().getInt(MainWindow.PREF_TIME_FROM, 30);
-		}
-		public void setFrom(int from) {
-			MainWindow.getPrefs().putInt(MainWindow.PREF_TIME_FROM, from);
-		}
-		public int getTo() {
-			return getFrom() + MainWindow.getPrefs().getInt(MainWindow.PREF_TIME_DURATION, 60);
-		}
-		public void setTo(int to) {
-			MainWindow.getPrefs().putInt(MainWindow.PREF_TIME_DURATION, to - getFrom());
-		}
-	}
 
 	public TimeFrame time = new TimeFrame();
 	public FrequencyRange freqRange = new FrequencyRange(1,15);
 	public AmplitudeRange amplitudeCutoff = new AmplitudeRange();
 	public DataInfos dataInfo = new DataInfos();
+	public EEGSource dataSource	= null;
+	public WaveClass waveClass;
+
+	@Override
+	public void setDataSource(EEGSource dataSource) {
+		this.dataSource = dataSource;
+	}
+
+	@Override
+	public EEGSource getDataSource() {
+		return dataSource;
+	}
 
 	protected final int X = 0;
 	protected final int Y = 1;
 	protected final int Z = 2;
-	public WaveClass waveClass;
+	protected Object data = null;
+	protected double[][] rawData = null;
 
-	public static String name;
-	public static String getCName () {
-		return name;
-	}
-
-	private Object data = null;
-	protected double[][] rawData = null; 
-	
-	public Plot(int channel, File file) {
-		dataInfo.file = file;
+	public Plot(int channel, EEGSource dataSrc) {
+		dataSource = dataSrc;
 		dataInfo.channel = channel;
 	}
 
 	public Plot(IPlot src) {
-		dataInfo.file = src.getInfos().file;
+		dataSource = src.getDataSource();
 		dataInfo.channel = src.getInfos().channel;
 		setWaveClass(src.getWaveClass());
 	}
-	
+
 	/**
-	 * Reads the EEG data from {@link #dataFile}
+	 * Reads the EEG data from {@link #dataSource}
 	 * @return the SGTData data used by the graph layouts
 	 */
+	@Override
 	public void update() {
 		Object data;
 		readData();
-		
+
 		if(waveClass != WaveClass.NONE) {
 			Logger.log("showing frequency range [" + freqRange.lower + " ; " + freqRange.higher + "]");
-			setRawData(FrequenciesCutOffFilter.frequencyRange(getRawData(), freqRange, dataInfo.fs));
+			setRawData(BandPassFilter.frequencyRange(getRawData(), freqRange, dataInfo.fs));
 		}
-		
+
 		data = processSignal();
-		setDataId(data, getDataId());		
+		setDataId(data, getDataId());
 	    data = setMetaData(data);
 	    setData(data);
 	}
-	
+
 	@GraphSetting("Test mode ?")
-	public boolean testMode = true;
-	
+	public boolean testMode = false;
+
 	@GraphSetting("Noise amount (Test mode)")
 	public int testModeAmountOfNoise = 0;
-	
+
 	@GraphSetting("Phase (test mode)")
 	public double testModePhase = 1.;
-	
+
 	@GraphSetting("Freq (test mode)")
 	public double testModeFreq = 5.;
-	
+
 	/**
 	 * Reads the raw data from the source input (eg. data file)
 	 * and registers it with {@link #setRawData(double[][])}.
@@ -98,16 +87,8 @@ public abstract class Plot implements IPlot {
 	 */
 	protected void readData() {
 		Logger.log("Test mode: " + (testMode ? true : false));
-
-		/*
-		if(testMode) setRawData(GaussianWhiteNoise.addNoise(Sinusoidal.merge(
-				Sinusoidal.generate(testModeFreq, dataInfo.fs, time.getTo() - time.getFrom(), 0.10, testModePhase),
-				Sinusoidal.generate(testModeFreq*2, dataInfo.fs, time.getTo() - time.getFrom(), 0.05, testModePhase)
-			),testModeAmountOfNoise));
-		*/
-		if(testMode) setRawData(SineWaveGenerator.generate(testModeFreq, dataInfo.fs, time.getTo() - time.getFrom(), 0.10, testModePhase));
-		
-		else	setRawData(new DataFileReader().dataReader.read(dataInfo, time));
+		if(testMode) setRawData(GaussianWhiteNoiseGenerator.addNoise(SineWaveGenerator.generate(testModeFreq, dataInfo.fs, time.getTo() - time.getFrom(), 0.10, testModePhase),testModeAmountOfNoise));
+		else setRawData(dataSource.read(dataInfo, time));
 	}
 
 	/**
@@ -120,10 +101,10 @@ public abstract class Plot implements IPlot {
 	protected abstract Object setMetaData(Object data);
 
 	/**
-	 * Applies the needed treatments to the raw signal 
+	 * Applies the needed treatments to the raw signal
 	 * and return it in a data Object form, corresponding
 	 * to whatever the plot component can handle.<br/>
-	 * Note: The raw data can be accessed by {@link #getRawData()} 
+	 * Note: The raw data can be accessed by {@link #getRawData()}
 	 * @return the plottable Object data
 	 */
 	protected abstract Object processSignal();
@@ -135,12 +116,12 @@ public abstract class Plot implements IPlot {
 	private String getDataId() {
 		// FIXME use something more like:
 		// dataInfo.hashCode() + data.hashCode();
-		return dataInfo.file.getPath()
+		return dataSource.getName()
 				+ "_" + dataInfo.channel + "_" + amplitudeCutoff.lower + "_" + amplitudeCutoff.higher
 				+ "_" + time.getFrom() + "_" + time.getTo()
 				+ "_" + freqRange.higher + "_" + freqRange.lower;
 	}
-	
+
 	@Override
 	public boolean areChannelsAveraged() {
 		return dataInfo.areChannelsAveraged;
@@ -172,7 +153,7 @@ public abstract class Plot implements IPlot {
 	public WaveClass getWaveClass() {
 		return waveClass;
 	}
-	
+
 	/**
 	 * Tool method usable by time-domain plot implementations to shift the
 	 * x-axis by <i>n</i> seconds.<br/>It's just a<br/>
@@ -199,7 +180,6 @@ public abstract class Plot implements IPlot {
 	@Override
 	public void setWaveClass(WaveClass wc) {
 		waveClass = wc;
-		//TODO verify that wc' range object is not overwritten
 		amplitudeCutoff = wc.getAmplitudeRange();
 		freqRange = wc.getFrequencyRange();
 	}

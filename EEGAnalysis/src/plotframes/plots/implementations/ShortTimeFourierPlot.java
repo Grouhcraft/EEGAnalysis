@@ -7,6 +7,7 @@ import gov.noaa.pmel.sgt.dm.SimpleGrid;
 
 import java.io.File;
 
+import plotframes.data.EEGSource;
 import plotframes.graphlayouts.GridPlotLayout;
 import plotframes.plots.IPlot;
 import plotframes.plots.Plot;
@@ -26,8 +27,8 @@ public class ShortTimeFourierPlot extends Plot {
 		super(src);
 	}
 
-	public ShortTimeFourierPlot(int channel, File file) {
-		super(channel, file);
+	public ShortTimeFourierPlot(int channel, EEGSource dataSrc) {
+		super(channel, dataSrc);
 	}
 
 	@Override

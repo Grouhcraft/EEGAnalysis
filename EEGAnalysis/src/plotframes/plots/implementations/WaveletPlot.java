@@ -1,8 +1,8 @@
 package plotframes.plots.implementations;
 
-import java.io.File;
 import java.util.Arrays;
 
+import plotframes.data.EEGSource;
 import plotframes.graphlayouts.MultiplePlotLayout;
 import plotframes.plots.IPlot;
 import plotframes.plots.Plot;
@@ -39,8 +39,8 @@ public class WaveletPlot extends Plot {
 	@GraphSetting("Wavelet function")
 	public Wavelet wavelet = Wavelet.Daub02;
 	
-	public WaveletPlot(int channel, File file) {
-		super(channel, file);
+	public WaveletPlot(int channel, EEGSource dataSrc) {
+		super(channel, dataSrc);
 	}
 	
 	public WaveletPlot(IPlot plot) {

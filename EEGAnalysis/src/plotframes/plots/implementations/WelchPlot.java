@@ -5,8 +5,7 @@ import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
 
-import java.io.File;
-
+import plotframes.data.EEGSource;
 import plotframes.data.WaveClass;
 import plotframes.graphlayouts.LinePlotLayout;
 import plotframes.plots.IPlot;
@@ -35,8 +34,8 @@ public class WelchPlot extends Plot{
 	@GraphSetting("Use Square window instead of Hann")
 	public boolean useSquareWindow = false;
 	
-	public WelchPlot(int channel, File file) {
-		super(channel, file);
+	public WelchPlot(int channel, EEGSource dataSrc) {
+		super(channel, dataSrc);
 	}
 
 	public WelchPlot(IPlot plot) {

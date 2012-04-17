@@ -13,7 +13,7 @@ import filters.Filter;
  * @author knoodrake
  *
  */
-public class FrequenciesCutOffFilter extends Filter {
+public class BandPassFilter extends Filter {
 	protected static enum AMPLITUDE { High, Low }
 
 	/**
@@ -31,11 +31,26 @@ public class FrequenciesCutOffFilter extends Filter {
 		int hzFrom = (int) ((signalLen / fs) * fr.getLower());
 		int hzTo = (int) ((signalLen / fs) * fr.getHigher());
 
+		/*
+		double[] im = new double[fft.getData().y.length];
+		double[] re = new double[im.length];
+		for(int i=0; i<im.length; i++) {
+			im[i] = fft.getData().y[i].im;
+			re[i] = fft.getData().y[i].real;
+		}
+		double im_mean = average(im);
+		double re_mean = average(re);
+		*/
+		
 		for(int i=0; i<hzFrom; i++) {
-			fft.getData().y[i].zero();
+			fft.getData().y[i].zero();			
+			//fft.getData().y[i].im = im_mean;
+			//fft.getData().y[i].real = re_mean;
 		}
 		for(int i=hzTo; i<fft.getData().y.length; i++) {
 			fft.getData().y[i].zero();
+			//fft.getData().y[i].im = im_mean;
+			//fft.getData().y[i].real = re_mean;
 		}
 		fft.inverse();
 		return fft.getInitialData();
