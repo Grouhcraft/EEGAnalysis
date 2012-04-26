@@ -4,36 +4,34 @@ import filters.implementations.WelchMethodFilter;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
-
 import plotframes.data.EEGSource;
 import plotframes.data.WaveClass;
 import plotframes.graphlayouts.LinePlotLayout;
 import plotframes.plots.IPlot;
 import plotframes.plots.Plot;
 import plotframes.plots.annotations.GraphSetting;
-import plotframes.plots.annotations.GraphType;
-
+import plotframes.plots.annotations.UserPlot;
 import utils.types.Range;
 
-@GraphType(
+@UserPlot(
 		name = "Welch Periodogram",
 		layout = LinePlotLayout.class
 		)
 
 public class WelchPlot extends Plot{
-	
+
 	@GraphSetting("Limit the Fq band to current waveclass one")
 	public boolean limitFrequencyToWaveClass = true;
-	
+
 	@GraphSetting("Segment length")
 	public int segmentLen = 800;
-	
+
 	@GraphSetting("Use logarithmic Y scale")
 	public boolean useLogScale = true;
-	
+
 	@GraphSetting("Use Square window instead of Hann")
 	public boolean useSquareWindow = false;
-	
+
 	public WelchPlot(int channel, EEGSource dataSrc) {
 		super(channel, dataSrc);
 	}
@@ -69,8 +67,8 @@ public class WelchPlot extends Plot{
 	public void setDataId(Object data, String id) {
 		((SimpleLine)data).setId(id);
 	}
-	
-	
+
+
 	@Override
 	public Range<Double> getXRange() {
 		return new Range<Double>(

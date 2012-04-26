@@ -33,7 +33,7 @@ import plotframes.data.WaveClass;
 import plotframes.graphlayouts.IGraphLayout;
 import plotframes.plots.IPlot;
 import plotframes.plots.Plot;
-import plotframes.plots.annotations.GraphType;
+import plotframes.plots.annotations.UserPlot;
 import plotframes.plots.implementations.WaveformPlot;
 import plotframes.plots.implementations.Xml2DPlot;
 import utils.Logger;
@@ -318,9 +318,9 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 	 * @return the class of a suitable layout
 	 */
 	public static Class<? extends IGraphLayout> getGraphTypeFor(Class<? extends IPlot> clss) {
-		if(!clss.isAnnotationPresent(GraphType.class))
+		if(!clss.isAnnotationPresent(UserPlot.class))
 			throw new AnnotationFormatError("Plots extendings IPlot must have annotation @graphtype");
-		GraphType gt = clss.getAnnotation(GraphType.class);
+		UserPlot gt = clss.getAnnotation(UserPlot.class);
 		return gt.layout();
 	}
 

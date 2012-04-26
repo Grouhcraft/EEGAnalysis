@@ -1,56 +1,55 @@
 package plotframes.plots.implementations;
 
-import java.util.Arrays;
-
-import plotframes.graphlayouts.LinePlotLayout;
-import plotframes.plots.IPlot;
-import plotframes.plots.Plot;
-import plotframes.plots.annotations.GraphSetting;
-import plotframes.plots.annotations.GraphType;
-
-import utils.types.Range;
-
-import math.transform.jwave.Transform;
-import math.transform.jwave.handlers.FastWaveletTransform;
-import math.transform.jwave.handlers.wavelets.WaveletInterface;
 import filters.Filter;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
 
-@GraphType(	name = "Wavelet denoised",
+import java.util.Arrays;
+
+import math.transform.jwave.Transform;
+import math.transform.jwave.handlers.FastWaveletTransform;
+import math.transform.jwave.handlers.wavelets.WaveletInterface;
+import plotframes.graphlayouts.LinePlotLayout;
+import plotframes.plots.IPlot;
+import plotframes.plots.Plot;
+import plotframes.plots.annotations.GraphSetting;
+import plotframes.plots.annotations.UserPlot;
+import utils.types.Range;
+
+@UserPlot(	name = "Wavelet denoised",
 			layout = LinePlotLayout.class )
 
 public class WaveletDenoisedPlot extends Plot {
-	
+
 	@GraphSetting("Seuil")
 	public double treshold = 3;
-	
+
 	@GraphSetting("Etapes")
 	public int scales = 3;
-	
+
 	public enum Wavelet {
 		Lege02, Lege04, Lege06,
-		Haar02, 
+		Haar02,
 		Haar02Orthogonal,
-		Coif06, 
+		Coif06,
 		Daub02, Daub03, Daub04
-	} 
-	
+	}
+
 	@GraphSetting("Wavelet function")
 	public Wavelet wavelet = Wavelet.Daub04;
-	
+
 	public WaveletDenoisedPlot(IPlot plot) {
 		super(plot);
 	}
-	
+
 	@Override
 	protected Object setMetaData(Object data) {
 	    ((SimpleLine)data).setXMetaData(new SGTMetaData("Time", "secondes", false, false));
 	    ((SimpleLine)data).setYMetaData(new SGTMetaData("Potential", "µV", false, false));
 	    return data;
 	}
-	
+
 	@Override
 	protected Object processSignal() {
 		double[][] data = getRawData();
@@ -58,31 +57,31 @@ public class WaveletDenoisedPlot extends Plot {
 			String pkg = "math.transform.jwave.handlers.wavelets.";
 			WaveletInterface wl = (WaveletInterface) Class.forName(pkg + wavelet.name()).newInstance();
 		    Transform t = new Transform(new FastWaveletTransform(wl, scales));
-		    
+
 		    data[Y] = t.forward(data[Y]);
 		    data[Y] = iterateScales(data[Y], 1, scales);
 		    data[Y] = t.reverse(data[Y]);
 		    data[X] = Filter.oneOfTwo(data[X]);
 		    data[X] = shiftTimeValues(data[X], time.getFrom());
-		    		
+
 		    return new SimpleLine(data[X], data[Y], null);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
-	
+
 	protected double[] iterateScales(double[] data, int currentLevel, int nLevels) {
 		double[] firstHalf = Arrays.copyOfRange(data, 0, data.length / 2);
 		double[] secondHalf = Arrays.copyOfRange(data, firstHalf.length, firstHalf.length*2);
-		
+
 		secondHalf = processScale(secondHalf, Filter.stdDeviation(secondHalf));
-		
+
 		if(currentLevel < nLevels)
 			firstHalf = iterateScales(firstHalf, currentLevel+1, nLevels);
 		else
 			firstHalf = processScale(firstHalf, Filter.stdDeviation(firstHalf));
-		
+
     	double[] completeLevel = new double[data.length];
     	completeLevel = Arrays.copyOfRange(secondHalf, 0, secondHalf.length);
     	for(int i=secondHalf.length; i<completeLevel.length; i++) {
@@ -105,8 +104,8 @@ public class WaveletDenoisedPlot extends Plot {
 	public void setDataId(Object data, String id) {
 		((SimpleLine)data).setId(id);
 	}
-	
-	
+
+
 	@Override
 	public Range<Double> getXRange() {
 		return new Range<Double>(

@@ -5,15 +5,11 @@ import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
 import plotframes.data.EEGSource;
 import plotframes.graphlayouts.LinePlotLayout;
-import plotframes.graphlayouts.MultiplePlotLayout;
 import plotframes.plots.IPlot;
-import plotframes.plots.Plot;
 import plotframes.plots.annotations.GraphSetting;
-import plotframes.plots.annotations.GraphType;
-import utils.types.Complex;
-import utils.types.Range;
+import plotframes.plots.annotations.UserPlot;
 
-@GraphType(	name = "FFT",
+@UserPlot(	name = "FFT",
 			layout = LinePlotLayout.class)
 
 public class FFTPlot extends WaveformPlot {
@@ -25,7 +21,7 @@ public class FFTPlot extends WaveformPlot {
 	public FFTPlot(IPlot plot) {
 		super(plot);
 	}
-	
+
 	@GraphSetting("Imaginaries instead of real ?")
 	public boolean viewImaginaries = false;
 
@@ -40,7 +36,7 @@ public class FFTPlot extends WaveformPlot {
 		newArr[Y][1] = 0;
 		if (viewImaginaries) {
 			for(int i=2; i<fft.getData().y.length; i++)
-				newArr[Y][i] = fft.getData().y[i].im;			
+				newArr[Y][i] = fft.getData().y[i].im;
 		} else {
 			for(int i=2; i<fft.getData().y.length; i++)
 				newArr[Y][i] = fft.getData().y[i].real;

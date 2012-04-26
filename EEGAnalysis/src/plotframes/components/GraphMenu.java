@@ -19,7 +19,7 @@ import plotframes.data.EEGSourceFile;
 import plotframes.data.WaveClass;
 import plotframes.plots.IPlot;
 import plotframes.plots.Plot;
-import plotframes.plots.annotations.GraphType;
+import plotframes.plots.annotations.UserPlot;
 import plotframes.plots.fromXml.XmlPlot;
 import plotframes.plots.implementations.Xml2DPlot;
 import utils.Logger;
@@ -96,8 +96,8 @@ public class GraphMenu extends JMenuBar implements ActionListener {
 
 		JMenu graphType = new JMenu("Visualize..");
 		for(Class<? extends IPlot> plotClass : IPlot.graphTypes) {
-			if(plotClass.isAnnotationPresent(GraphType.class)) {
-				GraphType gt = plotClass.getAnnotation(GraphType.class);
+			if(plotClass.isAnnotationPresent(UserPlot.class)) {
+				UserPlot gt = plotClass.getAnnotation(UserPlot.class);
 				JMenuItem item = new JMenuItem(gt.name());
 				item.setActionCommand(VIEWGRAPH_CMDSTR + ":" + plotClass.getName());
 				item.addActionListener(this);
@@ -136,7 +136,7 @@ public class GraphMenu extends JMenuBar implements ActionListener {
 		//TODO a terminer
 
 		if(parentWindow.getPlot() instanceof Xml2DPlot) {
-			for(final XmlPlot p : MainWindow.getInstance().xmls) {
+			for(final XmlPlot p : MainWindow.xmls) {
 				JMenuItem pitem = new JMenuItem(p.getMetas().getName());
 				pitem.addActionListener(new ActionListener() {
 

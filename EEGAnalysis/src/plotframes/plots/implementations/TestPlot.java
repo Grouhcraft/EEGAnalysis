@@ -21,10 +21,10 @@ import plotframes.plots.IPlot;
 import plotframes.plots.Plot;
 import plotframes.plots.annotations.GraphButton;
 import plotframes.plots.annotations.GraphSetting;
-import plotframes.plots.annotations.GraphType;
+import plotframes.plots.annotations.UserPlot;
 import utils.types.Range;
 
-@GraphType(	name = "Test !!",
+@UserPlot(	name = "Test !!",
 			layout = LinePlotLayout.class )
 
 public class TestPlot extends Plot {

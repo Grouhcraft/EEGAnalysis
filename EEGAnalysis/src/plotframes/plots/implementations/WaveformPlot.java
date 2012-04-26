@@ -4,7 +4,6 @@ import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
 
-import java.io.File;
 import java.text.DecimalFormat;
 
 import plotframes.data.EEGSource;
@@ -12,18 +11,17 @@ import plotframes.graphlayouts.LinePlotLayout;
 import plotframes.plots.IPlot;
 import plotframes.plots.Plot;
 import plotframes.plots.annotations.GraphSetting;
-import plotframes.plots.annotations.GraphType;
-
+import plotframes.plots.annotations.UserPlot;
 import utils.types.Range;
 
 
-@GraphType(	name = "Regular waveform",
+@UserPlot(	name = "Regular waveform",
 			layout = LinePlotLayout.class )
 
 public class WaveformPlot extends Plot {
 	@GraphSetting("Clean X - Axis values")
 	public boolean cleanXAxis = true;
-	
+
 	public WaveformPlot(int channel, EEGSource dataSrc) {
 		super(channel, dataSrc);
 	}
@@ -61,7 +59,7 @@ public class WaveformPlot extends Plot {
 		((SimpleLine)data).setId(id);
 	}
 
-	
+
 	@Override
 	public Range<Double> getXRange() {
 		return new Range<Double>(

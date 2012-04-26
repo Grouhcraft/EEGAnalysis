@@ -13,14 +13,14 @@ import plotframes.data.EEGSource;
 import plotframes.graphlayouts.LinePlotLayout;
 import plotframes.plots.IPlot;
 import plotframes.plots.Plot;
-import plotframes.plots.annotations.GraphType;
+import plotframes.plots.annotations.UserPlot;
 import plotframes.plots.fromXml.XmlPlot;
 import plotframes.plots.fromXml.XmlPlot.Metas.Axis;
 import utils.Logger;
 import utils.types.EEGAnalysisException;
 import utils.types.Range;
 
-@GraphType(
+@UserPlot(
 		name = "2D EEP files plots",
 		layout = LinePlotLayout.class
 		)

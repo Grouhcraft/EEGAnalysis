@@ -11,7 +11,7 @@ import plotframes.graphlayouts.IGraphLayout;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 
-public @interface graphtype {
+public @interface UserPlot {
 	String name();
 	Class<? extends IGraphLayout> layout();
 }

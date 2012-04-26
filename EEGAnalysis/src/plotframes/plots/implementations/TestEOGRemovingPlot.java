@@ -2,10 +2,10 @@ package plotframes.plots.implementations;
 
 import plotframes.graphlayouts.LinePlotLayout;
 import plotframes.plots.IPlot;
-import plotframes.plots.annotations.GraphType;
+import plotframes.plots.annotations.UserPlot;
 import filters.Filter;
 
-@GraphType(	name = "TestEOGRemoving", 
+@UserPlot(	name = "TestEOGRemoving",
 			layout = LinePlotLayout.class )
 
 public class TestEOGRemovingPlot extends WaveletDenoisedPlot {
@@ -14,10 +14,10 @@ public class TestEOGRemovingPlot extends WaveletDenoisedPlot {
 		super(plot);
 		treshold = 70;
 	}
-	
+
 	@Override
 	protected double[] processScale(double[] data, double stdDev) {
-		return threeshold(data, treshold * (1/(Filter.average(data)+ Filter.stdDeviation(data))));	
+		return threeshold(data, treshold * (1/(Filter.average(data)+ Filter.stdDeviation(data))));
 	}
 
 	@Override

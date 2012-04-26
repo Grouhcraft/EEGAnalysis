@@ -4,20 +4,16 @@ import filters.implementations.SpectralDensityFilter;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
-
-import java.io.File;
-
 import plotframes.data.EEGSource;
 import plotframes.data.WaveClass;
 import plotframes.graphlayouts.LinePlotLayout;
 import plotframes.plots.IPlot;
 import plotframes.plots.Plot;
 import plotframes.plots.annotations.GraphSetting;
-import plotframes.plots.annotations.GraphType;
-
+import plotframes.plots.annotations.UserPlot;
 import utils.types.Range;
 
-@GraphType(
+@UserPlot(
 		name = "Energy spectral density",
 		layout = LinePlotLayout.class
 		)
@@ -26,7 +22,7 @@ public class SpectralDensityPlot extends Plot{
 
 	@GraphSetting("Use logarithmic Y scale")
 	public boolean useLogScale = true;
-	
+
 	public SpectralDensityPlot(int channel, EEGSource dataSrc) {
 		super(channel, dataSrc);
 	}
@@ -58,7 +54,7 @@ public class SpectralDensityPlot extends Plot{
 		((SimpleLine)data).setId(id);
 	}
 
-	
+
 	@Override
 	public Range<Double> getXRange() {
 		return new Range<Double>(

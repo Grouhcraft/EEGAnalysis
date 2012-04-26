@@ -4,19 +4,15 @@ import filters.implementations.ShortTimeFourierFilter;
 import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleGrid;
-
-import java.io.File;
-
 import plotframes.data.EEGSource;
 import plotframes.graphlayouts.GridPlotLayout;
 import plotframes.plots.IPlot;
 import plotframes.plots.Plot;
 import plotframes.plots.annotations.GraphSetting;
-import plotframes.plots.annotations.GraphType;
-
+import plotframes.plots.annotations.UserPlot;
 import utils.types.Range;
 
-@GraphType(	name = "Short Time Fourier",
+@UserPlot(	name = "Short Time Fourier",
 			layout = GridPlotLayout.class )
 
 public class ShortTimeFourierPlot extends Plot {
@@ -51,8 +47,8 @@ public class ShortTimeFourierPlot extends Plot {
 	public void setDataId(Object data, String id) {
 		((SimpleGrid)data).setId(id);
 	}
-	
-	
+
+
 	@Override
 	public Range<Double> getXRange() {
 		return new Range<Double>(
