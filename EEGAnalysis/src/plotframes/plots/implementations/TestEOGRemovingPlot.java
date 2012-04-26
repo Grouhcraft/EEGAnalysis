@@ -2,10 +2,10 @@ package plotframes.plots.implementations;
 
 import plotframes.graphlayouts.LinePlotLayout;
 import plotframes.plots.IPlot;
-import plotframes.plots.annotations.graphtype;
+import plotframes.plots.annotations.GraphType;
 import filters.Filter;
 
-@graphtype(	name = "TestEOGRemoving", 
+@GraphType(	name = "TestEOGRemoving", 
 			layout = LinePlotLayout.class )
 
 public class TestEOGRemovingPlot extends WaveletDenoisedPlot {

@@ -7,7 +7,7 @@ import plotframes.graphlayouts.MultiplePlotLayout;
 import plotframes.plots.IPlot;
 import plotframes.plots.Plot;
 import plotframes.plots.annotations.GraphSetting;
-import plotframes.plots.annotations.graphtype;
+import plotframes.plots.annotations.GraphType;
 
 import utils.types.Range;
 
@@ -20,7 +20,7 @@ import gov.noaa.pmel.sgt.dm.SGTData;
 import gov.noaa.pmel.sgt.dm.SGTMetaData;
 import gov.noaa.pmel.sgt.dm.SimpleLine;
 
-@graphtype(	name = "Wavelet",
+@GraphType(	name = "Wavelet",
 			layout = MultiplePlotLayout.class)
 
 public class WaveletPlot extends Plot {

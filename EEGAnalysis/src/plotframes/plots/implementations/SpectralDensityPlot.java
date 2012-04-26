@@ -13,11 +13,11 @@ import plotframes.graphlayouts.LinePlotLayout;
 import plotframes.plots.IPlot;
 import plotframes.plots.Plot;
 import plotframes.plots.annotations.GraphSetting;
-import plotframes.plots.annotations.graphtype;
+import plotframes.plots.annotations.GraphType;
 
 import utils.types.Range;
 
-@graphtype(
+@GraphType(
 		name = "Energy spectral density",
 		layout = LinePlotLayout.class
 		)

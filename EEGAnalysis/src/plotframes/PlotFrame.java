@@ -18,11 +18,12 @@ import java.util.HashMap;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JInternalFrame;
-import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
+import main.MainWindow;
+import main.R;
 import plotframes.components.GraphContextualMenu;
 import plotframes.components.GraphMenu;
 import plotframes.components.GraphSettingsPanel;
@@ -32,13 +33,10 @@ import plotframes.data.WaveClass;
 import plotframes.graphlayouts.IGraphLayout;
 import plotframes.plots.IPlot;
 import plotframes.plots.Plot;
-import plotframes.plots.annotations.graphtype;
+import plotframes.plots.annotations.GraphType;
 import plotframes.plots.implementations.WaveformPlot;
-
+import plotframes.plots.implementations.Xml2DPlot;
 import utils.Logger;
-
-import main.MainWindow;
-import main.R;
 
 /**
  * PlotFrame is the window containing a plot
@@ -52,6 +50,7 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 	private HashMap<String, Object> linkedDatas = new HashMap<>();
 	private String plotId;
 	private JPanel plotPanel;
+	private GraphMenu menu;
 	private JButton btnShowSettings;
 	private GraphSettingsPanel dynSettingsPanel;
 	public IPlot getPlot() {
@@ -61,12 +60,22 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		String packageName = IPlot.class.getPackage().getName() + ".implementations.";
 		for(String graphClassName : R.get("graphtypes").split(",")) {
 			try {
-				Logger.log("Loading graph type \"" + graphClassName + "\"");
-				IPlot.graphTypes.add((Class<? extends IPlot>) Class.forName(packageName + graphClassName));
+				addGraphType(Class.forName(packageName + graphClassName));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	/**
+	 * Adds a graph class as selectable graph type in the UI.
+	 * (for instance, shown in the menus)
+	 * @param graphClass a <code>Class&lt;? extends {@link IPlot}&gt;</code> class
+	 */
+	@SuppressWarnings("unchecked")
+	public static void addGraphType(Class<?> graphClass) {
+		Logger.log("Loading graph type \"" + graphClass.getName() + "\"");
+		IPlot.graphTypes.add((Class<? extends IPlot>) graphClass);
 	}
 
 	/**
@@ -114,8 +123,8 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		setMinimumSize(new Dimension(240,250));
 		setTitle("plot #" + plotID);
 		plotId = plotID;
-		JMenuBar menuBar = new GraphMenu(this);
-		setJMenuBar(menuBar);
+		menu = new GraphMenu(this);
+		setJMenuBar(menu);
 
 		plotPanel = new JPanel();
 		JPanel btnPanel = new JPanel();
@@ -136,7 +145,7 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		JButton btnPrev = new JButton("<< Prev Ch.");
 		JButton btnNext = new JButton("Next Ch. >>");
 		btnShowSettings = new JButton("Show settings");
-		
+
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 0;
@@ -152,9 +161,9 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		c.weightx = 0.2;
 		btnPanel.add(btnShowSettings, c);
 
-		dynSettingsPanel = new GraphSettingsPanel(this);		
+		dynSettingsPanel = new GraphSettingsPanel(this);
 		dynSettingsPanel.setVisible(false);
-		
+
 		GroupLayout groupLayout = new GroupLayout(getContentPane());
 		groupLayout.setAutoCreateGaps(true);
 		groupLayout.setAutoCreateContainerGaps(true);
@@ -213,7 +222,7 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		switch(e.getActionCommand()) {
 		case "prev":
-			if(plot.getInfos().channel > 1) 
+			if(plot.getInfos().channel > 1)
 				plot.getInfos().channel--;
 			break;
 		case "next":
@@ -253,6 +262,10 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		for(Object linkedData : linkedDatas.values()) {
 			plotLayout.addData(linkedData);
 		}
+
+		if(plot instanceof Xml2DPlot) {
+			// TODO charger le xml qu'il faut
+		}
 /*
 		if(plot.getClass().isAssignableFrom(WaveformPlot.class)) {
 			try {
@@ -265,7 +278,10 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		dynSettingsPanel.parseSettingsFrom(plot);
 		plotLayout.endOperations();
 	}
-	
+
+	/**
+	 * resets zoom and revalidate layout
+	 */
 	public void updateLayout() {
 		((JPlotLayout)plotLayout).resetZoom();
 		((JPlotLayout)plotLayout).revalidate();
@@ -281,10 +297,16 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		updateGraph();
 	}
 
+	/**
+	 * @return the {@link EEGSource data object} used by the plot
+	 */
 	public EEGSource getDataSource() {
 		return plot.getDataSource();
 	}
 
+	/**
+	 * Sets the {@link EEGSource data object} used by the plot
+	 */
 	public void setDataSource(EEGSource dataSource) {
 		plot.setDataSource(dataSource);
 	}
@@ -296,9 +318,9 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 	 * @return the class of a suitable layout
 	 */
 	public static Class<? extends IGraphLayout> getGraphTypeFor(Class<? extends IPlot> clss) {
-		if(!clss.isAnnotationPresent(graphtype.class))
+		if(!clss.isAnnotationPresent(GraphType.class))
 			throw new AnnotationFormatError("Plots extendings IPlot must have annotation @graphtype");
-		graphtype gt = clss.getAnnotation(graphtype.class);
+		GraphType gt = clss.getAnnotation(GraphType.class);
 		return gt.layout();
 	}
 
@@ -311,6 +333,7 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 			plotPanel.remove(0);
 			plotPanel.add((Component) plotLayout);
 			plotPanel.validate();
+			menu.updateXmlPLotsList();
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {

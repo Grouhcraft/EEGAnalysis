@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="javadoc">
+    <target name="javadoc">
+        <javadoc access="public" author="true" classpath="C:\Program Files\eclipse\plugins\org.hamcrest.core_1.1.0.v20090501071000.jar;C:\Users\knoodrake\workspace\jwave-svn-ro\target\classes;C:\Users\knoodrake\workspace\jwave-svn-ro\target\test-classes;C:\Users\knoodrake\workspace\rhino1_7R3\js.jar;lib/sgt_v30.jar;C:\Users\knoodrake\workspace\rsyntaxtextarea.jar;C:\Program Files\eclipse\plugins\org.junit_4.8.2.v4_8_2_v20110321-1705\junit.jar;lib/jtransforms-2.4.jar" destdir="doc" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" source="1.7" sourcefiles="src/plotframes/plots/Plot.java" sourcepath="src;test;etc" splitindex="true" use="true" version="true"/>
+    </target>
+</project>

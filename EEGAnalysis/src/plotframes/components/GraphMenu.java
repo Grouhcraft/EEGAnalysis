@@ -1,6 +1,7 @@
 package plotframes.components;
 
 
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -12,14 +13,16 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
+import main.MainWindow;
 import plotframes.PlotFrame;
 import plotframes.data.EEGSourceFile;
 import plotframes.data.WaveClass;
 import plotframes.plots.IPlot;
 import plotframes.plots.Plot;
-import plotframes.plots.annotations.graphtype;
-
-import main.MainWindow;
+import plotframes.plots.annotations.GraphType;
+import plotframes.plots.fromXml.XmlPlot;
+import plotframes.plots.implementations.Xml2DPlot;
+import utils.Logger;
 
 
 
@@ -29,6 +32,7 @@ public class GraphMenu extends JMenuBar implements ActionListener {
 	private static File currentDir = null;
 	private PlotFrame parentWindow;
 	private JMenu linkMenu;
+	private JMenu xmlPlotsMenu;
 	private static ArrayList<GraphMenu> _instances = new ArrayList<GraphMenu>();
 	private static final String VIEWGRAPH_CMDSTR = "viewgraph";
 
@@ -50,7 +54,7 @@ public class GraphMenu extends JMenuBar implements ActionListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fileChooser;
-				if(getParentWindow().getDataSource().isFile()) 
+				if(getParentWindow().getDataSource().isFile())
 					currentDir = ((EEGSourceFile)getParentWindow().getDataSource()).getFile().getParentFile();
 				if (currentDir == null) {
 					fileChooser = new JFileChooser();
@@ -64,7 +68,6 @@ public class GraphMenu extends JMenuBar implements ActionListener {
 					System.out.println(selectedFile.getPath());
 					getParentWindow().updateGraph();
 			    }
-
 			}
 		});
 		file.add(loadDataFile);
@@ -93,8 +96,8 @@ public class GraphMenu extends JMenuBar implements ActionListener {
 
 		JMenu graphType = new JMenu("Visualize..");
 		for(Class<? extends IPlot> plotClass : IPlot.graphTypes) {
-			if(plotClass.isAnnotationPresent(graphtype.class)) {
-				graphtype gt = plotClass.getAnnotation(graphtype.class);
+			if(plotClass.isAnnotationPresent(GraphType.class)) {
+				GraphType gt = plotClass.getAnnotation(GraphType.class);
 				JMenuItem item = new JMenuItem(gt.name());
 				item.setActionCommand(VIEWGRAPH_CMDSTR + ":" + plotClass.getName());
 				item.addActionListener(this);
@@ -102,6 +105,7 @@ public class GraphMenu extends JMenuBar implements ActionListener {
 			}
 		}
 		add(graphType);
+
 
 		JMenu clone = new JMenu("Clone");
 		JMenuItem cloneItem = new JMenuItem("Clone this plot");
@@ -118,6 +122,42 @@ public class GraphMenu extends JMenuBar implements ActionListener {
 		linkMenu = new JMenu("Link with plot..");
 		linkMenu.setVisible(false);
 		add(linkMenu);
+
+		xmlPlotsMenu = new JMenu("Choose EEP file plot");
+		xmlPlotsMenu.setVisible(false);
+		xmlPlotsMenu.setFont(xmlPlotsMenu.getFont().deriveFont(Font.BOLD));
+		add(xmlPlotsMenu);
+	}
+
+	public void updateXmlPLotsList() {
+		if(MainWindow.getInstance() == null) return;
+		xmlPlotsMenu.removeAll();
+
+		//TODO a terminer
+
+		if(parentWindow.getPlot() instanceof Xml2DPlot) {
+			for(final XmlPlot p : MainWindow.getInstance().xmls) {
+				JMenuItem pitem = new JMenuItem(p.getMetas().getName());
+				pitem.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						Logger.log("plop !!!!!!!!!!!!!!!");
+						((Xml2DPlot)parentWindow.getPlot()).setXmlPlot(p);
+						((Xml2DPlot)parentWindow.getPlot()).update();
+						parentWindow.updateGraph();
+						parentWindow.updateLayout();
+					}
+				});
+				xmlPlotsMenu.add(pitem);
+			}
+			xmlPlotsMenu.setVisible(true);
+		} else {
+			xmlPlotsMenu.setVisible(false);
+		}
+
+		JMenuItem openANewXml = new JMenuItem("* Open a new EEP file *");
+		xmlPlotsMenu.add(openANewXml);
 	}
 
 	public static void updatePlotsLinkMenu() {

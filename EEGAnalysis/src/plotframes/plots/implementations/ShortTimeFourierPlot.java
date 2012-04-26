@@ -12,11 +12,11 @@ import plotframes.graphlayouts.GridPlotLayout;
 import plotframes.plots.IPlot;
 import plotframes.plots.Plot;
 import plotframes.plots.annotations.GraphSetting;
-import plotframes.plots.annotations.graphtype;
+import plotframes.plots.annotations.GraphType;
 
 import utils.types.Range;
 
-@graphtype(	name = "Short Time Fourier",
+@GraphType(	name = "Short Time Fourier",
 			layout = GridPlotLayout.class )
 
 public class ShortTimeFourierPlot extends Plot {

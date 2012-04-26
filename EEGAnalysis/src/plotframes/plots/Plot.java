@@ -48,6 +48,8 @@ public abstract class Plot implements IPlot {
 		setWaveClass(src.getWaveClass());
 	}
 
+	protected Plot() {}
+
 	/**
 	 * Reads the EEG data from {@link #dataSource}
 	 * @return the SGTData data used by the graph layouts

@@ -6,6 +6,7 @@ import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.Point;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.prefs.Preferences;
 
@@ -15,11 +16,10 @@ import javax.swing.UIManager;
 import main.components.BGDesktopPane;
 import main.components.MainMenu;
 import main.components.SettingsPanel;
-
 import plotframes.PlotFrame;
 import plotframes.components.GraphMenu;
-
-import utils.Logger;
+import plotframes.plots.fromXml.PlotXmlReader;
+import plotframes.plots.fromXml.XmlPlot;
 
 
 
@@ -27,10 +27,13 @@ public class MainWindow {
 
 	private JFrame frmEegAnalysis;
 	private BGDesktopPane desktopPane;
-	private ArrayList<PlotFrame> plots = new ArrayList<PlotFrame>();
+	private ArrayList<PlotFrame> plots = new ArrayList<>();
+
 	private static MainWindow _instance = null;
     private static Preferences prefs;
+
     public static Object zoom = null;
+    public static ArrayList<XmlPlot> xmls = new ArrayList<>();
 
 	/**
 	 * Préférences keys
@@ -87,7 +90,20 @@ public class MainWindow {
 		frmEegAnalysis.getContentPane().add(settingPanel, BorderLayout.EAST);
 
 		createNewPlot(new File(System.getenv("EEGDATA") + "\\" + R.get("datafile")));
-		Logger.log("plop");
+		loadXmlPlots();
+	}
+
+	private void loadXmlPlots() {
+		File dir = new File("C:\\Users\\knoodrake\\Desktop\\");
+		for(File f : dir.listFiles(new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String name) {
+				if(name.endsWith(".eep")) return true;
+				return false;
+			}
+		})) {
+			xmls.add(new PlotXmlReader(f).getXmlPlot());
+		}
 	}
 
 	private void setDefaultPreferences() {

@@ -12,12 +12,12 @@ import plotframes.graphlayouts.LinePlotLayout;
 import plotframes.plots.IPlot;
 import plotframes.plots.Plot;
 import plotframes.plots.annotations.GraphSetting;
-import plotframes.plots.annotations.graphtype;
+import plotframes.plots.annotations.GraphType;
 
 import utils.types.Range;
 
 
-@graphtype(	name = "Regular waveform",
+@GraphType(	name = "Regular waveform",
 			layout = LinePlotLayout.class )
 
 public class WaveformPlot extends Plot {
