@@ -11,4 +11,5 @@ public interface IGraphLayout {
 	boolean supportZooming();
 	Object getZoom();
 	void setZoom(Object object);
+	void updateLayout();
 }

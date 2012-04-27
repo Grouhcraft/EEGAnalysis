@@ -13,18 +13,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import plotframes.plots.IPlot;
-
 import utils.Logger;
 import utils.types.TimeFrame;
 
 public class EEGSourceFile implements EEGSource {
 
 	private File file = null;
-	
+
 	public EEGSourceFile(File f) {
 		file = f;
 	}
-	
+
 	@Override
 	public String getName() {
 		return file.getName();
@@ -33,7 +32,7 @@ public class EEGSourceFile implements EEGSource {
 	public File getFile() {
 		return file;
 	}
-	
+
 	@Override
 	public double[][] read(DataInfos infos, TimeFrame time) {
 		BufferedReader in = null;
@@ -69,7 +68,7 @@ public class EEGSourceFile implements EEGSource {
 	    		for(int chan : infos.channelsToAverage) {
 	    			y += Double.parseDouble(splitted[chan]);
 	    		}
-	    		y /= (double)infos.channelsToAverage.length;
+	    		y /= infos.channelsToAverage.length;
 	    	} else {
 	    		y = Integer.parseInt(line.split("\t")[infos.channel]);
 	    	}
@@ -83,7 +82,7 @@ public class EEGSourceFile implements EEGSource {
 				e.printStackTrace();
 			}
 	    }
-	     
+
 	    Logger.log("parsing " + i/1000 + "K samples (over " + i/1000 + "K ones) from "
 	    		+ infos.fs + "Hz channel " + infos.channel + "'s data => "
 	    		+ i/infos.fs + "s record");
@@ -113,19 +112,19 @@ public class EEGSourceFile implements EEGSource {
 	public boolean isFile() {
 		return true;
 	}
-	
-	public SGTData readMarkersFromPlot(IPlot plot) 
+
+	public SGTData readMarkersFromPlot(IPlot plot)
 			throws IOException, IllegalArgumentException {
-		
+
 		if(!plot.getDataSource().isFile())
 			throw new IllegalArgumentException("Unable to read a marker file if source is not a file..");
-		
+
 		File plotFile = ((EEGSourceFile)plot.getDataSource()).getFile();
 		String plotFileName = plotFile.getName();
 		File markerFile = null;
 		String markerFileName = "";
 		if(plotFileName.contains("_cnt")) {
-			markerFileName = plotFile.getParentFile() + "\\" + plotFileName.replace("_cnt", "_mrk");
+			markerFileName = plotFile.getParentFile() + File.separator + plotFileName.replace("_cnt", "_mrk");
 			markerFile = new File(markerFileName);
 		}
 		if(markerFile == null || !markerFile.exists()) {
@@ -133,10 +132,10 @@ public class EEGSourceFile implements EEGSource {
 		}
 
 		return readMarkers(
-				(Double)plot.getXRange().getLower(),
-				(Double)plot.getXRange().getHigher(),
-				(Double)plot.getYRange().getLower(),
-				(Double)plot.getYRange().getHigher(),
+				plot.getXRange().getLower(),
+				plot.getXRange().getHigher(),
+				plot.getYRange().getLower(),
+				plot.getYRange().getHigher(),
 				markerFile,
 				plot.getInfos().fs,
 				plot.getTime().getFrom(),

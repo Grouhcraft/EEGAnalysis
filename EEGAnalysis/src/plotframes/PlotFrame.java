@@ -1,7 +1,5 @@
 package plotframes;
 
-import gov.noaa.pmel.sgt.swing.JPlotLayout;
-
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -11,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.lang.annotation.AnnotationFormatError;
 import java.util.HashMap;
@@ -35,7 +34,6 @@ import plotframes.plots.IPlot;
 import plotframes.plots.Plot;
 import plotframes.plots.annotations.UserPlot;
 import plotframes.plots.implementations.WaveformPlot;
-import plotframes.plots.implementations.Xml2DPlot;
 import utils.Logger;
 
 /**
@@ -262,10 +260,6 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		for(Object linkedData : linkedDatas.values()) {
 			plotLayout.addData(linkedData);
 		}
-
-		if(plot instanceof Xml2DPlot) {
-			// TODO charger le xml qu'il faut
-		}
 /*
 		if(plot.getClass().isAssignableFrom(WaveformPlot.class)) {
 			try {
@@ -277,14 +271,7 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 		*/
 		dynSettingsPanel.parseSettingsFrom(plot);
 		plotLayout.endOperations();
-	}
-
-	/**
-	 * resets zoom and revalidate layout
-	 */
-	public void updateLayout() {
-		((JPlotLayout)plotLayout).resetZoom();
-		((JPlotLayout)plotLayout).revalidate();
+		plotLayout.updateLayout();
 	}
 
 	/**
@@ -327,13 +314,14 @@ public class PlotFrame extends JInternalFrame implements ActionListener {
 	public void setGraphType(Class<? extends Plot> graphType) {
 		try {
 			plot = graphType.getConstructor(IPlot.class).newInstance(plot);
-			MouseAdapter m = (MouseAdapter) ((Component)plotLayout).getMouseListeners()[1];
+			MouseListener[] mlst = ((Component)plotLayout).getMouseListeners();
 			plotLayout = getGraphTypeFor(plot.getClass()).getConstructor(String.class).newInstance(plotId);
-			((Component)plotLayout).addMouseListener(m);
+			if(mlst.length > 1)
+				((Component)plotLayout).addMouseListener(mlst[1]);
 			plotPanel.remove(0);
 			plotPanel.add((Component) plotLayout);
-			plotPanel.validate();
 			menu.updateXmlPLotsList();
+			plotPanel.validate();
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {

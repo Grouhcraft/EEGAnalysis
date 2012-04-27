@@ -67,10 +67,16 @@ public class LinePlotLayout extends JPlotLayout implements IGraphLayout {
 
 	@Override
 	public void setZoom(Object object) {
-		try {			
+		try {
 			super.setRangeNoVeto((Domain)object);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void updateLayout() {
+		super.resetZoom();
+		super.revalidate();
 	}
 }

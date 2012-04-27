@@ -19,7 +19,8 @@ import main.components.SettingsPanel;
 import plotframes.PlotFrame;
 import plotframes.components.GraphMenu;
 import plotframes.plots.fromXml.PlotXmlReader;
-import plotframes.plots.fromXml.XmlPlot;
+import plotframes.plots.fromXml.XmlPlotObject;
+import utils.MessageBox;
 
 
 
@@ -33,8 +34,9 @@ public class MainWindow {
     private static Preferences prefs;
 
     public static Object zoom = null;
-    public static ArrayList<XmlPlot> xmls = new ArrayList<>();
+    public static ArrayList<XmlPlotObject> xmls = new ArrayList<>();
 
+    private final static String NL = System.getProperty("line.separator");
 	/**
 	 * Préférences keys
 	 */
@@ -89,12 +91,14 @@ public class MainWindow {
 		SettingsPanel settingPanel = new SettingsPanel();
 		frmEegAnalysis.getContentPane().add(settingPanel, BorderLayout.EAST);
 
-		createNewPlot(new File(System.getenv("EEGDATA") + "\\" + R.get("datafile")));
+		String defaultFile = System.getenv("EEGAnalysis_default_file");
+		if(defaultFile != null)
+			createNewPlot(new File(defaultFile));
 		loadXmlPlots();
 	}
 
 	private void loadXmlPlots() {
-		File dir = new File("C:\\Users\\knoodrake\\Desktop\\");
+		File dir = new File(R.get("xmlplots"));
 		for(File f : dir.listFiles(new FilenameFilter() {
 			@Override
 			public boolean accept(File dir, String name) {
@@ -102,7 +106,17 @@ public class MainWindow {
 				return false;
 			}
 		})) {
-			xmls.add(new PlotXmlReader(f).getXmlPlot());
+			String badFiles = "";
+			try {
+				xmls.add(new PlotXmlReader(f).getXmlPlot());
+			} catch (Exception e) {
+				badFiles += " - " + f.getName() + NL;
+			} finally {
+				if(!badFiles.isEmpty()) {
+					new MessageBox("Error: was unable to open the following "
+							+"plot files during initialization:" + NL + badFiles);
+				}
+			}
 		}
 	}
 

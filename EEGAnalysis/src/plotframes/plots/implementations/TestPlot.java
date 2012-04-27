@@ -115,11 +115,14 @@ public class TestPlot extends Plot {
 	}
 
 	@GraphSetting(value="Script", rows=10, js=true)
-	public String script = 	"/**\n * plot data => var X[], var Y[], var dataLength\n"
-							+ "*/\n"
-							+ "for(var i=0; i<dataLength; i++) \n{\n"
-							+ "\t// Y[i] = Y[i]*2;\n"
-							+ "}\n";
+	public String script = "/**"
+					+ NL + " * plot data => var X[], var Y[], var dataLength"
+					+ NL + " */"
+					+ NL + "for(var i=0; i<dataLength; i++) "
+					+ NL + "{"
+					+ NL + "     // Y[i] = Y[i]*2;"
+					+ NL + "}"
+					+ NL;
 
 	@GraphSetting("Results")
 	public String scriptResult = "";

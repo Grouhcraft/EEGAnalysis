@@ -37,51 +37,51 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link XmlPlot }
+     * Create an instance of {@link XmlPlotObject }
      * 
      */
-    public XmlPlot createPlot() {
-        return new XmlPlot();
+    public XmlPlotObject createPlot() {
+        return new XmlPlotObject();
     }
 
     /**
-     * Create an instance of {@link XmlPlot.Code }
+     * Create an instance of {@link XmlPlotObject.Code }
      * 
      */
-    public XmlPlot.Code createPlotCode() {
-        return new XmlPlot.Code();
+    public XmlPlotObject.Code createPlotCode() {
+        return new XmlPlotObject.Code();
     }
 
     /**
-     * Create an instance of {@link XmlPlot.Metas }
+     * Create an instance of {@link XmlPlotObject.Metas }
      * 
      */
-    public XmlPlot.Metas createPlotMetas() {
-        return new XmlPlot.Metas();
+    public XmlPlotObject.Metas createPlotMetas() {
+        return new XmlPlotObject.Metas();
     }
 
     /**
-     * Create an instance of {@link XmlPlot.Code.Setting }
+     * Create an instance of {@link XmlPlotObject.Code.Setting }
      * 
      */
-    public XmlPlot.Code.Setting createPlotCodeSetting() {
-        return new XmlPlot.Code.Setting();
+    public XmlPlotObject.Code.Setting createPlotCodeSetting() {
+        return new XmlPlotObject.Code.Setting();
     }
 
     /**
-     * Create an instance of {@link XmlPlot.Code.Script }
+     * Create an instance of {@link XmlPlotObject.Code.Script }
      * 
      */
-    public XmlPlot.Code.Script createPlotCodeScript() {
-        return new XmlPlot.Code.Script();
+    public XmlPlotObject.Code.Script createPlotCodeScript() {
+        return new XmlPlotObject.Code.Script();
     }
 
     /**
-     * Create an instance of {@link XmlPlot.Metas.Axis }
+     * Create an instance of {@link XmlPlotObject.Metas.Axis }
      * 
      */
-    public XmlPlot.Metas.Axis createPlotMetasAxis() {
-        return new XmlPlot.Metas.Axis();
+    public XmlPlotObject.Metas.Axis createPlotMetasAxis() {
+        return new XmlPlotObject.Metas.Axis();
     }
 
 }

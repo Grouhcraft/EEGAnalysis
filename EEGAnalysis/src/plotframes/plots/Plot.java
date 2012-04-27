@@ -21,6 +21,8 @@ public abstract class Plot implements IPlot {
 	public EEGSource dataSource	= null;
 	public WaveClass waveClass;
 
+    protected final static String NL = System.getProperty("line.separator");
+
 	@Override
 	public void setDataSource(EEGSource dataSource) {
 		this.dataSource = dataSource;

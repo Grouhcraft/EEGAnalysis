@@ -96,22 +96,22 @@ import javax.xml.bind.annotation.XmlValue;
     "code"
 })
 @XmlRootElement(name = "plot")
-public class XmlPlot {
+public class XmlPlotObject {
 
     @XmlElement(required = true)
-    protected XmlPlot.Metas metas;
+    protected XmlPlotObject.Metas metas;
     @XmlElement(required = true)
-    protected XmlPlot.Code code;
+    protected XmlPlotObject.Code code;
 
     /**
      * Gets the value of the metas property.
      *
      * @return
      *     possible object is
-     *     {@link XmlPlot.Metas }
+     *     {@link XmlPlotObject.Metas }
      *
      */
-    public XmlPlot.Metas getMetas() {
+    public XmlPlotObject.Metas getMetas() {
         return metas;
     }
 
@@ -120,10 +120,10 @@ public class XmlPlot {
      *
      * @param value
      *     allowed object is
-     *     {@link XmlPlot.Metas }
+     *     {@link XmlPlotObject.Metas }
      *
      */
-    public void setMetas(XmlPlot.Metas value) {
+    public void setMetas(XmlPlotObject.Metas value) {
         this.metas = value;
     }
 
@@ -132,10 +132,10 @@ public class XmlPlot {
      *
      * @return
      *     possible object is
-     *     {@link XmlPlot.Code }
+     *     {@link XmlPlotObject.Code }
      *
      */
-    public XmlPlot.Code getCode() {
+    public XmlPlotObject.Code getCode() {
         return code;
     }
 
@@ -144,10 +144,10 @@ public class XmlPlot {
      *
      * @param value
      *     allowed object is
-     *     {@link XmlPlot.Code }
+     *     {@link XmlPlotObject.Code }
      *
      */
-    public void setCode(XmlPlot.Code value) {
+    public void setCode(XmlPlotObject.Code value) {
         this.code = value;
     }
 
@@ -198,9 +198,9 @@ public class XmlPlot {
     })
     public static class Code {
 
-        protected List<XmlPlot.Code.Setting> setting;
+        protected List<XmlPlotObject.Code.Setting> setting;
         @XmlElement(required = true)
-        protected XmlPlot.Code.Script script;
+        protected XmlPlotObject.Code.Script script;
 
         /**
          * Gets the value of the setting property.
@@ -220,13 +220,13 @@ public class XmlPlot {
          *
          * <p>
          * Objects of the following type(s) are allowed in the list
-         * {@link XmlPlot.Code.Setting }
+         * {@link XmlPlotObject.Code.Setting }
          *
          *
          */
-        public List<XmlPlot.Code.Setting> getSetting() {
+        public List<XmlPlotObject.Code.Setting> getSetting() {
             if (setting == null) {
-                setting = new ArrayList<XmlPlot.Code.Setting>();
+                setting = new ArrayList<XmlPlotObject.Code.Setting>();
             }
             return this.setting;
         }
@@ -236,10 +236,10 @@ public class XmlPlot {
          *
          * @return
          *     possible object is
-         *     {@link XmlPlot.Code.Script }
+         *     {@link XmlPlotObject.Code.Script }
          *
          */
-        public XmlPlot.Code.Script getScript() {
+        public XmlPlotObject.Code.Script getScript() {
             return script;
         }
 
@@ -248,10 +248,10 @@ public class XmlPlot {
          *
          * @param value
          *     allowed object is
-         *     {@link XmlPlot.Code.Script }
+         *     {@link XmlPlotObject.Code.Script }
          *
          */
-        public void setScript(XmlPlot.Code.Script value) {
+        public void setScript(XmlPlotObject.Code.Script value) {
             this.script = value;
         }
 
@@ -541,7 +541,7 @@ public class XmlPlot {
         @XmlElement(required = true)
         protected String name;
         @XmlElement(required = true)
-        protected List<XmlPlot.Metas.Axis> axis;
+        protected List<XmlPlotObject.Metas.Axis> axis;
 
         /**
          * Gets the value of the name property.
@@ -585,13 +585,13 @@ public class XmlPlot {
          *
          * <p>
          * Objects of the following type(s) are allowed in the list
-         * {@link XmlPlot.Metas.Axis }
+         * {@link XmlPlotObject.Metas.Axis }
          *
          *
          */
-        public List<XmlPlot.Metas.Axis> getAxis() {
+        public List<XmlPlotObject.Metas.Axis> getAxis() {
             if (axis == null) {
-                axis = new ArrayList<XmlPlot.Metas.Axis>();
+                axis = new ArrayList<XmlPlotObject.Metas.Axis>();
             }
             return this.axis;
         }
@@ -624,6 +624,8 @@ public class XmlPlot {
             protected String value;
             @XmlAttribute(name = "type")
             protected String type;
+            @XmlAttribute(name = "unit")
+            protected String unit;
 
             /**
              * Gets the value of the value property.
@@ -673,6 +675,29 @@ public class XmlPlot {
                 this.type = value;
             }
 
+            /**
+             * Gets the value of the unit property.
+             *
+             * @return
+             *     possible object is
+             *     {@link String }
+             *
+             */
+            public String getUnit() {
+                return unit;
+            }
+
+            /**
+             * Sets the value of the unit property.
+             *
+             * @param value
+             *     allowed object is
+             *     {@link String }
+             *
+             */
+            public void setUnit(String value) {
+                this.unit = value;
+            }
         }
 
     }

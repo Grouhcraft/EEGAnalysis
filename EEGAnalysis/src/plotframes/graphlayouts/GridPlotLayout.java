@@ -75,4 +75,10 @@ public class GridPlotLayout extends JPlotLayout implements IGraphLayout {
 		resetZoom();
 		getZoomBounds().setBounds((Rectangle)object);
 	}
+
+	@Override
+	public void updateLayout() {
+		super.resetZoom();
+		super.revalidate();
+	}
 }

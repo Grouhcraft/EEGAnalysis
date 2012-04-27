@@ -20,9 +20,11 @@ import plotframes.data.WaveClass;
 import plotframes.plots.IPlot;
 import plotframes.plots.Plot;
 import plotframes.plots.annotations.UserPlot;
-import plotframes.plots.fromXml.XmlPlot;
-import plotframes.plots.implementations.Xml2DPlot;
+import plotframes.plots.fromXml.PlotXmlReader;
+import plotframes.plots.fromXml.XmlPlotObject;
+import plotframes.plots.implementations.XmlPlot;
 import utils.Logger;
+import utils.MessageBox;
 
 
 
@@ -65,7 +67,7 @@ public class GraphMenu extends JMenuBar implements ActionListener {
 			    if(returnVal == JFileChooser.APPROVE_OPTION) {
 			    	File selectedFile = fileChooser.getSelectedFile();
 					getParentWindow().setDataSource(new EEGSourceFile(selectedFile));
-					System.out.println(selectedFile.getPath());
+					Logger.log("Opening data file: " + selectedFile.getPath());
 					getParentWindow().updateGraph();
 			    }
 			}
@@ -133,31 +135,55 @@ public class GraphMenu extends JMenuBar implements ActionListener {
 		if(MainWindow.getInstance() == null) return;
 		xmlPlotsMenu.removeAll();
 
-		//TODO a terminer
-
-		if(parentWindow.getPlot() instanceof Xml2DPlot) {
-			for(final XmlPlot p : MainWindow.xmls) {
+		if(getParentWindow().getPlot() instanceof XmlPlot) {
+			for(final XmlPlotObject p : MainWindow.xmls) {
 				JMenuItem pitem = new JMenuItem(p.getMetas().getName());
 				pitem.addActionListener(new ActionListener() {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						Logger.log("plop !!!!!!!!!!!!!!!");
-						((Xml2DPlot)parentWindow.getPlot()).setXmlPlot(p);
-						((Xml2DPlot)parentWindow.getPlot()).update();
-						parentWindow.updateGraph();
-						parentWindow.updateLayout();
+						((XmlPlot)getParentWindow().getPlot()).setXmlPlotObject(p);
+						((XmlPlot)getParentWindow().getPlot()).update();
+						getParentWindow().updateGraph();
 					}
 				});
 				xmlPlotsMenu.add(pitem);
 			}
+			JMenuItem openANewXml = new JMenuItem("* Open a new EEP file *");
+			openANewXml.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					JFileChooser fileChooser;
+					if(getParentWindow().getDataSource().isFile())
+						currentDir = ((EEGSourceFile)getParentWindow().getDataSource()).getFile().getParentFile();
+					if (currentDir == null) {
+						fileChooser = new JFileChooser();
+					} else {
+						fileChooser = new JFileChooser(currentDir);
+					}
+					int returnVal = fileChooser.showOpenDialog(getParent());
+				    if(returnVal == JFileChooser.APPROVE_OPTION) {
+				    	File selectedFile = fileChooser.getSelectedFile();
+						Logger.log("opening plot file: " + selectedFile.getPath());
+						try {
+							XmlPlotObject xmlo = new PlotXmlReader(selectedFile).getXmlPlot();
+							((XmlPlot)getParentWindow().getPlot()).setXmlPlotObject(xmlo);
+							((XmlPlot)getParentWindow().getPlot()).update();
+							getParentWindow().updateGraph();
+							MainWindow.xmls.add(xmlo);
+							updateXmlPLotsList();
+						} catch (Exception e1) {
+							new MessageBox("Error while opening plot file: " + e1.getStackTrace());
+						}
+				    }
+				}
+			});
+			xmlPlotsMenu.add(openANewXml);
 			xmlPlotsMenu.setVisible(true);
 		} else {
 			xmlPlotsMenu.setVisible(false);
 		}
-
-		JMenuItem openANewXml = new JMenuItem("* Open a new EEP file *");
-		xmlPlotsMenu.add(openANewXml);
 	}
 
 	public static void updatePlotsLinkMenu() {
