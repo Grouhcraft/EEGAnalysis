@@ -9,12 +9,13 @@ import gov.noaa.pmel.sgt.swing.JPlotLayout;
 import gov.noaa.pmel.util.Domain;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.Font;
 import java.util.Arrays;
 
 import javax.swing.JLabel;
 
-public class UnknownPlotLayout extends JPane implements IGraphLayout {
+public class XmlPlotLayout extends JPane implements IGraphLayout {
 
 	/**
 	 *
@@ -23,14 +24,15 @@ public class UnknownPlotLayout extends JPane implements IGraphLayout {
 	private String id = null;
 	private JPlotLayout jplotlayout = null;
 	private boolean isGrid = false;
-	private JLabel noPlotMsg = new JLabel("Please select an EEP file with the above menu.");
+	private JLabel noPlotMsg = new JLabel("Please select an EEP plot file with the above menu.");
 
-	public UnknownPlotLayout (String id) {
+
+	public XmlPlotLayout (String id) {
 		this.id = id;
 		setLayout(new BorderLayout());
 
 		noPlotMsg.setFont(noPlotMsg.getFont().deriveFont(Font.BOLD));
-		add(noPlotMsg, BorderLayout.CENTER);
+		add(noPlotMsg);
 	}
 
 	@Override
@@ -43,6 +45,10 @@ public class UnknownPlotLayout extends JPane implements IGraphLayout {
 	public void endOperations() {
 		if(jplotlayout != null)
 			jplotlayout.setBatch(false);
+	}
+
+	protected Container getJPlotLayoutContainer() {
+		return this;
 	}
 
 	private void createJPlotLayout(boolean asGrid) {
